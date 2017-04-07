@@ -1,11 +1,13 @@
 # MonoXDataCards
 
 Workspace with the background model are committed into the Workspace directory:
-       workspace_MJ.root --> background model for monojet category
-       workspace_MV.root --> background model for monoV category
+
+	  workspace_MJ.root --> background model for monojet category
+	  workspace_MV.root --> background model for monoV category
 
 
 Text datacards for each DM model are committed in the Datacard directory, with the following nomenclature:
+
      MV stands for monoV-category, MJ for monojet category
      There is one datacard for each control region i.e. ZM = Zmumu, ZE = Zee, GJ = gamma+jets, WM = Wmunu, WE = Wenu, SR = signal region.
      datacard_COMB_monoJ.txt is the combined monojet category card 
