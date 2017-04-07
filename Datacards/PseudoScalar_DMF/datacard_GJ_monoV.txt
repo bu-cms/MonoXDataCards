@@ -1,0 +1,45 @@
+imax * number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+
+---------------------------------------------------------
+shapes data_obs      GJ_MV   workspace_MV.root GJ_MV:data_obs_GJ_MV
+shapes Znunu         GJ_MV   workspace_MV.root GJ_MV:Znunu_GJ_MV
+shapes QCD_GJ        GJ_MV   workspace_MV.root GJ_MV:QCD_GJ_MV
+shapes VGamma_GJ     GJ_MV   workspace_MV.root GJ_MV:VGamma_GJ_MV
+shapes WJets_GJ      GJ_MV   workspace_MV.root GJ_MV:WJets_GJ_MV
+---------------------------------------------------------
+bin         GJ_MV
+observation -1
+---------------------------------------------------------
+bin                                 GJ_MV       GJ_MV      GJ_MV      GJ_MV
+process                             Znunu       QCD_GJ     VGamma_GJ  WJets_GJ
+process                             1           11         17         18
+rate                                1          -1          -1         -1
+---------------------------------------------------------
+lumi_13TeV                lnN       -           -           1.026     1.026
+QCD_GJ_Norm13TeV          lnN       -           1.400       -         -
+CMS_eff_ph                lnN       1.020       -           1.020     1.020
+CMS_trig_ph               lnN       1.010       -           1.010     1.010
+VGamma_Norm13TeV          lnN       -           -           1.200     -
+WJets_GJ_Norm13TeV        lnN       -           -           -         1.500
+ZG_GJ_QCDScale         param     0     1
+ZG_GJ_QCDShape         param     0     1
+ZG_GJ_QCDProcess       param     0     1
+ZG_GJ_PDF              param     0     1
+ZG_GJ_NNLOEWK          param     0     1
+Znunu_SR_Sudakov       param     0     1
+Gamma_GJ_Sudakov       param     0     1
+Znunu_SR_NNLOMiss      param     0     1
+Gamma_GJ_NNLOMiss      param     0     1
+ZG_GJ_QCDEWKMIX        param     0     1
+Znunu_GJ_MV_bin1_Runc     param     0     1
+Znunu_GJ_MV_bin2_Runc     param     0     1
+Znunu_GJ_MV_bin3_Runc     param     0     1
+Znunu_GJ_MV_bin4_Runc     param     0     1
+Znunu_GJ_MV_bin5_Runc     param     0     1
+Znunu_GJ_MV_bin6_Runc     param     0     1
+Znunu_GJ_MV_bin7_Runc     param     0     1
+CMS_met_trig              param     0     1
+---------------------------------------------------------
+

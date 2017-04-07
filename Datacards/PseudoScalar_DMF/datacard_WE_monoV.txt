@@ -1,0 +1,68 @@
+imax * number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+
+------------------------------------------------------------------------------------------------
+shapes data_obs      WE_MV   workspace_MV.root WE_MV:data_obs_WE_MV
+shapes WJets         WE_MV   workspace_MV.root WE_MV:WJets_WE_MV
+shapes ZJets_WE      WE_MV   workspace_MV.root WE_MV:ZJets_WE_MV    WE_MV:ZJets_WE_MV_$SYSTEMATIC
+shapes Dibosons      WE_MV   workspace_MV.root WE_MV:Dibosons_WE_MV WE_MV:Dibosons_WE_MV_$SYSTEMATIC
+shapes Top           WE_MV   workspace_MV.root WE_MV:Top_WE_MV      WE_MV:Top_WE_MV_$SYSTEMATIC
+shapes QCD_WE        WE_MV   workspace_MV.root WE_MV:QCD_WE_MV      WE_MV:QCD_WE_MV_$SYSTEMATIC
+------------------------------------------------------------------------------------------------
+bin         WE_MV
+observation -1
+------------------------------------------------------------------------------------------------
+bin                                 WE_MV       WE_MV       WE_MV           WE_MV         WE_MV
+process                             WJets       ZJets_WE    Dibosons        Top           QCD_WE
+process                             2           13           4               5            14
+rate                                1          -1           -1             -1            -1
+------------------------------------------------------------------------------------------------
+lumi_13TeV                lnN       -           1.026       1.026           1.026         1.026
+CMS_eff_e                 lnN       1.020       1.020       1.020           1.020         -
+CMS_reco_e                lnN       1.010       1.010       1.010           1.010         -
+CMS_eff_trig_e            lnN       1.010       1.010       1.010           1.010         1.010
+ZJets_WE_Norm13TeV        lnN       -           1.200       -               -             -
+Dibosons_Norm13TeV        lnN       -           -           1.200           -             -
+Top_Norm13TeV             lnN       -           -           -               1.100         -
+Top_Reweight13TeV         lnN       -           -           -               1.100         -
+QCD_WE_Norm13TeV          lnN       -           -           -               -             1.500
+CMS_met_13TeV             lnN       -           1.040       1.040           1.040         1.040 
+CMS_btag_13TeV            lnN       -           1.020       1.020           1.060         1.020    
+CMS_eff_Vtag_stat         lnN       -           -           0.935/1.065  0.935/1.065      -    
+CMS_eff_Vtag_PS           lnN       -           -           0.935/1.065  0.935/1.065      -    
+Dibosons_WE_MV_CMS_bin1_stat shape -           -           1              -             -
+Dibosons_WE_MV_CMS_bin2_stat shape -           -           1              -             -
+Dibosons_WE_MV_CMS_bin3_stat shape -           -           1              -             -
+Dibosons_WE_MV_CMS_bin4_stat shape -           -           1              -             -
+Dibosons_WE_MV_CMS_bin5_stat shape -           -           1              -             -
+Dibosons_WE_MV_CMS_bin6_stat shape -           -           1              -             -
+Dibosons_WE_MV_CMS_bin7_stat shape -           -           1              -             -
+Top_WE_MV_CMS_bin1_stat shape -           -           -              1             -
+Top_WE_MV_CMS_bin2_stat shape -           -           -              1             -
+Top_WE_MV_CMS_bin3_stat shape -           -           -              1             -
+Top_WE_MV_CMS_bin4_stat shape -           -           -              1             -
+Top_WE_MV_CMS_bin5_stat shape -           -           -              1             -
+Top_WE_MV_CMS_bin6_stat shape -           -           -              1             -
+Top_WE_MV_CMS_bin7_stat shape -           -           -              1             -
+#QCD_WE_MV_CMS_bin1_stat shape -           -           -              -             1
+QCD_WE_MV_CMS_bin2_stat shape -           -           -              -             1
+QCD_WE_MV_CMS_bin3_stat shape -           -           -              -             1
+QCD_WE_MV_CMS_bin4_stat shape -           -           -              -             1
+QCD_WE_MV_CMS_bin5_stat shape -           -           -              -             1
+QCD_WE_MV_CMS_bin6_stat shape -           -           -              -             1
+QCD_WE_MV_CMS_bin7_stat shape -           -           -              -             1
+WJets_WE_MV_bin1_Runc     param     0     1
+WJets_WE_MV_bin2_Runc     param     0     1
+WJets_WE_MV_bin3_Runc     param     0     1
+WJets_WE_MV_bin4_Runc     param     0     1
+WJets_WE_MV_bin5_Runc     param     0     1
+WJets_WE_MV_bin6_Runc     param     0     1
+WJets_WE_MV_bin7_Runc     param     0     1
+CMS_met_trig              param     0     1
+WtoWPDF                   param     0     1
+CMS_muon_veto              param     0     1
+CMS_ele_veto               param     0     1
+CMS_tau_veto               param     0     1
+------------------------------------------------------------------------------------------------
+

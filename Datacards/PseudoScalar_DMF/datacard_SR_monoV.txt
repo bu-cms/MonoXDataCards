@@ -1,0 +1,82 @@
+imax * number of bins
+cmax * number of processes minus 1
+kmax * number of nuisance parameters
+--------------------------------------------------------------------------------------------------------------------------
+shapes data_obs    SR_MV   workspace_MV.root SR_MV:data_obs_SR_MV
+shapes Znunu       SR_MV   workspace_MV.root SR_MV:Znunu_SR_MV 
+shapes WJets       SR_MV   workspace_MV.root SR_MV:WJets_SR_MV 
+shapes ZJets       SR_MV   workspace_MV.root SR_MV:ZJets_SR_MV        SR_MV:ZJets_SR_MV_$SYSTEMATIC
+shapes Dibosons    SR_MV   workspace_MV.root SR_MV:Dibosons_SR_MV     SR_MV:Dibosons_SR_MV_$SYSTEMATIC
+shapes Top         SR_MV   workspace_MV.root SR_MV:Top_SR_MV          SR_MV:Top_SR_MV_$SYSTEMATIC
+shapes QCD         SR_MV   workspace_MV.root SR_MV:QCD_SR_MV          SR_MV:QCD_SR_MV_$SYSTEMATIC
+shapes GJets       SR_MV   workspace_MV.root SR_MV:GJets_SR_MV        SR_MV:GJets_SR_MV_$SYSTEMATIC
+shapes MonoJ       SR_MV   MonoJ_806_1.0_catmonov_13TeV_v1_updated.root combinedws:monov_signal_signal_$MASS combinedws:monov_signal_signal_$MASS_$SYSTEMATIC
+--------------------------------------------------------------------------------------------------------------------------
+bin         SR_MV
+observation -1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bin                               SR_MV  SR_MV        SR_MV       SR_MV        SR_MV           SR_MV        SR_MV      SR_MV
+process                           MonoJ  Znunu        WJets       ZJets        Dibosons        Top           QCD       GJets
+process                           0      1            2            3             4             5             6          7 
+rate                             -1      1            1           -1            -1            -1            -1         -1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+lumi_13TeV                lnN    1.026   -            -          1.026          1.026         1.026         -        1.026
+CMS_met_trig_bkg          lnN    1.010   -            -          1.010          1.010         1.010         -        1.010
+CMS_eff_Vtag_stat         lnN        -   -            -            -         0.935/1.065     0.935/1.065      -        -
+CMS_eff_Vtag_PS           lnN        -   -            -            -         0.935/1.065     0.935/0.065      -        -
+CMS_eff_lepVeto_13TeV     lnN        -   -            -           1.030       1.030           1.030         -        1.030
+CMS_met_13TeV             lnN    1.040   -            -           1.040       1.040           1.040         -        1.040
+CMS_btag_13TeV            lnN    1.020   -            -           1.020       1.020           1.060         -        1.020
+ZJets_Norm13TeV           lnN        -   -            -           1.200         -              -            -        -
+Dibosons_Norm13TeV        lnN        -   -            -            -            1.200          -            -        -
+Top_Norm13TeV             lnN        -   -            -            -            -             1.100         -        -
+Top_Reweight13TeV         lnN        -   -            -            -            -             1.100         -        -
+GJets_Norm13TeV           lnN        -   -            -            -            -              -            -        1.200
+CMS_QCD_SR                shape      -   -            -            -            -              -            1        -
+MonoJ_SR_MV_CMS_bin1_stat   shape    1   -            -            -            -              -            -        -
+MonoJ_SR_MV_CMS_bin2_stat   shape    1   -            -            -            -              -            -        -
+MonoJ_SR_MV_CMS_bin3_stat   shape    1   -            -            -            -              -            -        -
+MonoJ_SR_MV_CMS_bin4_stat   shape    1   -            -            -            -              -            -        -
+MonoJ_SR_MV_CMS_bin5_stat   shape    1   -            -            -            -              -            -        -
+MonoJ_SR_MV_CMS_bin6_stat   shape    1   -            -            -            -              -            -        -
+MonoJ_SR_MV_CMS_bin7_stat   shape    1   -            -            -            -              -            -        -
+ZJets_SR_MV_CMS_bin1_stat   shape    -   -            -            1              -            -        -       -
+ZJets_SR_MV_CMS_bin2_stat   shape    -   -            -            1              -            -        -       -
+ZJets_SR_MV_CMS_bin3_stat   shape    -   -            -            1              -            -        -       -
+ZJets_SR_MV_CMS_bin4_stat   shape    -   -            -            1              -            -        -       -
+ZJets_SR_MV_CMS_bin5_stat   shape    -   -            -            1              -            -        -       -
+ZJets_SR_MV_CMS_bin6_stat   shape    -   -            -            1              -            -        -       -
+ZJets_SR_MV_CMS_bin7_stat   shape    -   -            -            1              -            -        -       -
+Dibosons_SR_MV_CMS_bin1_stat   shape    -   -            -            -              1            -        -       -
+Dibosons_SR_MV_CMS_bin2_stat   shape    -   -            -            -              1            -        -       -
+Dibosons_SR_MV_CMS_bin3_stat   shape    -   -            -            -              1            -        -       -
+Dibosons_SR_MV_CMS_bin4_stat   shape    -   -            -            -              1            -        -       -
+Dibosons_SR_MV_CMS_bin5_stat   shape    -   -            -            -              1            -        -       -
+Dibosons_SR_MV_CMS_bin6_stat   shape    -   -            -            -              1            -        -       -
+Dibosons_SR_MV_CMS_bin7_stat   shape    -   -            -            -              1            -        -       -
+Top_SR_MV_CMS_bin1_stat   shape    -   -            -            -              -            1        -       -
+Top_SR_MV_CMS_bin2_stat   shape    -   -            -            -              -            1        -       -
+Top_SR_MV_CMS_bin3_stat   shape    -   -            -            -              -            1        -       -
+Top_SR_MV_CMS_bin4_stat   shape    -   -            -            -              -            1        -       -
+Top_SR_MV_CMS_bin5_stat   shape    -   -            -            -              -            1        -       -
+Top_SR_MV_CMS_bin6_stat   shape    -   -            -            -              -            1        -       -
+Top_SR_MV_CMS_bin7_stat   shape    -   -            -            -              -            1        -       -
+WJets_SR_MV_bin1_Runc        param     0     1
+WJets_SR_MV_bin2_Runc        param     0     1
+WJets_SR_MV_bin3_Runc        param     0     1
+WJets_SR_MV_bin4_Runc        param     0     1
+WJets_SR_MV_bin5_Runc        param     0     1
+WJets_SR_MV_bin6_Runc        param     0     1
+WJets_SR_MV_bin7_Runc        param     0     1
+ZW_SR_QCDScale           param     0     1
+ZW_SR_QCDShape           param     0     1
+ZW_SR_QCDProcess         param     0     1
+ZW_SR_PDF                param     0     1
+ZW_SR_NNLOEWK            param     0     1
+Znunu_SR_NNLOMiss        param     0     1
+WJets_SR_NNLOMiss        param     0     1
+Znunu_SR_Sudakov         param     0     1
+WJets_SR_Sudakov         param     0     1
+ZW_SR_QCDEWKMIX          param     0     1
+lumiScale_MonoJ_MV       rateParam  SR_MV    MonoJ   1
+
