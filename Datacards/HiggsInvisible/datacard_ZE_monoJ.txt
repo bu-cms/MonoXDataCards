@@ -1,0 +1,98 @@
+imax * number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+
+----------------------------------------------------------------------------------
+shapes data_obs      ZE_MJ  workspace_MJ.root ZE_MJ:data_obs_ZE_MJ
+shapes Znunu         ZE_MJ  workspace_MJ.root ZE_MJ:Znunu_ZE_MJ
+shapes WJets_ZE      ZE_MJ  workspace_MJ.root ZE_MJ:WJets_ZE_MJ    ZE_MJ:WJets_ZE_MJ_$SYSTEMATIC
+shapes Dibosons      ZE_MJ  workspace_MJ.root ZE_MJ:Dibosons_ZE_MJ ZE_MJ:Dibosons_ZE_MJ_$SYSTEMATIC
+shapes Top           ZE_MJ  workspace_MJ.root ZE_MJ:Top_ZE_MJ      ZE_MJ:Top_ZE_MJ_$SYSTEMATIC
+----------------------------------------------------------------------------------
+bin         ZE_MJ
+observation -1
+----------------------------------------------------------------------------------
+bin                                 ZE_MJ       ZE_MJ       ZE_MJ           ZE_MJ
+process                             Znunu       WJets_ZE    Dibosons        Top   
+process                             1           12          4               5     
+rate                                1          -1           -1              -1    
+----------------------------------------------------------------------------------
+lumi_13TeV                lnN       -           1.026       1.026           1.026
+CMS_eff_e                 lnN       1.040       1.040       1.040           1.040             
+CMS_reco_e                lnN       1.020       1.020       1.020           1.020         
+WJets_ZE_Norm13TeV        lnN       -           1.200       -               -     
+Dibosons_Norm13TeV        lnN       -           -           1.200           -     
+Top_Norm13TeV             lnN       -           -           -               1.100 
+Top_Reweight13TeV         lnN       -           -           -               1.100 
+CMS_met_13TeV             lnN       -           1.040       1.040           1.040 
+CMS_btag_13TeV            lnN       -           1.020       1.020           1.060  
+CMS_eff_Vtag_stat         lnN       -            -         1.010/0.990     1.010/0.990 
+CMS_eff_Vtag_PS           lnN       -            -         1.010/0.990     1.010/0.990
+Dibosons_ZE_MJ_CMS_bin1_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin2_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin3_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin4_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin5_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin6_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin7_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin8_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin9_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin10_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin11_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin12_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin13_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin14_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin15_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin16_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin17_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin18_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin19_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin20_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin21_stat shape -           -           1           -
+Dibosons_ZE_MJ_CMS_bin22_stat shape -           -           1           -
+Top_ZE_MJ_CMS_bin1_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin2_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin3_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin4_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin5_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin6_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin7_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin8_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin9_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin10_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin11_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin12_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin13_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin14_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin15_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin16_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin17_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin18_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin19_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin20_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin21_stat shape -           -           -           1
+Top_ZE_MJ_CMS_bin22_stat shape -           -           -           1
+Znunu_ZE_MJ_bin1_Runc     param     0     1
+Znunu_ZE_MJ_bin2_Runc     param     0     1
+Znunu_ZE_MJ_bin3_Runc     param     0     1
+Znunu_ZE_MJ_bin4_Runc     param     0     1
+Znunu_ZE_MJ_bin5_Runc     param     0     1
+Znunu_ZE_MJ_bin6_Runc     param     0     1
+Znunu_ZE_MJ_bin7_Runc     param     0     1
+Znunu_ZE_MJ_bin8_Runc     param     0     1
+Znunu_ZE_MJ_bin9_Runc     param     0     1
+Znunu_ZE_MJ_bin10_Runc     param     0     1
+Znunu_ZE_MJ_bin11_Runc     param     0     1
+Znunu_ZE_MJ_bin12_Runc     param     0     1
+Znunu_ZE_MJ_bin13_Runc     param     0     1
+Znunu_ZE_MJ_bin14_Runc     param     0     1
+Znunu_ZE_MJ_bin15_Runc     param     0     1
+Znunu_ZE_MJ_bin16_Runc     param     0     1
+Znunu_ZE_MJ_bin17_Runc     param     0     1
+Znunu_ZE_MJ_bin18_Runc     param     0     1
+Znunu_ZE_MJ_bin19_Runc     param     0     1
+Znunu_ZE_MJ_bin20_Runc     param     0     1
+Znunu_ZE_MJ_bin21_Runc     param     0     1
+Znunu_ZE_MJ_bin22_Runc     param     0     1
+CMS_met_trig               param     0     1
+----------------------------------------------------------------------------------
