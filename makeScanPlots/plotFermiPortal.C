@@ -379,7 +379,8 @@ void plotFermiPortal(string inputFileName, string outputDIR) {
   leg->AddEntry(hobs2,"Observed 95% CL","L");
   leg->AddEntry(hobu2,"Observed #pm 1 s.d._{theory}","L");
   if(addRelicDensity)
-    leg->AddEntry(wm   ,"Thermal Relic","F");
+    //leg->AddEntry(wm   ,"Thermal Relic","F");
+    leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
   leg->Draw("SAME");
   
   TLatex *   tex2 = new TLatex();
@@ -422,7 +423,45 @@ TGraph*relic_gf(){
   
   double *x = new double[1000];
   double *y = new double[1000];
-
+x[0]=50;     y[0]=3.8;
+x[1]=139;    y[1]=11;
+x[2]=262;    y[2]=23;
+x[3]=336;    y[3]=38;
+x[4]=394;    y[4]=53;
+x[5]=467;    y[5]=77;
+x[6]=541;    y[6]=104;
+x[7]=603;    y[7]=134;
+x[8]=657;    y[8]=161;
+x[9]=727;    y[9]=200;
+x[10]=781;   y[10]=235;
+x[11]=835;   y[11]=273;
+x[12]=850;   y[12]=285;
+x[13]=889;   y[13]=320;
+x[14]=943;   y[14]=366;
+x[15]=997;   y[15]=424;
+x[16]=1036;  y[16]=462;
+x[17]=1067;  y[17]=501;
+x[18]=1121;  y[18]=578;
+x[19]=1171;  y[19]=663;
+x[20]=1214;  y[20]=744;
+x[21]=1241;  y[21]=813;
+x[22]=1268;  y[22]=871;
+x[23]=1287;  y[23]=952;
+x[24]=1303;  y[24]=1002;
+x[25]=1314;  y[25]=1048;
+x[26]=1326;  y[26]=1114;
+x[27]=1338;  y[27]=1141;
+x[28]=1349;  y[28]=1172;
+x[29]=1361;  y[29]=1206;
+x[30]=1384;  y[30]=1249;
+x[31]=1407;  y[31]=1284;
+x[32]=1427;  y[32]=1311;
+x[33]=1454;  y[33]=1353;
+x[34]=1488;  y[34]=1399;
+x[35]=1519;  y[35]=1446;
+x[36]=1550;  y[36]=1488;
+x[37]=1562;  y[37]=1500;
+/*
   x[0]=100;
   x[1]=150;
   x[2]=200;
@@ -452,13 +491,14 @@ TGraph*relic_gf(){
   y[11]=440;
   y[12]=490.889;
   y[13]=563.18;
-  
+*/  
 	
-  TGraph *lrelic = new TGraph(13,x,y);
+  TGraph *lrelic = new TGraph(37,x,y);
   lrelic->SetLineColor(kBlue+2);
   lrelic->SetLineWidth(-802);
   lrelic->SetFillStyle(3005);
   lrelic->SetFillColor(kBlue+2);
   return lrelic;
 }	
+
 
