@@ -101,7 +101,6 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
 
     // for plotting reasons
     if (medmass > 600) continue;
-    if (medmass == 90) continue;
     
     // fill expected limit graph
     if (quantile == 0.5) {

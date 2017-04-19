@@ -99,9 +99,6 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
 
-    if(medmass >  1400 and dmmass >= 150 and dmmass <= 350) continue;
-    if(medmass == 2500 and dmmass <= 50) continue;
-    
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;

@@ -238,12 +238,12 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   hexp2_down->SetLineStyle(1);
   hexp2_down->SetLineWidth(1);
 
-  hobs2->SetLineColor(kBlack);
+  hobs2->SetLineColor(kRed);
   hobs2->SetLineWidth(3);
   hobu2->SetLineWidth(1);
   hobd2->SetLineWidth(1);
-  hobu2->SetLineColor(kBlack);
-  hobd2->SetLineColor(kBlack);
+  hobu2->SetLineColor(kRed);
+  hobd2->SetLineColor(kRed);
   
   hobs->SetMinimum(minZ);
   hobs->SetMaximum(maxZ);
