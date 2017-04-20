@@ -91,12 +91,11 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
 
+  // identify bad limits files
   int currentmedmass = -1;
   int currentdmmass  = -1;
   int npoints = 0;
-
   vector<pair<int,int> > goodMassPoint;
-
   for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
 
@@ -119,6 +118,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   if(npoints == 6)
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
 
+  /// main loop
   int expcounter       = 0;
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
@@ -138,7 +138,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
         break;
       }
     }
-    if(not isGoodMassPoint){
+    if(not isGoodMassPoint){ // printout bad limits
       cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
       continue;
     }

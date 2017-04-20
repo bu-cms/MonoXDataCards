@@ -23,8 +23,8 @@ int code(double mh){
 /////////
 static bool saveOutputFile = true;
 static bool addRelicDensity = true;
-static float nbinsX = 800;
-static float nbinsY = 500;
+static float nbinsX = 1000;
+static float nbinsY = 600;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 2500;
@@ -92,10 +92,12 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   int exp_down_counter = 0;
   int obscounter       = 0;
 
+  // identify bad limits
   vector<pair<int,int> > goodMassPoint;
   int currentmedmass = -1;
   int currentdmmass  = -1;
   int npoints = 0;
+
   for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
 
@@ -118,6 +120,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   if(npoints == 6)
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
 
+  // main loop
   for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
     
@@ -138,6 +141,20 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     }
 
 
+    // remove some point by hand
+    if(medmass == 1925 and dmmass == 200) continue;
+    if(medmass == 1925 and dmmass == 250) continue;
+    if(medmass == 1800 and dmmass == 250) continue;
+    if(medmass == 1800 and dmmass == 800) continue;
+    if(medmass == 1725 and dmmass == 200) continue;
+    if(medmass == 1725 and dmmass == 250) continue;  
+    if(medmass == 1725 and dmmass >  700) continue;
+    if(medmass == 925  and dmmass >= 600) continue;
+    if(medmass == 1000 and dmmass >= 600) continue;
+    if(medmass == 1125 and dmmass >= 600) continue;
+    if(medmass == 1200 and dmmass >= 600) continue;
+    if(medmass == 1325 and dmmass >= 600) continue;
+ 
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
@@ -152,13 +169,12 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
       grexp_up->SetPoint(exp_up_counter, double(medmass), double(dmmass), limit);      
       exp_up_counter++;
     }
-
+    
     if (quantile == -1) { // observed
-      grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
+      grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       obscounter++;      
-      cout<<"medmass "<<medmass<<" dmmass "<<dmmass<<" limit "<<limit<<endl;
     }
   }
 
