@@ -120,7 +120,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   if(npoints == 6)
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
 
-  // main loop
+  // main loop  
   for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
     
@@ -154,7 +154,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     if(medmass == 1125 and dmmass >= 600) continue;
     if(medmass == 1200 and dmmass >= 600) continue;
     if(medmass == 1325 and dmmass >= 600) continue;
- 
+
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
@@ -202,6 +202,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
 
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
+
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
       if(hexp_up -> GetBinContent(i,j) <= 0) hexp_up->SetBinContent(i,j,maxZ);
