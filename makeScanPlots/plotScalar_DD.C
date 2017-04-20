@@ -148,11 +148,17 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
     }
   }
-  
+
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) > maxZ) hexp->SetBinContent(i,j,maxZ);
+      if(hobs -> GetBinContent(i,j) > maxZ) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) < minZ) hexp->SetBinContent(i,j,minZ);
+      if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
     }
   }
   

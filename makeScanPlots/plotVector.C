@@ -21,7 +21,7 @@ int code(double mh){
 }
 
 /////////
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 static bool addRelicDensity = true;
 static float nbinsX = 800;
 static float nbinsY = 500;
@@ -30,7 +30,7 @@ static float minY = 1;
 static float maxX = 2500;
 static float maxY = 1200;
 static float minZ = 0.01;
-static float maxZ = 20;
+static float maxZ = 10;
 
 TGraph*relic_g1();
 TGraph*relic_g25();
@@ -92,12 +92,51 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   int exp_down_counter = 0;
   int obscounter       = 0;
 
-  for (int i = 0; i < tree->GetEntries(); i++){
+  vector<pair<int,int> > goodMassPoint;
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+	goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+
+  for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
     
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
+
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+	isGoodMassPoint = true;
+	break;
+      }
+    }
+    if(not isGoodMassPoint){
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
 
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -119,6 +158,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       obscounter++;      
+      cout<<"medmass "<<medmass<<" dmmass "<<dmmass<<" limit "<<limit<<endl;
     }
   }
 

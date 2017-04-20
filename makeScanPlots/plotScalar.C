@@ -26,7 +26,7 @@ static bool addRelicDensity = false;
 static float nbinsX = 400;
 static float nbinsY = 250;
 static float minX = 0;
-static float minY = 0;
+static float minY = 1;
 static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
@@ -83,18 +83,61 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
+
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+
+  vector<pair<int,int> > goodMassPoint;
+
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
   
   int expcounter       = 0;
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
   int obscounter       = 0;
+  double minObs = 0;
+  double minmass = 100000;
 
   for (int i = 0; i < tree->GetEntries(); i++){
+
     tree->GetEntry(i);
     
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
+
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
     
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -116,9 +159,12 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       obscounter++;      
+      if(medmass <= minmass and dmmass < medmass/2){
+        minObs = limit;
+        minmass = medmass;
+      }
     }
   }
-
 
   tree->ResetBranchAddresses();
   
@@ -138,6 +184,15 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
       hobu->SetBinContent(i,j,grobu->Interpolate(hobu->GetXaxis()->GetBinCenter(i),hobu->GetYaxis()->GetBinCenter(j)));
       hobd->SetBinContent(i,j,grobd->Interpolate(hobd->GetXaxis()->GetBinCenter(i),hobd->GetYaxis()->GetBinCenter(j)));
+
+      if(hexp->GetXaxis()->GetBinCenter(i) <= 40 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
+	hexp_up->SetBinContent(i,j,minObs);
+	hexp_down->SetBinContent(i,j,minObs);
+	hexp->SetBinContent(i,j,minObs);
+	hobs->SetBinContent(i,j,minObs);
+	hobu->SetBinContent(i,j,minObs);
+	hobd->SetBinContent(i,j,minObs);
+      }
     }
   }
 
@@ -149,6 +204,20 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
       if(hobu -> GetBinContent(i,j) <= 0) hobu->SetBinContent(i,j,maxZ);
       if(hobd -> GetBinContent(i,j) <= 0) hobd->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) > maxZ) hexp->SetBinContent(i,j,maxZ);
+      if(hexp_down -> GetBinContent(i,j) > maxZ) hexp_down->SetBinContent(i,j,maxZ);
+      if(hexp_up -> GetBinContent(i,j) > maxZ) hexp_up->SetBinContent(i,j,maxZ);
+      if(hobs -> GetBinContent(i,j) > maxZ) hobs->SetBinContent(i,j,maxZ);
+      if(hobu -> GetBinContent(i,j) > maxZ) hobu->SetBinContent(i,j,maxZ);
+      if(hobd -> GetBinContent(i,j) > maxZ) hobd->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) < minZ) hexp->SetBinContent(i,j,minZ);
+      if(hexp_down -> GetBinContent(i,j) < minZ) hexp_down->SetBinContent(i,j,minZ);
+      if(hexp_up -> GetBinContent(i,j) < minZ) hexp_up->SetBinContent(i,j,minZ);
+      if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
+      if(hobu -> GetBinContent(i,j) < minZ) hobu->SetBinContent(i,j,minZ);
+      if(hobd -> GetBinContent(i,j) < minZ) hobd->SetBinContent(i,j,minZ);
     }
   }
 

@@ -212,7 +212,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   }
   
   //////////// All the plotting and cosmetics
-  TCanvas* canvas = new TCanvas("canvas", "canvas",600,600);
+  TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
   TH1* frame = canvas->DrawFrame(medMin,TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
 				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*1.5, "");
   frame->GetYaxis()->CenterTitle();
@@ -274,7 +274,6 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   frame->GetYaxis()->SetRangeUser(0,6);
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".png").c_str(),"png");
-  canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".C").c_str(),"C");
 
   canvas->SetLogy();
   frame->GetYaxis()->SetRangeUser(TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.01,

@@ -65,11 +65,12 @@ TGraph * makeOBA(TGraph *Graph1){
 /////
 static float nbinsX = 800;
 static float nbinsY = 500;
-static float minX = 100;
-static float minY = 0;
-static float maxX = 5000;
-static float maxY = 1500;
-static float maxZ = 10;
+static float minX = 0;
+static float minY = 1.;
+static float maxX = 2500;
+static float maxY = 1000;
+static float minZ = 0.01;
+static float maxZ = 20;
 
 static float minX_dd = 1;
 static float maxX_dd = 1000;
@@ -115,8 +116,6 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     int medmass = mmed(mh, c);
     int dmmass = mdm(mh, c);
 
-    if(medmass == 1800 and dmmass >= 25 and dmmass <= 150) continue;
-
     if (quantile == 0.5) {
       expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -145,8 +144,16 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     for(int j = 0; j < nbinsY; j++){
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) > maxZ) hexp->SetBinContent(i,j,maxZ);
+      if(hobs -> GetBinContent(i,j) > maxZ) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) < minZ) hexp->SetBinContent(i,j,minZ);
+      if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
     }
   }
+  
+
   
   hexp->Smooth();
   hobs->Smooth();

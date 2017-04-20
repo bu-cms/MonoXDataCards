@@ -51,14 +51,15 @@ TGraph * makeOBV(TGraph *Graph1){
     return gr;
 }
 
-/////                                                                                                                                                                                                  
+/////                                                                                                                                                                                                 
 static float nbinsX = 800;
 static float nbinsY = 500;
-static float minX = 100;
-static float minY = 0;
-static float maxX = 5000;
-static float maxY = 1500;
-static float maxZ = 10;
+static float minX = 0;
+static float minY = 1;
+static float maxX = 2500;
+static float maxY = 1200;
+static float minZ = 0.01;
+static float maxZ = 20; 
 
 static float minX_dd = 1;
 static float maxX_dd = 1400;
@@ -104,9 +105,6 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     int c       = code(mh);
     int medmass = mmed(mh,c);
     int dmmass  = mdm(mh,c);
-    //for cosmetic reasons
-    if(medmass >  1400 and dmmass >= 150 and dmmass <= 350) continue;
-    if(medmass == 2500 and dmmass <= 50) continue;
 
     if (quantile == 0.5) {
       expcounter++;
@@ -131,10 +129,17 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     }
   }
 
+
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) > maxZ) hexp->SetBinContent(i,j,maxZ);
+      if(hobs -> GetBinContent(i,j) > maxZ) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) < minZ) hexp->SetBinContent(i,j,minZ);
+      if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
     }
   }
 
@@ -145,9 +150,9 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
   
   hexp2->SetContour(2);
-  hexp2->SetContourLevel(1, 1);
+  hexp2->SetContourLevel(1,1);
   hobs2->SetContour(2);
-  hobs2->SetContourLevel(1, 1);
+  hobs2->SetContourLevel(1,1);
   
   hexp2->Draw("contz list");
   gPad->Update();

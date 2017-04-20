@@ -22,7 +22,7 @@ int code(double mh){
 }
 
 /////////
-static bool saveOutputFile = false;
+static bool saveOutputFile  = true;
 static bool addRelicDensity = true;
 static float nbinsX = 800;
 static float nbinsY = 500;
@@ -31,7 +31,7 @@ static float minY = 1.;
 static float maxX = 2500;
 static float maxY = 1000;
 static float minZ = 0.01;
-static float maxZ = 20;
+static float maxZ = 10;
 
 TGraph* relic_g1();
 TGraph* relic_g25_1();
@@ -90,7 +90,35 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
+
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+
+  vector<pair<int,int> > goodMassPoint;
+
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
   
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+
   int expcounter       = 0;
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
@@ -102,7 +130,28 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
-    
+
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
+
+    // filter out some bad mass points
+    if(medmass == 925  and dmmass >= 600) continue;
+    if(medmass == 1000 and dmmass >= 600) continue;
+    if(medmass == 1125 and dmmass >= 600) continue;
+    if(medmass == 1200 and dmmass >= 600) continue;
+    if(medmass == 1325 and dmmass >= 600) continue;
+    if(medmass == 325) continue;
+
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
@@ -118,7 +167,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
       exp_up_counter++;
     }
 
-    if (quantile == -1) { // observed
+    if (quantile == -1) { // observed      
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
