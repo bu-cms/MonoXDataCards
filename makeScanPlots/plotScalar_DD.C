@@ -22,54 +22,87 @@ int code(double mh){
 
 
 double vecF(double mMED,double mDM){  
+
   // Assume coupling only to t and b quakrs
-  if (! (mMED>0)) return 10;
-    
-    double mR = (0.939*mDM)/(0.939+mDM);
-    double fTG = 1. - 0.019 - 0.045 - 0.043;
-    double fn = (0.939/246.)*(1./(mMED*mMED))*(2./27)*fTG; //(4.7)
-    double c = 0.3984e-27;  // to cm2
-    
-    return c*mR*mR*fn*fn/3.14159;
+  if (! (mMED>0)) return 10;    
+  double mR = (0.939*mDM)/(0.939+mDM);
+  double fTG = 1. - 0.019 - 0.045 - 0.043;
+  double fn = (0.939/246.)*(1./(mMED*mMED))*(2./27)*fTG; //(4.7)
+  double c = 0.3984e-27;  // to cm2  
+  return c*mR*mR*fn*fn/3.14159;
 }
 
+static float minX_dd = 1;
+static float maxX_dd = 1400;
+static double minY_dd = 5e-47;
+static double maxY_dd = 5e-34;
 
 TGraph * makeOBV(TGraph *Graph1){
 
-    TGraph *gr = new TGraph();
-    double X;
-    double Y;
-    int pp  = 0;
-    Graph1->GetPoint(0,X,Y);
-    
-    for (double MDM=1;MDM<=Y;MDM+=0.1){
-      gr->SetPoint(pp,MDM,vecF(X,MDM));
-      pp++;
-    }
-    
-    for (int p =0;p<Graph1->GetN()-1;p++){
-      Graph1->GetPoint(p,X,Y);
-      if (!(X >200)) continue;
-      if (!(X <300)) continue;      
-      gr->SetPoint(pp,Y,vecF(X,Y));
-      pp++;
-    }
-    
-    for (double MDM=1;MDM>=0.001;MDM-=0.01){
-      X = 2*MDM;
-      gr->SetPoint(pp,MDM,vecF(X,MDM));
-      pp++;
-    }
-    
-    gr->GetXaxis()->SetTitle("m_{DM}");
-    gr->GetYaxis()->SetTitle("#sigma_{SD}");
-    gr->SetName(Form("%s_DD",Graph1->GetName()));
-    gr->SetLineStyle(Graph1->GetLineStyle());
-    gr->SetLineColor(Graph1->GetLineColor());
-    gr->SetLineWidth(Graph1->GetLineWidth());
+  TGraph *gr = new TGraph();
+  double X, Y;
+  int pp  = 0;
+  Graph1->GetPoint(0,X,Y);
+  // increase granylarity at low mDM --> from minimum dd x-axis to the first official point
+  for (double MDM=minX_dd;MDM<=Y;MDM+=0.1){
+    gr->SetPoint(pp,MDM,vecF(X,MDM));
+    pp++;
+  }
 
-    return gr;
+  for (int p =0;p<Graph1->GetN()-1;p++){
+    Graph1->GetPoint(p,X,Y);
+    // to correctly get the contour in case of a bad limit
+    if (X < 20) continue;
+    if (X > 85 and X < 1000) continue;
+    
+    gr->SetPoint(pp,Y,vecF(X,Y));
+    pp++;
+  }
+  
+  for (double MDM=minX_dd;MDM>=0.01;MDM-=0.01){
+    X = 2*MDM;
+    gr->SetPoint(pp,MDM,vecF(X,MDM));
+    pp++;
+  }
+
+  gr->GetXaxis()->SetTitle("m_{DM}");
+  gr->GetYaxis()->SetTitle("#sigma_{SD}");
+  gr->SetName(Form("%s_DD",Graph1->GetName()));
+  gr->SetLineStyle(Graph1->GetLineStyle());
+  gr->SetLineColor(Graph1->GetLineColor());
+  gr->SetLineWidth(Graph1->GetLineWidth());
+  
+  return gr;
 }
+
+TGraph* produceContour (const int & reduction){
+
+  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  std::vector<double> lXE;
+  std::vector<double> lYE;
+  int lTotalContsE = lContoursE->GetSize();
+  for(int i0 = 0; i0 < lTotalContsE; i0++){
+    TList * pContLevel = (TList*)lContoursE->At(i0);
+    TGraph *pCurv = (TGraph*)pContLevel->First();
+    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
+        if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                    
+        lXE.push_back(pCurv->GetX()[i2]);
+        lYE.push_back(pCurv->GetY()[i2]);
+      }
+      pCurv->SetLineColor(kRed);
+      pCurv = (TGraph*)pContLevel->After(pCurv);
+    }
+  }
+  if(lXE.size() == 0) {
+    lXE.push_back(0);
+    lYE.push_back(0);
+  }
+
+  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
+  return lTotalE;
+}
+
 
 TGraph *superCDMS();
 TGraph *lux();
@@ -77,21 +110,18 @@ TGraph *panda();
 TGraph *cresst();
 TGraph *cdmslite();
 
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 static float nbinsX = 400;
 static float nbinsY = 250;
 static float minX = 0;
-static float minY = 0;
+static float minY = 1;
 static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
 static float maxZ = 10;
+static int  reductionForContour = 2;
 
-static float minX_dd = 1;
-static float maxX_dd = 1400;
-static double minY_dd = 5e-47;
-static double maxY_dd = 5e-34;
-
+///////////
 void plotScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
 
   gROOT->SetBatch(kTRUE);
@@ -112,19 +142,69 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
+
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+
+  vector<pair<int,int> > goodMassPoint;
+
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+
   
   int expcounter = 0;
   int obscounter = 0;
-  
+  double minObs = 0;
+  double minmass = 100000;
+
   for (int i = 0; i < tree->GetEntries(); i++){
     
     tree->GetEntry(i);
     
     if (quantile != 0.5 && quantile != -1) continue;
+
     int c = code(mh);
     int medmass = mmed(mh, c);
     int dmmass = mdm(mh, c);
 
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
+
+    if(medmass < 50) continue; //avoid bad points
+    if(medmass == 60  and dmmass == 20) continue; //avoid bad points
+    if(medmass == 70  and dmmass == 10) continue; //avoid bad points
+    if(medmass == 125 and dmmass == 1) continue; //avoid bad points
+    
     if (quantile == 0.5) {
       expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -132,6 +212,10 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     if (quantile == -1) {
       obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      if(medmass <= minmass and dmmass < medmass/2){
+        minObs = limit;
+        minmass = medmass;
+      }
     }
   }
   
@@ -146,6 +230,10 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     for (int j = 1; j <= nbinsY; j++) {
       hexp->SetBinContent(i,j,grexp->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetYaxis()->GetBinCenter(j)));
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
+      if(hexp->GetXaxis()->GetBinCenter(i) < 50 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
+	hexp->SetBinContent(i,j,minObs);
+	hobs->SetBinContent(i,j,minObs);
+      }
     }
   }
   
@@ -153,6 +241,12 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     for(int j = 0; j < nbinsY; j++){
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) > maxZ) hexp->SetBinContent(i,j,maxZ);
+      if(hobs -> GetBinContent(i,j) > maxZ) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) < minZ) hexp->SetBinContent(i,j,minZ);
+      if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
     }
   }
   
@@ -161,66 +255,22 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   
   TH2* hexp2 = (TH2*)hexp->Clone("hexp2");
   TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
-  
-  hexp2->SetContour(2);
-  hexp2->SetContourLevel(1, 1);
-  hobs2->SetContour(2);
-  hobs2->SetContourLevel(1, 1);
-  
+
+  double contours[1]; contours[0]=1;
+  hexp2->SetContour(1,contours);
+  hobs2->SetContour(1,contours);
+    
   hexp2->Draw("contz list");
   gPad->Update();
-
-  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lXE;
-  std::vector<double> lYE;
-  int lTotalContsE = lContoursE->GetSize();
-  for(int i0 = 0; i0 < lTotalContsE; i0++){
-    TList * pContLevel = (TList*)lContoursE->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lXE.push_back(pCurv->GetX()[i2]); 
-	lYE.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kRed);                                                                                                            
-      pCurv = (TGraph*)pContLevel->After(pCurv);                                                                                        
-    }
-  }
-  if(lXE.size() == 0) {
-    lXE.push_back(0); 
-    lYE.push_back(0); 
-  }
-
-  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);  
-  lTotalE->SetLineColor(1);
+  TGraph* lTotalE = produceContour(reductionForContour);
+  lTotalE->SetLineColor(kBlack);
+  lTotalE->SetLineStyle(7);
   lTotalE->SetLineWidth(3);
   
   hobs2->Draw("contz list");
   gPad->Update();
-  
-  TObjArray *lContours = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lX;
-  std::vector<double> lY;
-  int lTotalConts = lContours->GetSize();
-  for(int i0 = 0; i0 < lTotalConts; i0++){
-    TList * pContLevel = (TList*)lContours->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lX.push_back(pCurv->GetX()[i2]);
-	lY.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kRed);
-      pCurv = (TGraph*)pContLevel->After(pCurv);
-    }
-  }
-  if(lX.size() == 0) {
-    lX.push_back(0); 
-    lY.push_back(0); 
-  }
-
-  TGraph *lTotal = new TGraph(lX.size(),&lX[0],&lY[0]);
-  lTotal->SetLineColor(1);
+  TGraph* lTotal = produceContour(reductionForContour);
+  lTotal->SetLineColor(kRed);
   lTotal->SetLineWidth(3);
   
   TGraph *DDE_graph = makeOBV(lTotalE);
@@ -257,8 +307,6 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
   
-  DDE_graph->SetLineColor(kRed);
-  DD_graph->SetLineColor(kBlack);
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 
@@ -303,11 +351,13 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
 
   if(saveOutputFile){
 
-    TFile*outfile = new TFile(("scalar_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    TFile*outfile = new TFile((outputDirectory+"/scalar_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    hobs2->Write("contour_obs");
+    hexp2->Write("contour_exp");
+    lTotalE->Write("contour_exp_graph");
+    lTotal->Write("contour_obs_graph");
     DDE_graph->SetName("expected");
     DD_graph->SetName("observed");
-    DDE_graph->Write();
-    DD_graph->Write();
     outfile->Write();
     outfile->Close();
   }

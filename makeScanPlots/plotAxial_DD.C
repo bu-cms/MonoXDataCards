@@ -38,16 +38,14 @@ TGraph * makeOBA(TGraph *Graph1){
   double X;
   double Y;
   int pp=0;
-  Graph1->GetPoint(1,X,Y);
-  for (double MDM=1;MDM<=Y;MDM+=0.1){
-    
+  Graph1->GetPoint(0,X,Y);
+  for (double MDM=1;MDM<=Y;MDM+=1){    
     gr->SetPoint(pp,MDM,axialF(X,MDM));
     pp++;
   }
   for (int p =1;p<Graph1->GetN();p++){
     Graph1->GetPoint(p,X,Y);
-    if (!(X >1)) continue;
-    if ((X <100)) continue;
+    if(X < 100) continue;
     gr->SetPoint(pp,Y,axialF(X,Y));
     pp++;
   }
@@ -61,14 +59,43 @@ TGraph * makeOBA(TGraph *Graph1){
   return gr;
 }
 
+TGraph* produceContour (const int & reduction){
+
+  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  std::vector<double> lXE;
+  std::vector<double> lYE;
+  int lTotalContsE = lContoursE->GetSize();
+  for(int i0 = 0; i0 < lTotalContsE; i0++){
+    TList * pContLevel = (TList*)lContoursE->At(i0);
+    TGraph *pCurv = (TGraph*)pContLevel->First();
+    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
+        if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                    
+        lXE.push_back(pCurv->GetX()[i2]);
+        lYE.push_back(pCurv->GetY()[i2]);
+      }
+      pCurv->SetLineColor(kRed);
+      pCurv = (TGraph*)pContLevel->After(pCurv);
+    }
+  }
+  if(lXE.size() == 0) {
+    lXE.push_back(0);
+    lYE.push_back(0);
+  }
+
+  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
+  return lTotalE;
+}
+
 
 /////
 static float nbinsX = 800;
 static float nbinsY = 500;
-static float minX = 100;
-static float minY = 0;
-static float maxX = 5000;
-static float maxY = 1500;
+static float minX = 0;
+static float minY = 1.;
+static float maxX = 2500;
+static float maxY = 1000;
+static float minZ = 0.01;
 static float maxZ = 10;
 
 static float minX_dd = 1;
@@ -76,13 +103,15 @@ static float maxX_dd = 1000;
 static double minY_dd = 5e-46;
 static double maxY_dd = 5e-34;
 
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
+static int  reductionForContour = 20;
 
 TGraph* Pico2L();
 TGraph* Pico60();
 TGraph* SuperKtt();
 TGraph* IceCubett();
 
+////////
 void plotAxial_DD(string inputFileName, string outputDirectory, string coupling = "025", string energy = "13") {
 
   gROOT->SetBatch(kTRUE);
@@ -102,6 +131,33 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
+
+  // identify bad limits files                                                                                                                                                                        
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+  vector<pair<int,int> > goodMassPoint;
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+    
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
   
   int expcounter = 0;
   int obscounter = 0;
@@ -111,11 +167,30 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     tree->GetEntry(i);
     
     if (quantile != 0.5 && quantile != -1) continue;
+
     int c = code(mh);
     int medmass = mmed(mh, c);
     int dmmass = mdm(mh, c);
 
-    if(medmass == 1800 and dmmass >= 25 and dmmass <= 150) continue;
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){ // printout bad limits                                                                                                                                                 
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
+    // filter out some bad mass points                                                                                                                                                           
+    if(medmass == 925  and dmmass >= 600) continue;
+    if(medmass == 1000 and dmmass >= 600) continue;
+    if(medmass == 1125 and dmmass >= 600) continue;
+    if(medmass == 1200 and dmmass >= 600) continue;
+    if(medmass == 1325 and dmmass >= 600) continue;
+    if(medmass == 325) continue;
 
     if (quantile == 0.5) {
       expcounter++;
@@ -145,76 +220,41 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     for(int j = 0; j < nbinsY; j++){
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) > maxZ) hexp->SetBinContent(i,j,maxZ);
+      if(hobs -> GetBinContent(i,j) > maxZ) hobs->SetBinContent(i,j,maxZ);
+
+      if(hexp -> GetBinContent(i,j) < minZ) hexp->SetBinContent(i,j,minZ);
+      if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
     }
   }
+  
   
   hexp->Smooth();
   hobs->Smooth();
 
   TH2* hexp2 = (TH2*)hexp->Clone("hexp2");
   TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
-  
-  hexp2->SetContour(2);
-  hexp2->SetContourLevel(1,1);
-  hobs2->SetContour(2);
-  hobs2->SetContourLevel(1,1);
+
+  double contours[1]; contours[0]=1;
+  hexp2->SetContour(1,contours);
+  hobs2->SetContour(1,contours);
 
   hexp2->Draw("contz list");
   gPad->Update();
-
+  
   /// import the expected contour line
-  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lXE;
-  std::vector<double> lYE;
-  int lTotalContsE = lContoursE->GetSize();
-  for(int i0 = 0; i0 < lTotalContsE; i0++){ // there can be more than one contour if the are not connected
-    TList * pContLevel = (TList*)lContoursE->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lXE.push_back(pCurv->GetX()[i2]); 
-	lYE.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kBlack);                                                                                                            
-      pCurv = (TGraph*)pContLevel->After(pCurv);                                                                                        
-    }
-  }
-  if(lXE.size() == 0) {
-    lXE.push_back(0); 
-    lYE.push_back(0); 
-  }
-
-  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
-  lTotalE->SetLineColor(kRed);
+  TGraph* lTotalE = produceContour(reductionForContour);
+  lTotalE->SetLineColor(kBlack);
+  lTotalE->SetLineStyle(2);
   lTotalE->SetLineWidth(3);
 
   // observed one
   hobs2->Draw("contz list");
   gPad->Update();
 
-  TObjArray *lContours = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lX;
-  std::vector<double> lY;
-  int lTotalConts = lContours->GetSize();
-  for(int i0 = 0; i0 < lTotalConts; i0++){
-    TList * pContLevel = (TList*)lContours->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lX.push_back(pCurv->GetX()[i2]);
-	lY.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kBlack);
-      pCurv = (TGraph*)pContLevel->After(pCurv);
-    }
-  }
-  if(lX.size() == 0) {
-    lX.push_back(0); 
-    lY.push_back(0); 
-  }
-
-  TGraph *lTotal = new TGraph(lX.size(),&lX[0],&lY[0]);
-  lTotal->SetLineColor(kBlack);
+  TGraph* lTotal = produceContour(reductionForContour);
+  lTotal->SetLineColor(kRed);
   lTotal->SetLineWidth(3);
 
   // make the DD limits
@@ -232,7 +272,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
 
   TGraph *DDE_graph = makeOBA(lTotalE);
   TGraph *DD_graph  = makeOBA(lTotal);
-  
+
   TCanvas* canvas = new TCanvas("canvas","canvas",750,600);
   canvas->SetLogx();
   canvas->SetLogy();
@@ -254,10 +294,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
 
-  DDE_graph->SetLineColor(kRed);
-  DD_graph->SetLineColor(kBlack);
-  DDE_graph->Draw("L SAME");
-  DD_graph->Draw("L SAME");
+  DDE_graph->Draw("C SAME");
+  DD_graph->Draw("C SAME");
 
 
   canvas->SetLogx();
@@ -282,7 +320,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   leg->Draw("SAME");
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.22);
 
-  
+  canvas->RedrawAxis("samesaxis");
 
   TLatex * tex = new TLatex();
   tex->SetNDC();
@@ -304,7 +342,11 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
 
   if(saveOutputFile){
 
-    TFile*outfile = new TFile(("axial_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    TFile*outfile = new TFile((outputDirectory+"/axial_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    hobs2->Write("contour_obs");
+    hexp2->Write("contour_exp");
+    lTotalE->Write("contour_exp_graph");
+    lTotal->Write("contour_obs_graph");
     DDE_graph->SetName("expected");
     DD_graph->SetName("observed");
     DDE_graph->Write();
@@ -312,7 +354,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     outfile->Write();
     outfile->Close();
 
-  }  
+  } 
+   
 }
 
 TGraph *IceCubett() {

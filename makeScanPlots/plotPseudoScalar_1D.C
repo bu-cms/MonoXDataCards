@@ -211,7 +211,7 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   }
   
   //////////// All the plotting and cosmetics
-  TCanvas* canvas = new TCanvas("canvas", "canvas",600,600);
+  TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
   TH1* frame = canvas->DrawFrame(medMin,TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
 				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*1.5, "");
   frame->GetYaxis()->CenterTitle();
