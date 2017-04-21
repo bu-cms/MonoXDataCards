@@ -63,8 +63,8 @@ TGraph * makeOBA(TGraph *Graph1){
 
 
 /////
-static float nbinsX = 800;
-static float nbinsY = 500;
+static float nbinsX = 1500;
+static float nbinsY = 1000;
 static float minX = 0;
 static float minY = 1.;
 static float maxX = 2500;
@@ -83,6 +83,8 @@ TGraph* Pico2L();
 TGraph* Pico60();
 TGraph* SuperKtt();
 TGraph* IceCubett();
+
+////////
 
 void plotAxial_DD(string inputFileName, string outputDirectory, string coupling = "025", string energy = "13") {
 
@@ -103,6 +105,34 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
+
+
+  // identify bad limits files                                                                                                                                                                         
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+  vector<pair<int,int> > goodMassPoint;
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
   
   int expcounter = 0;
   int obscounter = 0;
@@ -112,9 +142,30 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     tree->GetEntry(i);
     
     if (quantile != 0.5 && quantile != -1) continue;
+
     int c = code(mh);
     int medmass = mmed(mh, c);
     int dmmass = mdm(mh, c);
+
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){ // printout bad limits                                                                                                                                                 
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
+    // filter out some bad mass points                                                                                                                                                           
+    if(medmass == 925  and dmmass >= 600) continue;
+    if(medmass == 1000 and dmmass >= 600) continue;
+    if(medmass == 1125 and dmmass >= 600) continue;
+    if(medmass == 1200 and dmmass >= 600) continue;
+    if(medmass == 1325 and dmmass >= 600) continue;
+    if(medmass == 325) continue;
 
     if (quantile == 0.5) {
       expcounter++;
@@ -160,11 +211,10 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
 
   TH2* hexp2 = (TH2*)hexp->Clone("hexp2");
   TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
-  
-  hexp2->SetContour(2);
-  hexp2->SetContourLevel(1,1);
-  hobs2->SetContour(2);
-  hobs2->SetContourLevel(1,1);
+
+  double contours[1]; contours[0]=1;
+  hexp2->SetContour(1,contours);
+  hobs2->SetContour(1,contours);
 
   hexp2->Draw("contz list");
   gPad->Update();
@@ -261,8 +311,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
 
-  DDE_graph->SetLineColor(kRed);
-  DD_graph->SetLineColor(kBlack);
+  DDE_graph->SetLineColor(kBlack);
+  DD_graph->SetLineColor(kRed);
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 
@@ -289,7 +339,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   leg->Draw("SAME");
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.22);
 
-  
+  canvas->RedrawAxis("samesaxis");
 
   TLatex * tex = new TLatex();
   tex->SetNDC();

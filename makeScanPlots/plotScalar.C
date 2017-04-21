@@ -237,24 +237,14 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   TH2* hobd2 = (TH2*)hobd->Clone("hobd2");
 
 
-  //////////
-  hexp2->SetContour(2);
-  hexp2->SetContourLevel(1,1);
-
-  hexp2_up->SetContour(2);
-  hexp2_up->SetContourLevel(1,1);
-
-  hexp2_down->SetContour(2);
-  hexp2_down->SetContourLevel(1,1);
-
-  hobs2->SetContour(2);
-  hobs2->SetContourLevel(1,1);
-
-  hobu2->SetContour(2);
-  hobu2->SetContourLevel(1,1);
-
-  hobd2->SetContour(2);
-  hobd2->SetContourLevel(1,1);
+  //////////                                                                                                                                                                                          
+  double contours[1]; contours[0]=1;
+  hexp2->SetContour(1,contours);
+  hexp2_up->SetContour(1,contours);
+  hexp2_down->SetContour(1,contours);
+  hobs2->SetContour(1,contours);
+  hobu2->SetContour(1,contours);
+  hobd2->SetContour(1,contours);
   
   // All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);

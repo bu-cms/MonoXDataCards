@@ -1,28 +1,31 @@
 #include "../CMS_lumi.h"
 
+// to get mass point info
 int mmed(double mh, int code){
-    if (code == 800) return ((int)(mh-80000000000))/10000; 
-    if (code == 801) return ((int)(mh-80100000000))/10000; 
-    if (code == 805) return ((int)(mh-80500000000))/10000; 
-    if (code == 806) return ((int)(mh-80600000000))/10000; 
-    return -1;
+  if (code == 800) return ((int)(mh-80000000000))/10000; 
+  if (code == 801) return ((int)(mh-80100000000))/10000; 
+  if (code == 805) return ((int)(mh-80500000000))/10000; 
+  if (code == 806) return ((int)(mh-80600000000))/10000; 
+  return -1;
 }
 
 int mdm(double mh, int code){
-    if (code == 800) return (mh-80000000000)  - ( ((Int_t)(mh-80000000000))/10000 )*10000;
-    if (code == 801) return (mh-80100000000)  - ( ((Int_t)(mh-80100000000))/10000 )*10000;
-    if (code == 805) return (mh-80500000000)  - ( ((Int_t)(mh-80500000000))/10000 )*10000;
-    if (code == 806) return (mh-80600000000)  - ( ((Int_t)(mh-80600000000))/10000 )*10000;
-    return -1;
+  if (code == 800) return (mh-80000000000)  - ( ((Int_t)(mh-80000000000))/10000 )*10000;
+  if (code == 801) return (mh-80100000000)  - ( ((Int_t)(mh-80100000000))/10000 )*10000;
+  if (code == 805) return (mh-80500000000)  - ( ((Int_t)(mh-80500000000))/10000 )*10000;
+  if (code == 806) return (mh-80600000000)  - ( ((Int_t)(mh-80600000000))/10000 )*10000;
+  return -1;
 }
 
 int code(double mh){
-    return (int)(mh/100000000);
+  return (int)(mh/100000000);
 }
 
+// constatins
 double const mtop = 173.34;
 double const mb   = 4.18;
 
+// Width
 double WidthDM(double mMED, double mF){
     double fac = (1- 4*mF*mF/(mMED*mMED));
     double vev = 246.;
@@ -35,78 +38,84 @@ double Width(double mMED, double mF){
 }
 
 bool STOP = false;
-double vecF(double mMED,double mDM){
-  
-    if (mMED<=0) return 10;
-    if (2*mDM > 0.99*mMED) {
-        mMED = 2*mDM; //return 10;
-        STOP=true;
-    }
-    double iGamma = 1;
-    if (mMED < 2.*mtop) iGamma = 3*Width(mMED,mb) + WidthDM(mMED,mDM) ;
-    else iGamma = 3*Width(mMED,mb) + 3*Width(mMED,mtop) + WidthDM(mMED,mDM) ;
 
-    double  lVal    = 0.5*1./TMath::Pi()*3;
-    double  lDenom  = (mMED*mMED-4.*mDM*mDM)*(mMED*mMED-4.*mDM*mDM);
-    lDenom += mMED*mMED*iGamma*iGamma;
-    lVal /= lDenom;
-    lVal *= mMED *mMED;
-    lVal *= TMath::Sqrt(1.-(4.2*4.2)/mDM/mDM);
-    //Adding Yukawa Copulings
-    lVal *= (4.2/246.)*(4.2/246.);
-    lVal *= (mDM/246.)*(mDM/246.);
-    
-    double c = 1.167E-17;
-    return c*lVal;
+// conversion
+static float gDM = 1;
+static float gq  = 1;
+
+double vecF(double mMED,double mDM){
+
+  if(mMED<=0) return 10;
+
+  if(2*mDM > 0.99*mMED) {
+    mMED = 2*mDM;
+    STOP=true;
+  }
+  
+  double iGamma = 1;
+  if (mMED < 2.*mtop) iGamma = 3*Width(mMED,mb) + WidthDM(mMED,mDM) ;
+  else iGamma = 3*Width(mMED,mb) +  3*Width(mMED,mtop) + WidthDM(mMED,mDM) ;
+
+  double  lVal    = 3*mb*mb/(2*TMath::Pi()*246*246);
+  double  lDenom  = (mMED*mMED-4.*mDM*mDM)*(mMED*mMED-4.*mDM*mDM);
+  lDenom += mMED*mMED*iGamma*iGamma;
+  lVal /= lDenom;
+  lVal *= mDM *mDM*gDM*gDM*gq*gq;
+  lVal *= TMath::Sqrt(1.-(mb*mb)/(mDM*mDM));
+  double c = 1.167E-17;
+
+  return c*lVal;
 }
 
 void majoranatodirac(TGraph* gr){
-    double X;
-    double Y;
-    double fac = 2;
-    for (int p=0;p<gr->GetN();p++){
-        gr->GetPoint(p,X,Y);
-        gr->SetPoint(p,X,fac*Y);
-    }
+  double X;
+  double Y;
+  double fac = 2;
+  for (int p=0;p<gr->GetN();p++){
+    gr->GetPoint(p,X,Y);
+    gr->SetPoint(p,X,fac*Y);
+  }
 }
 
+// conversion macro
 TGraph * makeOBV(TGraph *Graph1){
 
-    STOP=false;
-    TGraph *gr = new TGraph();
-    double X;
-    double Y;
-    int pp=0;
-    Graph1->GetPoint(0,X,Y);
-    for (double MDM=0.1;MDM<=Y;MDM+=0.1){
+  STOP=false;
+  TGraph *gr = new TGraph();
+  double X;
+  double Y;
+  int pp = 0;
+  Graph1->GetPoint(0,X,Y);
+  for (double MDM=mb;MDM<=Y;MDM+=0.1){
+    gr->SetPoint(pp,MDM,vecF(X,MDM));
+    pp++;
+  }
 
-        gr->SetPoint(pp,MDM,vecF(X,MDM));
-        pp++;
-    }
-    for (int p =0;p<Graph1->GetN();p++){
+  for (int p =0;p<Graph1->GetN();p++){    
+    Graph1->GetPoint(p,X,Y);
+    if (!(X>0)) continue; // skip negative mMED 
+    if (STOP) continue;   // stop if off-shell      
+    if(X < mtop*2 and p%15 != 0) continue;
+    gr->SetPoint(pp,Y,vecF(X,Y));    
+    pp++;
+  }
+  gr->GetXaxis()->SetTitle("m_{DM}");
+  gr->GetYaxis()->SetTitle("< #sigma v > (cm^{3}/s)");
+  gr->SetName(Form("%s_DD",Graph1->GetName()));
+  gr->SetLineStyle(Graph1->GetLineStyle());
+  gr->SetLineColor(Graph1->GetLineColor());
+  gr->SetLineWidth(Graph1->GetLineWidth());
 
-        Graph1->GetPoint(p,X,Y);
-        if (!(X >0)) continue;        
-        if (STOP) continue;
-        gr->SetPoint(pp,Y,vecF(X,Y));
-        pp++;
-    }
-    gr->GetXaxis()->SetTitle("m_{DM}");
-    gr->GetYaxis()->SetTitle("< #sigma v > (cm^{3}/s)");
-    gr->SetName(Form("%s_DD",Graph1->GetName()));
-    gr->SetLineStyle(Graph1->GetLineStyle());
-    gr->SetLineColor(Graph1->GetLineColor());
-    gr->SetLineWidth(Graph1->GetLineWidth());
-    
-    return gr;
+  return gr;
+  
 }
 
 /////////                                                                                                                                                                                             
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 static float nbinsX = 400;
 static float nbinsY = 250;
 static float minX = 0;
-static float minY = 5;
+static float minY = 5; // cannot go below 5 since mDM > mb for the formula used to translate into DM-nucleon xsec
 static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
@@ -115,7 +124,7 @@ static float maxZ = 10;
 static float minX_dd  = 5;
 static float maxX_dd  = 400;
 static double minY_dd = 1e-31;
-static double maxY_dd = 1e-24;
+static double maxY_dd = 1e-22;
 
 void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
 
@@ -142,7 +151,36 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
-  
+
+  // identify possible bad limits
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+  vector<pair<int,int> > goodMassPoint;
+
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+
+  ////////////
   int expcounter = 0;
   int obscounter = 0;
   
@@ -154,7 +192,21 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
-      
+
+    
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
+
     if (quantile == 0.5) {
       expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -162,12 +214,11 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
     if (quantile == -1) {
       obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
-      
+
       if(medmass <= minmass and dmmass < medmass/2){
-	minObs = limit;
-	minmass = medmass;
-      }
-      
+        minObs = limit;
+        minmass = medmass;
+      }     
     }
   }
   
@@ -191,6 +242,7 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
+
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
       
@@ -208,19 +260,18 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   ////////////////                                                                                                                                                                              
   TH2* hexp2 = (TH2*)hexp->Clone("hexp2");
   TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
+
+  double contours[1]; contours[0]=1;
+  hexp2->SetContour(1,contours);
+  hobs2->SetContour(1,contours);
   
-  hexp2->SetContour(2);
-  hexp2->SetContourLevel(1, 1);
-  hobs2->SetContour(2);
-  hobs2->SetContourLevel(1, 1);
-  
+  // Save expected conoturs as TGraph
   hexp2->Draw("contz list");
   gPad->Update();
   
   TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
   std::vector<double> lXE;
   std::vector<double> lYE;
-  cout<<"size "<<lContoursE->GetSize()<<endl;
   for(int i0 = 0; i0 < lContoursE->GetSize(); i0++){
     TList * pContLevel = (TList*)lContoursE->At(i0);
     TGraph *pCurv = (TGraph*)pContLevel->First();
@@ -237,11 +288,12 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
     lXE.push_back(0); 
     lYE.push_back(0); 
   }
-  
+    
   TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
   lTotalE->SetLineColor(kRed);
   lTotalE->SetLineWidth(3);
 
+  /// Save observed contours as TGraph
   hobs2->Draw("contz list");
   gPad->Update();
   
@@ -334,16 +386,18 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   canvas->SaveAs((outputDirectory+"/scanDD_pseudo_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDirectory+"/scanDD_pseudo_g"+coupling+"_"+energy+"TeV_v1.png").c_str(),"png");
   
-  if(saveOutputFile){
-    
-    TFile*outfile = new TFile(("pseudo_g"+coupling+"_DD.root").c_str(),"RECREATE");
+  if(saveOutputFile){   
+    TFile*outfile = new TFile((outputDirectory+"/pseudo_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    hobs2->Write("contour_obs");
+    hexp2->Write("contour_exp");
+    lTotalE->Write("contour_exp_graph");
+    lTotal->Write("contour_obs_graph");
     DDE_graph->SetName("expected");
     DD_graph->SetName("observed");
     DDE_graph->Write();
     DD_graph->Write();
     outfile->Write();
-    outfile->Close();
-    
+    outfile->Close();    
   }
 
 

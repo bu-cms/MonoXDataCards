@@ -20,6 +20,8 @@ int code(double mh){
     return (int)(mh/100000000);
 }
 
+// To convert mMED-mDM in DM-nucleons vs mDM
+
 double vecF(double mMED,double mDM){    
     double mR = (0.939*mDM)/(0.939+mDM);
     double c = 6.9e-41*1e12;
@@ -27,28 +29,28 @@ double vecF(double mMED,double mDM){
 }
 
 TGraph * makeOBV(TGraph *Graph1){
-    TGraph *gr = new TGraph();
-    double X;
-    double Y;
-    int pp=0;
-    Graph1->GetPoint(1,X,Y);
-    for (double MDM = 1; MDM < Y; MDM += 0.1){
-        gr->SetPoint(pp,MDM,vecF(X,MDM));
-        pp++;
-    }
-    for (int p =0; p < Graph1->GetN(); p++){
-        Graph1->GetPoint(p,X,Y);
-        if (!(X >0)) continue;
-        if (!(Y >0)) continue;
-        gr->SetPoint(pp,Y,vecF(X,Y));
-        pp++;
-    }
-    gr->SetName(Form("%s_DD",Graph1->GetName()));
-    gr->SetLineStyle(Graph1->GetLineStyle());
-    gr->SetLineColor(Graph1->GetLineColor());
-    gr->SetLineWidth(Graph1->GetLineWidth());
-    
-    return gr;
+  TGraph *gr = new TGraph();
+  double X;
+  double Y;
+  int pp=0;
+  Graph1->GetPoint(1,X,Y);
+  for (double MDM = 1; MDM < Y; MDM += 0.1){
+    gr->SetPoint(pp,MDM,vecF(X,MDM));
+    pp++;
+  }
+  for (int p =0; p < Graph1->GetN(); p++){
+    Graph1->GetPoint(p,X,Y);
+    if (!(X >0)) continue;
+    if (!(Y >0)) continue;
+    gr->SetPoint(pp,Y,vecF(X,Y));
+    pp++;
+  }
+  gr->SetName(Form("%s_DD",Graph1->GetName()));
+  gr->SetLineStyle(Graph1->GetLineStyle());
+  gr->SetLineColor(Graph1->GetLineColor());
+  gr->SetLineWidth(Graph1->GetLineWidth());
+  
+  return gr;
 }
 
 /////                                                                                                                                                                                                 
@@ -64,7 +66,7 @@ static float maxZ = 20;
 static float minX_dd = 1;
 static float maxX_dd = 1400;
 static double minY_dd = 5e-47;
-static double maxY_dd = 5e-34;
+static double maxY_dd = 1e-35;
 
 static bool saveOutputFile = false;
 
@@ -93,19 +95,76 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
+
+  // find bad limits
+  int currentmedmass = -1;
+  int currentdmmass  = -1;
+  int npoints = 0;
+  vector<pair<int,int> > goodMassPoint;
+  for(int i = 0; i < tree->GetEntries(); i++){
+    tree->GetEntry(i);
+
+    int c       = code(mh);
+    int medmass = mmed(mh, c);
+    int dmmass  = mdm(mh, c);
+
+    if(medmass != currentmedmass or dmmass != currentdmmass){
+      if(npoints == 6)
+        goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+      npoints = 0;
+      currentmedmass = medmass;
+      currentdmmass  = dmmass;
+      npoints++;
+    }
+    else
+      npoints++;
+  }
+
+  if(npoints == 6)
+    goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
+
   
   int expcounter = 0;
   int obscounter = 0;
 
+  // main loop
   for (int i = 0; i < tree->GetEntries(); i++){
     
     tree->GetEntry(i);
     
     if (quantile != 0.5 && quantile != -1) continue;
+
     int c       = code(mh);
     int medmass = mmed(mh,c);
     int dmmass  = mdm(mh,c);
 
+    bool isGoodMassPoint = false;
+    for(auto mass : goodMassPoint){
+      if(medmass == mass.first and dmmass == mass.second){
+        isGoodMassPoint = true;
+        break;
+      }
+    }
+    if(not isGoodMassPoint){ // printout bad limits                                                                                                                                                 
+      cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
+      continue;
+    }
+
+    // remove some point by hand                                                                                                                                                                    
+    if(medmass == 1925 and dmmass == 200) continue;
+    if(medmass == 1925 and dmmass == 250) continue;
+    if(medmass == 1800 and dmmass == 250) continue;
+    if(medmass == 1800 and dmmass == 800) continue;
+    if(medmass == 1725 and dmmass == 200) continue;
+    if(medmass == 1725 and dmmass == 250) continue;
+    if(medmass == 1725 and dmmass >  700) continue;
+    if(medmass == 925  and dmmass >= 600) continue;
+    if(medmass == 1000 and dmmass >= 600) continue;
+    if(medmass == 1125 and dmmass >= 600) continue;
+    if(medmass == 1200 and dmmass >= 600) continue;
+    if(medmass == 1325 and dmmass >= 600) continue;
+
+    
     if (quantile == 0.5) {
       expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -148,12 +207,12 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   
   TH2* hexp2 = (TH2*)hexp->Clone("hexp2");
   TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
-  
-  hexp2->SetContour(2);
-  hexp2->SetContourLevel(1,1);
-  hobs2->SetContour(2);
-  hobs2->SetContourLevel(1,1);
-  
+
+  //////////                                                                                                                                                                                         
+  double contours[1]; contours[0]=1;
+  hexp2->SetContour(1,contours);
+  hobs2->SetContour(1,contours);
+
   hexp2->Draw("contz list");
   gPad->Update();
   
@@ -168,7 +227,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
       for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
 	lXE.push_back(pCurv->GetX()[i2]); 
 	lYE.push_back(pCurv->GetY()[i2]);
-            }
+      }
       pCurv->SetLineColor(kRed);                                                                                                            
       pCurv = (TGraph*)pContLevel->After(pCurv);                                                                                        
     }
@@ -198,14 +257,14 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
 	lY.push_back(pCurv->GetY()[i2]);
       }
       pCurv->SetLineColor(kRed);
-            pCurv = (TGraph*)pContLevel->After(pCurv);
+      pCurv = (TGraph*)pContLevel->After(pCurv);
     }
   }
   if(lX.size() == 0) {
     lX.push_back(0); 
     lY.push_back(0); 
   }
-
+  
   TGraph *lTotal = new TGraph(lX.size(),&lX[0],&lY[0]);  
   lTotal->SetLineColor(1);
   lTotal->SetLineWidth(3);
@@ -244,8 +303,8 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
 
-  DDE_graph->SetLineColor(kRed);
-  DD_graph->SetLineColor(kBlack);
+  DDE_graph->SetLineColor(kBlack);
+  DD_graph->SetLineColor(kRed);
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 
@@ -268,6 +327,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
 
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.22);
 
+  canvas->RedrawAxis("samesaxis");
 
   TLatex * tex = new TLatex();
   tex->SetNDC();
