@@ -33,7 +33,7 @@ TGraph * makeOBV(TGraph *Graph1){
   double X;
   double Y;
   int pp=0;
-  Graph1->GetPoint(1,X,Y);
+  Graph1->GetPoint(0,X,Y);
   for (double MDM = 1; MDM < Y; MDM += 0.1){
     gr->SetPoint(pp,MDM,vecF(X,MDM));
     pp++;
@@ -53,21 +53,49 @@ TGraph * makeOBV(TGraph *Graph1){
   return gr;
 }
 
+TGraph* produceContour (const int & reduction){
+
+  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  std::vector<double> lXE;
+  std::vector<double> lYE;
+  int lTotalContsE = lContoursE->GetSize();
+  for(int i0 = 0; i0 < lTotalContsE; i0++){
+    TList * pContLevel = (TList*)lContoursE->At(i0);
+    TGraph *pCurv = (TGraph*)pContLevel->First();
+    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
+        if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                
+        lXE.push_back(pCurv->GetX()[i2]);
+        lYE.push_back(pCurv->GetY()[i2]);
+      }
+      pCurv->SetLineColor(kRed);
+      pCurv = (TGraph*)pContLevel->After(pCurv);
+    }
+  }
+  if(lXE.size() == 0) {
+    lXE.push_back(0);
+    lYE.push_back(0);
+  }
+
+  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
+  return lTotalE;
+}
+
 /////                                                                                                                                                                                                 
-static float nbinsX = 800;
-static float nbinsY = 500;
+static float nbinsX = 1000;
+static float nbinsY = 600;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 2500;
 static float maxY = 1200;
 static float minZ = 0.01;
-static float maxZ = 20; 
+static float maxZ = 10;
 
 static float minX_dd = 1;
 static float maxX_dd = 1400;
 static double minY_dd = 5e-47;
 static double maxY_dd = 1e-35;
-
+static int reductionForContour = 20;
 static bool saveOutputFile = false;
 
 TGraph* superCDMS();
@@ -215,60 +243,20 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
 
   hexp2->Draw("contz list");
   gPad->Update();
-  
-  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lXE;
-  std::vector<double> lYE;
-  int lTotalContsE = lContoursE->GetSize();
-  for(int i0 = 0; i0 < lTotalContsE; i0++){
-    TList * pContLevel = (TList*)lContoursE->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lXE.push_back(pCurv->GetX()[i2]); 
-	lYE.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kRed);                                                                                                            
-      pCurv = (TGraph*)pContLevel->After(pCurv);                                                                                        
-    }
-  }
-  if(lXE.size() == 0) {
-    lXE.push_back(0); 
-    lYE.push_back(0); 
-  }
 
-  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);  
-  lTotalE->SetLineColor(1);
+  
+  TGraph* lTotalE = produceContour(reductionForContour);
+  lTotalE->SetLineColor(kBlack);
+  lTotalE->SetLineStyle(2);
   lTotalE->SetLineWidth(3);
 
   hobs2->Draw("contz list");
   gPad->Update();
-  
-  TObjArray *lContours = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lX;
-  std::vector<double> lY;
-  int lTotalConts = lContours->GetSize();
-  for(int i0 = 0; i0 < lTotalConts; i0++){
-    TList * pContLevel = (TList*)lContours->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lX.push_back(pCurv->GetX()[i2]);
-	lY.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kRed);
-      pCurv = (TGraph*)pContLevel->After(pCurv);
-    }
-  }
-  if(lX.size() == 0) {
-    lX.push_back(0); 
-    lY.push_back(0); 
-  }
-  
-  TGraph *lTotal = new TGraph(lX.size(),&lX[0],&lY[0]);  
-  lTotal->SetLineColor(1);
+
+  TGraph* lTotal = produceContour(reductionForContour);
+  lTotal->SetLineColor(kRed);
   lTotal->SetLineWidth(3);
-  
+    
   TGraph *DDE_graph = makeOBV(lTotalE);
   TGraph *DD_graph  = makeOBV(lTotal);
 
@@ -303,8 +291,6 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
 
-  DDE_graph->SetLineColor(kBlack);
-  DD_graph->SetLineColor(kRed);
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 

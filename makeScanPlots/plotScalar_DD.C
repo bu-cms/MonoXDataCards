@@ -75,6 +75,35 @@ TGraph * makeOBV(TGraph *Graph1){
   return gr;
 }
 
+TGraph* produceContour (const int & reduction){
+
+  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  std::vector<double> lXE;
+  std::vector<double> lYE;
+  int lTotalContsE = lContoursE->GetSize();
+  for(int i0 = 0; i0 < lTotalContsE; i0++){
+    TList * pContLevel = (TList*)lContoursE->At(i0);
+    TGraph *pCurv = (TGraph*)pContLevel->First();
+    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
+        if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                    
+        lXE.push_back(pCurv->GetX()[i2]);
+        lYE.push_back(pCurv->GetY()[i2]);
+      }
+      pCurv->SetLineColor(kRed);
+      pCurv = (TGraph*)pContLevel->After(pCurv);
+    }
+  }
+  if(lXE.size() == 0) {
+    lXE.push_back(0);
+    lYE.push_back(0);
+  }
+
+  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
+  return lTotalE;
+}
+
+
 TGraph *superCDMS();
 TGraph *lux();
 TGraph *panda();
@@ -90,7 +119,9 @@ static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
 static float maxZ = 10;
+static int  reductionForContour = 2;
 
+///////////
 void plotScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
 
   gROOT->SetBatch(kTRUE);
@@ -228,62 +259,18 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   double contours[1]; contours[0]=1;
   hexp2->SetContour(1,contours);
   hobs2->SetContour(1,contours);
-  
-  
+    
   hexp2->Draw("contz list");
   gPad->Update();
-
-  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lXE;
-  std::vector<double> lYE;
-  int lTotalContsE = lContoursE->GetSize();
-  for(int i0 = 0; i0 < lTotalContsE; i0++){
-    TList * pContLevel = (TList*)lContoursE->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lXE.push_back(pCurv->GetX()[i2]); 
-	lYE.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kRed);                                                                                                            
-      pCurv = (TGraph*)pContLevel->After(pCurv);                                                                                        
-    }
-  }
-  if(lXE.size() == 0) {
-    lXE.push_back(0); 
-    lYE.push_back(0); 
-  }
-
-  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);  
-  lTotalE->SetLineColor(1);
+  TGraph* lTotalE = produceContour(reductionForContour);
+  lTotalE->SetLineColor(kBlack);
+  lTotalE->SetLineStyle(7);
   lTotalE->SetLineWidth(3);
   
   hobs2->Draw("contz list");
   gPad->Update();
-  
-  TObjArray *lContours = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
-  std::vector<double> lX;
-  std::vector<double> lY;
-  int lTotalConts = lContours->GetSize();
-  for(int i0 = 0; i0 < lTotalConts; i0++){
-    TList * pContLevel = (TList*)lContours->At(i0);
-    TGraph *pCurv = (TGraph*)pContLevel->First();
-    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
-      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-	lX.push_back(pCurv->GetX()[i2]);
-	lY.push_back(pCurv->GetY()[i2]);
-      }
-      pCurv->SetLineColor(kRed);
-      pCurv = (TGraph*)pContLevel->After(pCurv);
-    }
-  }
-  if(lX.size() == 0) {
-    lX.push_back(0); 
-    lY.push_back(0); 
-  }
-
-  TGraph *lTotal = new TGraph(lX.size(),&lX[0],&lY[0]);
-  lTotal->SetLineColor(1);
+  TGraph* lTotal = produceContour(reductionForContour);
+  lTotal->SetLineColor(kRed);
   lTotal->SetLineWidth(3);
   
   TGraph *DDE_graph = makeOBV(lTotalE);
@@ -320,8 +307,6 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
   
-  DDE_graph->SetLineColor(kRed);
-  DD_graph->SetLineColor(kBlack);
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 

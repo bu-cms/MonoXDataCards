@@ -20,6 +20,35 @@ int code(double mh){
     return (int)(mh/100000000);
 }
 
+TGraph* produceContour (const int & reduction){
+
+  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  std::vector<double> lXE;
+  std::vector<double> lYE;
+  int lTotalContsE = lContoursE->GetSize();
+  for(int i0 = 0; i0 < lTotalContsE; i0++){
+    TList * pContLevel = (TList*)lContoursE->At(i0);
+    TGraph *pCurv = (TGraph*)pContLevel->First();
+    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
+        if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                     
+        lXE.push_back(pCurv->GetX()[i2]);
+        lYE.push_back(pCurv->GetY()[i2]);
+      }
+      pCurv->SetLineColor(kRed);
+      pCurv = (TGraph*)pContLevel->After(pCurv);
+    }
+  }
+  if(lXE.size() == 0) {
+    lXE.push_back(0);
+    lYE.push_back(0);
+  }
+
+  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);
+  return lTotalE;
+}
+
+
 /////////
 static bool saveOutputFile = false;
 static bool addRelicDensity = true;
@@ -31,6 +60,7 @@ static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
 static float maxZ = 10;
+static int   reductionForContour = 20;
 
 TGraph*relic_g1_2();
 TGraph*relic_g1_1();
@@ -230,6 +260,14 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   hobu->Smooth();
   hobd->Smooth();
 
+  ////////////////                                                                                                                                                                                     
+  TH2* hexp2 = (TH2*)hexp->Clone("hexp2");
+  TH2* hexp2_up = (TH2*)hexp_up->Clone("hexp2_up");
+  TH2* hexp2_down = (TH2*)hexp_down->Clone("hexp2_down");
+  TH2* hobs2 = (TH2*)hobs->Clone("hobs2");
+  TH2* hobu2 = (TH2*)hobu->Clone("hobu2");
+  TH2* hobd2 = (TH2*)hobd->Clone("hobd2");
+
   ////////////////
   double contours[1]; contours[0]=1;
   hexp2->SetContour(1,contours);
@@ -241,6 +279,8 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   
   // All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
+  canvas->SetRightMargin(0.15);
+  canvas->SetLeftMargin(0.13);
   canvas->SetLogz();
   
   TH1* frame = canvas->DrawFrame(minX,minY,maxX,maxY, "");
@@ -251,37 +291,73 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   frame->GetYaxis()->SetTitleOffset(1.20);
   frame->Draw();
 
-  hexp2->SetLineColor(kBlack);
-  hexp2_up->SetLineColor(kBlack);
-  hexp2_down->SetLineColor(kBlack);    
-  hexp2->SetLineWidth(3);
-  hexp2_up->SetLineStyle(1);
-  hexp2_up->SetLineWidth(1);
-  hexp2_down->SetLineStyle(1);
-  hexp2_down->SetLineWidth(1);
-
-  hobs2->SetLineColor(kRed);
-  hobs2->SetLineWidth(3);
-  hobu2->SetLineWidth(1);
-  hobd2->SetLineWidth(1);
-  hobu2->SetLineColor(kRed);
-  hobd2->SetLineColor(kRed);
-  
   hobs->SetMinimum(minZ);
   hobs->SetMaximum(maxZ);
 
-  hobs->Draw("COLZ SAME");
-  hexp2_up->Draw("CONT3 SAME");
-  hexp2_down->Draw("CONT3 SAME");
-  hexp2->Draw("CONT3 SAME");
-  hobs2->Draw("CONT3 SAME");
-  hobu2->Draw("CONT3 SAME");
-  hobd2->Draw("CONT3 SAME");
+  hexp2_up->GetZaxis()->SetLabelSize(0);
+  hexp2_up->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_exp_up = produceContour(reductionForContour);
+
+  hexp2_down->GetZaxis()->SetLabelSize(0);
+  hexp2_down->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_exp_dw = produceContour(reductionForContour);
+
+  hexp2->GetZaxis()->SetLabelSize(0);
+  hexp2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_exp = produceContour(reductionForContour);
+
+  hobs2->GetZaxis()->SetLabelSize(0);
+  hobs2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs = produceContour(1);
+
+  hobu2->GetZaxis()->SetLabelSize(0);
+  hobu2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_up = produceContour(1);
+
+  hobd2->GetZaxis()->SetLabelSize(0);
+  hobd2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_dw = produceContour(1);
+
+  frame->Draw();
+  hobs->Draw("COLZ same");
 
   if(addRelicDensity){
     wm->Draw("SAME");
     wm2->Draw("SAME");
   }
+
+  contour_exp_up->SetLineColor(kBlack);
+  contour_exp->SetLineColor(kBlack);
+  contour_exp_dw->SetLineColor(kBlack);
+  contour_exp_up->SetLineWidth(1);
+  contour_exp->SetLineWidth(3);
+  contour_exp_dw->SetLineWidth(1);
+  contour_exp_up->SetLineStyle(7);
+  contour_exp->SetLineStyle(7);
+  contour_exp_dw->SetLineStyle(7);
+
+  contour_exp_up->Draw("Lsame");
+  contour_exp_dw->Draw("Lsame");
+  contour_exp->Draw("Lsame");
+
+  contour_obs_up->SetLineColor(kRed);
+  contour_obs->SetLineColor(kRed);
+  contour_obs_dw->SetLineColor(kRed);
+  contour_obs_up->SetLineWidth(1);
+  contour_obs->SetLineWidth(3);
+  contour_obs_dw->SetLineWidth(1);
+
+  contour_obs_up->Draw("Lsame");
+  contour_obs_dw->Draw("Lsame");
+  contour_obs->Draw("Lsame");
+
+
 
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
 
@@ -292,10 +368,10 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
-  leg->AddEntry(hexp2,"Median expected 95% CL","L");
-  leg->AddEntry(hexp2_up,"Expected #pm 1 s.d._{experiment}","L");
-  leg->AddEntry(hobs2,"Observed 95% CL","L");
-  leg->AddEntry(hobu2,"Observed #pm 1 s.d._{theory}","L");
+  leg->AddEntry(contour_exp,"Median expected 95% CL","L");
+  leg->AddEntry(contour_exp_up,"Expected #pm 1 s.d._{experiment}","L");
+  leg->AddEntry(contour_obs,"Observed 95% CL","L");
+  leg->AddEntry(contour_obs_up,"Observed #pm 1 s.d._{theory}","L");
   if(addRelicDensity)
     leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
   leg->Draw("SAME");
@@ -321,11 +397,7 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   tex2->SetTextAngle(90);
   tex2->DrawLatex(0.975,0.55,"Observed #sigma_{95% CL}/#sigma_{th}");
   
-  gPad->SetRightMargin(0.15);
-  gPad->SetLeftMargin(0.13);
-  gPad->RedrawAxis();
-  gPad->Modified(); 
-  gPad->Update();
+  canvas->RedrawAxis("sameaxis");
 
   canvas->SaveAs((outputDIR+"/scan_pseudoscalar_g"+string(coupling)+"_"+string(energy)+"TeV_v2.pdf").c_str());
   canvas->SaveAs((outputDIR+"/scan_pseudoscalar_g"+string(coupling)+"_"+string(energy)+"TeV_v2.png").c_str());
