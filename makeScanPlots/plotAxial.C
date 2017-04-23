@@ -50,17 +50,17 @@ TGraph* produceContour (const int & reduction){
 }
 
 /////////
-static bool saveOutputFile  = true;
 static bool addRelicDensity = true;
-static float nbinsX = 800;
-static float nbinsY = 500;
+static bool saveOutputFile  = true;
+static float nbinsX = 1000;
+static float nbinsY = 600;
 static float minX = 0;
-static float minY = 1.;
+static float minY = 1;
 static float maxX = 2500;
-static float maxY = 1000;
+static float maxY = 1200;
 static float minZ = 0.01;
 static float maxZ = 10;
-static int   reductionForContour = 20;
+static int reductionForContour = 20;
 
 TGraph* relic_g1();
 TGraph* relic_g25_1();
@@ -152,6 +152,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
   int obscounter       = 0;
+  double minmass = 100000;
 
   for (int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
@@ -172,15 +173,13 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
       continue;
     }
 
-
-    // filter out some bad mass points
-    if(medmass == 925  and dmmass >= 600) continue;
-    if(medmass == 1000 and dmmass >= 600) continue;
+    // skip some bad points
+    if(medmass == 1800 and (dmmass == 1 or dmmass == 5)) continue;
     if(medmass == 1125 and dmmass >= 600) continue;
-    if(medmass == 1200 and dmmass >= 600) continue;
-    if(medmass == 1325 and dmmass >= 600) continue;
-    if(medmass == 325) continue;
-
+    if(medmass == 800  and dmmass >= 400) continue;
+    if(medmass == 525  and dmmass == 275) continue;
+    
+    // filter out some bad mass points
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
@@ -201,6 +200,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       obscounter++;      
+      if(medmass <= minmass) minmass = medmass;      
     }
   }
 
@@ -214,7 +214,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   TH2D* hobu = new TH2D("hobu", "", nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hobd = new TH2D("hobd", "", nbinsX, minX, maxX, nbinsY, minY, maxY);
 
-  // make granularity
+  // make granularity with linear interpolation on 2D
   for (int i = 1; i   <= nbinsX; i++) {
     for (int j = 1; j <= nbinsY; j++) {
       hexp_up->SetBinContent(i,j,   grexp_up->Interpolate(hexp_up->GetXaxis()->GetBinCenter(i),hexp_up->GetYaxis()->GetBinCenter(j)));
@@ -226,6 +226,22 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
     }
   }
 
+
+  // fix mass points below min med mass generated
+  for (int i = 1; i   <= nbinsX; i++) {
+    for (int j = 1; j <= nbinsY; j++) {      
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass){
+	hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass,hexp_up->GetYaxis()->GetBinCenter(j))));
+	hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass,hexp_down->GetYaxis()->GetBinCenter(j))));
+	hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
+	hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass,hobs->GetYaxis()->GetBinCenter(j))));
+	hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass,hobd->GetYaxis()->GetBinCenter(j))));
+	hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass,hobu->GetYaxis()->GetBinCenter(j))));
+      }
+    }
+  }
+
+  // fix min and max values as well as empty points
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
@@ -248,6 +264,7 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
       if(hobs -> GetBinContent(i,j) < minZ) hobs->SetBinContent(i,j,minZ);
       if(hobu -> GetBinContent(i,j) < minZ) hobu->SetBinContent(i,j,minZ);
       if(hobd -> GetBinContent(i,j) < minZ) hobd->SetBinContent(i,j,minZ);
+
     }
   }
 
@@ -313,17 +330,17 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   hobs2->GetZaxis()->SetLabelSize(0);
   hobs2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs = produceContour(1);
+  TGraph* contour_obs = produceContour(reductionForContour);
 
   hobu2->GetZaxis()->SetLabelSize(0);
   hobu2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_up = produceContour(1);
+  TGraph* contour_obs_up = produceContour(reductionForContour);
 
   hobd2->GetZaxis()->SetLabelSize(0);
   hobd2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_dw = produceContour(1);
+  TGraph* contour_obs_dw = produceContour(reductionForContour);
   
   frame->Draw();
   hobs->Draw("COLZ SAME");

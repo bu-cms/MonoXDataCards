@@ -96,7 +96,7 @@ static float maxX_dd = 1400;
 static double minY_dd = 5e-47;
 static double maxY_dd = 1e-35;
 static int reductionForContour = 20;
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 
 TGraph* superCDMS();
 TGraph* lux();
@@ -154,6 +154,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   
   int expcounter = 0;
   int obscounter = 0;
+  double minmass = 100000;
 
   // main loop
   for (int i = 0; i < tree->GetEntries(); i++){
@@ -179,19 +180,12 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     }
 
     // remove some point by hand                                                                                                                                                                    
-    if(medmass == 1925 and dmmass == 200) continue;
-    if(medmass == 1925 and dmmass == 250) continue;
-    if(medmass == 1800 and dmmass == 250) continue;
-    if(medmass == 1800 and dmmass == 800) continue;
-    if(medmass == 1725 and dmmass == 200) continue;
-    if(medmass == 1725 and dmmass == 250) continue;
-    if(medmass == 1725 and dmmass >  700) continue;
-    if(medmass == 925  and dmmass >= 600) continue;
-    if(medmass == 1000 and dmmass >= 600) continue;
-    if(medmass == 1125 and dmmass >= 600) continue;
-    if(medmass == 1200 and dmmass >= 600) continue;
-    if(medmass == 1325 and dmmass >= 600) continue;
-
+    if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
+    if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
+    if(medmass == 1525 and dmmass > 600) continue;
+    if(medmass == 1125 and dmmass > 600) continue;
+    if(medmass == 600  and dmmass == 350) continue;
+    if(medmass == 525  and dmmass == 275) continue;
     
     if (quantile == 0.5) {
       expcounter++;
@@ -200,6 +194,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     if (quantile == -1) {
       obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      if(medmass <= minmass) minmass = medmass;
     }
   }
   tree->ResetBranchAddresses();
@@ -216,9 +211,19 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     }
   }
 
+  // fix mass points below min med mass generated                                                                                                                                                    
+  for (int i = 1; i   <= nbinsX; i++) {
+    for (int j = 1; j <= nbinsY; j++) {
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass){
+        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
+        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass,hobs->GetYaxis()->GetBinCenter(j))));
+      }
+    }
+  }
 
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
+
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hobs -> GetBinContent(i,j) <= 0) hobs->SetBinContent(i,j,maxZ);
 
@@ -336,7 +341,11 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   
   if(saveOutputFile){
 
-    TFile*outfile = new TFile(("vector_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    TFile*outfile = new TFile((outputDirectory+"/vector_g"+coupling+"_DD.root").c_str(),"RECREATE");
+    hobs2->Write("contour_obs");
+    hexp2->Write("contour_exp");
+    lTotalE->Write("contour_exp_graph");
+    lTotal->Write("contour_obs_graph");
     DDE_graph->SetName("expected");
     DD_graph->SetName("observed");
     DDE_graph->Write();
