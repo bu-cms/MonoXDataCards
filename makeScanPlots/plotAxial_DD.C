@@ -89,12 +89,12 @@ TGraph* produceContour (const int & reduction){
 
 
 /////
-static float nbinsX = 800;
-static float nbinsY = 500;
+static float nbinsX = 1000;
+static float nbinsY = 600;
 static float minX = 0;
-static float minY = 1.;
+static float minY = 1;
 static float maxX = 2500;
-static float maxY = 1000;
+static float maxY = 1200;
 static float minZ = 0.01;
 static float maxZ = 10;
 
@@ -103,7 +103,7 @@ static float maxX_dd = 1000;
 static double minY_dd = 5e-46;
 static double maxY_dd = 5e-34;
 
-static bool saveOutputFile = true;
+static bool saveOutputFile      = true;
 static int  reductionForContour = 20;
 
 TGraph* Pico2L();
@@ -161,6 +161,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   
   int expcounter = 0;
   int obscounter = 0;
+  double minmass = 100000;
 
   for (int i = 0; i < tree->GetEntries(); i++){
     
@@ -185,12 +186,11 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     }
 
     // filter out some bad mass points                                                                                                                                                           
-    if(medmass == 925  and dmmass >= 600) continue;
-    if(medmass == 1000 and dmmass >= 600) continue;
+    if(medmass == 1925 and (dmmass >=10 or dmmass <= 100)) continue;
     if(medmass == 1125 and dmmass >= 600) continue;
-    if(medmass == 1200 and dmmass >= 600) continue;
-    if(medmass == 1325 and dmmass >= 600) continue;
-    if(medmass == 325) continue;
+    if(medmass == 925  and dmmass >= 600) continue;
+    if(medmass == 800  and dmmass >= 400) continue;
+    if(medmass == 525  and dmmass >= 275) continue;
 
     if (quantile == 0.5) {
       expcounter++;
@@ -199,7 +199,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     if (quantile == -1) {
       obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
-    }
+      if(medmass <= minmass) minmass = medmass;
+     }
   }
   tree->ResetBranchAddresses();
 
@@ -210,6 +211,14 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   
   // make granularity                                                                                                                                                                                 
   for (int i   = 1; i <= nbinsX; i++) {
+    for (int j = 1; j <= nbinsY; j++) {
+      hexp->SetBinContent(i,j,grexp->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetYaxis()->GetBinCenter(j)));
+      hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
+    }
+  }
+
+  // make granularity with linear interpolation on 2D                                                                                                                                               
+  for (int i = 1; i   <= nbinsX; i++) {
     for (int j = 1; j <= nbinsY; j++) {
       hexp->SetBinContent(i,j,grexp->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetYaxis()->GetBinCenter(j)));
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));

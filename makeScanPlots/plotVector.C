@@ -64,7 +64,7 @@ static int reductionForContour = 20;
 TGraph*relic_g1();
 TGraph*relic_g25();
 
-
+///////////////
 void plotVector(string inputFileName, string outputDIR, string coupling = "025", string energy = "13") {
 
   system(("mkdir -p "+outputDIR).c_str());
@@ -117,11 +117,6 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
   
-  int expcounter       = 0;
-  int exp_up_counter   = 0;
-  int exp_down_counter = 0;
-  int obscounter       = 0;
-
   // identify bad limits
   vector<pair<int,int> > goodMassPoint;
   int currentmedmass = -1;
@@ -151,6 +146,12 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
 
   // main loop  
+  int expcounter       = 0;
+  int exp_up_counter   = 0;
+  int exp_down_counter = 0;
+  int obscounter       = 0;
+  double minmass       = 100000;
+
   for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
     
@@ -172,18 +173,12 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
 
 
     // remove some point by hand
-    if(medmass == 1925 and dmmass == 200) continue;
-    if(medmass == 1925 and dmmass == 250) continue;
-    if(medmass == 1800 and dmmass == 250) continue;
-    if(medmass == 1800 and dmmass == 800) continue;
-    if(medmass == 1725 and dmmass == 200) continue;
-    if(medmass == 1725 and dmmass == 250) continue;  
-    if(medmass == 1725 and dmmass >  700) continue;
-    if(medmass == 925  and dmmass >= 600) continue;
-    if(medmass == 1000 and dmmass >= 600) continue;
-    if(medmass == 1125 and dmmass >= 600) continue;
-    if(medmass == 1200 and dmmass >= 600) continue;
-    if(medmass == 1325 and dmmass >= 600) continue;
+    if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
+    if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
+    if(medmass == 1525 and dmmass > 600) continue;
+    if(medmass == 1125 and dmmass > 600) continue;
+    if(medmass == 600  and dmmass == 350) continue;
+    if(medmass == 525  and dmmass == 275) continue;
 
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
@@ -205,6 +200,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       obscounter++;      
+      if(medmass <= minmass) minmass = medmass;
     }
   }
 
@@ -230,6 +226,21 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     }
   }
 
+  // fix mass points below min med mass generated                                                                                                                                                 
+  for (int i = 1; i   <= nbinsX; i++) {
+    for (int j = 1; j <= nbinsY; j++) {
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass){
+        hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass,hexp_up->GetYaxis()->GetBinCenter(j))));
+        hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass,hexp_down->GetYaxis()->GetBinCenter(j))));
+        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
+        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass,hobs->GetYaxis()->GetBinCenter(j))));
+        hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass,hobd->GetYaxis()->GetBinCenter(j))));
+        hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass,hobu->GetYaxis()->GetBinCenter(j))));
+      }
+    }
+  }
+
+  ////////////
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
 
@@ -316,17 +327,17 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   hobs2->GetZaxis()->SetLabelSize(0);
   hobs2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs = produceContour(1);
+  TGraph* contour_obs = produceContour(reductionForContour);
 
   hobu2->GetZaxis()->SetLabelSize(0);
   hobu2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_up = produceContour(1);
+  TGraph* contour_obs_up = produceContour(reductionForContour);
 
   hobd2->GetZaxis()->SetLabelSize(0);
   hobd2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_dw = produceContour(1);
+  TGraph* contour_obs_dw = produceContour(reductionForContour);
 
   frame->Draw();
   hobs->Draw("COLZ SAME");
