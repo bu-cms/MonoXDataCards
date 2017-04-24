@@ -85,10 +85,38 @@ int mdm(double mh){
     return -1;
 }
 
+TGraph* produceContour (const int & reduction){
+  
+  TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
+  std::vector<double> lXE;
+  std::vector<double> lYE;
+  int lTotalContsE = lContoursE->GetSize();
+  for(int i0 = 0; i0 < lTotalContsE; i0++){
+    TList * pContLevel = (TList*)lContoursE->At(i0);
+    TGraph *pCurv = (TGraph*)pContLevel->First();
+    for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
+	if(i2%reduction != 0) continue; // reduce number of points
+	lXE.push_back(pCurv->GetX()[i2]); 
+	lYE.push_back(pCurv->GetY()[i2]);
+      }
+      pCurv->SetLineColor(kRed);                                                                                                            
+      pCurv = (TGraph*)pContLevel->After(pCurv);                                                                                        
+    }
+  }
+  if(lXE.size() == 0) {
+    lXE.push_back(0); 
+    lYE.push_back(0); 
+  }
+  
+  TGraph *lTotalE = new TGraph(lXE.size(),&lXE[0],&lYE[0]);  
+  return lTotalE;
+}
+
 /////////
 static bool saveOutputFile  = false;
 static bool addRelicDensity = true;
-static bool addTheoreticalLine = true;
+static bool addTheoreticalLine = false;
 static float nbinsX = 800;
 static float nbinsY = 500;
 static float minX = 0;
@@ -97,6 +125,7 @@ static float maxX = 1800;
 static float maxY = 1000;
 static float minZ = 0.01;
 static float maxZ = 10;
+static int reductionForContour = 20;
 
 TGraph* relic_gf();
 TGraph* theoretical_gf();
@@ -329,6 +358,8 @@ void plotFermiPortal(string inputFileName, string outputDIR) {
   
   // All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
+  canvas->SetRightMargin(0.15);
+  canvas->SetLeftMargin(0.13);
   canvas->SetLogz();
   
   TH1* frame = canvas->DrawFrame(minX,minY,maxX,maxY, "");
@@ -339,26 +370,41 @@ void plotFermiPortal(string inputFileName, string outputDIR) {
   frame->GetYaxis()->SetTitleOffset(1.20);
   frame->Draw();
 
-  hexp2->SetLineColor(kBlack);
-  hexp2_up->SetLineColor(kBlack);
-  hexp2_down->SetLineColor(kBlack);    
-  hexp2->SetLineWidth(3);
-  hexp2_up->SetLineStyle(1);
-  hexp2_up->SetLineWidth(1);
-  hexp2_down->SetLineStyle(1);
-  hexp2_down->SetLineWidth(1);
-
-  hobs2->SetLineColor(kRed);
-  hobs2->SetLineWidth(3);
-  hobu2->SetLineWidth(1);
-  hobd2->SetLineWidth(1);
-  hobu2->SetLineColor(kRed);
-  hobd2->SetLineColor(kRed);
-  
   hobs->SetMinimum(minZ);
   hobs->SetMaximum(maxZ);
 
-  hobs->Draw("COLZ SAME");
+  hexp2_up->GetZaxis()->SetLabelSize(0);
+  hexp2_up->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_exp_up = produceContour(reductionForContour);
+
+  hexp2_down->GetZaxis()->SetLabelSize(0);
+  hexp2_down->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_exp_dw = produceContour(reductionForContour);
+
+  hexp2->GetZaxis()->SetLabelSize(0);
+  hexp2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_exp = produceContour(reductionForContour);
+
+  hobs2->GetZaxis()->SetLabelSize(0);
+  hobs2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs = produceContour(reductionForContour);
+
+  hobu2->GetZaxis()->SetLabelSize(0);
+  hobu2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_up = produceContour(reductionForContour);
+
+  hobd2->GetZaxis()->SetLabelSize(0);
+  hobd2->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_dw = produceContour(reductionForContour);
+  
+  frame->Draw();
+hobs->Draw("COLZ SAME");
 
   if(addRelicDensity){
     wm->SetFillColor(kBlue);
@@ -371,12 +417,30 @@ void plotFermiPortal(string inputFileName, string outputDIR) {
     wm2->SetFillStyle(3005);
     wm2->Draw("SAME");
   }
-  hexp2_up->Draw("CONT3 SAME");
-  hexp2_down->Draw("CONT3 SAME");
-  hexp2->Draw("CONT3 SAME");
-  hobs2->Draw("CONT3 SAME");
-  //hobu2->Draw("CONT3 SAME");
-  //hobd2->Draw("CONT3 SAME");
+  contour_exp_up->SetLineColor(kBlack);
+  contour_exp->SetLineColor(kBlack);
+  contour_exp_dw->SetLineColor(kBlack);
+  contour_exp_up->SetLineWidth(1);
+  contour_exp->SetLineWidth(3);
+  contour_exp_dw->SetLineWidth(1);
+  contour_exp_up->SetLineStyle(7);
+  contour_exp->SetLineStyle(7);
+  contour_exp_dw->SetLineStyle(7);
+
+  contour_exp_up->Draw("Lsame");
+  contour_exp_dw->Draw("Lsame");
+  contour_exp->Draw("Lsame");
+
+  contour_obs_up->SetLineColor(kRed);
+  contour_obs->SetLineColor(kRed);
+  contour_obs_dw->SetLineColor(kRed);
+  contour_obs_up->SetLineWidth(1);
+  contour_obs->SetLineWidth(3);
+  contour_obs_dw->SetLineWidth(1);
+
+  //contour_obs_up->Draw("Lsame");
+  //contour_obs_dw->Draw("Lsame");
+ contour_obs->Draw("Lsame");
 
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
 
@@ -385,10 +449,12 @@ void plotFermiPortal(string inputFileName, string outputDIR) {
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
-  leg->AddEntry(hexp2,"Median expected 95% CL","L");
-  leg->AddEntry(hexp2_up,"Expected #pm 1 s.d._{experiment}","L");
-  leg->AddEntry(hobs2,"Observed 95% CL","L");
-  //leg->AddEntry(hobu2,"Observed #pm 1 s.d._{theory}","L");
+
+  leg->AddEntry(contour_exp,"Median expected 95% CL","L");
+  leg->AddEntry(contour_exp_up,"Expected #pm 1 s.d._{experiment}","L");
+  leg->AddEntry(contour_obs,"Observed 95% CL","L");
+  //leg->AddEntry(contour_obs_up,"Observed #pm 1 s.d._{theory}","L");
+
   if(addRelicDensity)
     leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
   if(addTheoreticalLine)
