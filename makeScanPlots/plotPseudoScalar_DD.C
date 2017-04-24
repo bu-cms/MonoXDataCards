@@ -93,6 +93,7 @@ TGraph * makeOBV(TGraph *Graph1){
 
   for (int p =0;p<Graph1->GetN();p++){    
     Graph1->GetPoint(p,X,Y);
+    if (X < 45) continue;
     if (!(X>0)) continue; // skip negative mMED 
     if (STOP) continue;   // stop if off-shell      
     if (X < 2*mtop and p%10 !=0) continue;
@@ -153,8 +154,8 @@ static float maxZ = 10;
 static float minX_dd  = 5;
 static float maxX_dd  = 400;
 static double minY_dd = 1e-31;
-static double maxY_dd = 1e-22;
-static int  reductionForContour = 5;
+static double maxY_dd = 1e-20;
+static int  reductionForContour = 3;
 
 void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
 
@@ -317,19 +318,19 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   grdd->SetLineColor(kAzure+1);
   grdd->SetLineWidth(3);
   
-  
-  TCanvas* canvas = new TCanvas("canvas","canvas",750,600);
+
+  TCanvas* canvas = new TCanvas("canvas","canvas",600,625);
   canvas->SetLogx();
   canvas->SetLogy();
   
   TH1* frame = canvas->DrawFrame(minX_dd,minY_dd,maxX_dd,maxY_dd,"");
   frame->GetYaxis()->SetTitle("<#sigma v > (cm^{3}/s)");
   frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
-  frame->GetXaxis()->SetLabelSize(0.035);
-  frame->GetYaxis()->SetLabelSize(0.035);
-  frame->GetXaxis()->SetTitleSize(0.045);
-  frame->GetYaxis()->SetTitleSize(0.045);
-  frame->GetYaxis()->SetTitleOffset(1.25);
+  frame->GetXaxis()->SetLabelSize(0.032);
+  frame->GetYaxis()->SetLabelSize(0.032);
+  frame->GetXaxis()->SetTitleSize(0.042);
+  frame->GetYaxis()->SetTitleSize(0.042);
+  frame->GetYaxis()->SetTitleOffset(1.65);
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->CenterTitle();
   frame->Draw();
@@ -339,12 +340,12 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
   
-  gPad->SetRightMargin(0.28);
+  gPad->SetLeftMargin(0.15);
   gPad->RedrawAxis();
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.75,0.45,0.97,0.72,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.23,0.57,0.54,0.75,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -353,7 +354,7 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   leg->AddEntry(grdd ,"FermiLAT","L");
   
   leg->Draw("SAME");
-  CMS_lumi(canvas,"35.9",false,true,false,0,-0.22);
+  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
     
   TLatex * tex = new TLatex();
   tex->SetNDC();
@@ -361,16 +362,10 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   tex->SetLineWidth(2);
   tex->SetTextSize(0.030);
   tex->Draw();
-  if (coupling == "1"){
-    tex->DrawLatex(0.75,0.82,"#bf{Pseudoscalar med}");
-    tex->DrawLatex(0.75,0.79,"#bf{Dirac DM}");
-    tex->DrawLatex(0.75,0.75,"#bf{g_{q} = 1, g_{DM} = 1}");
-  }
-  else{
-    tex->DrawLatex(0.75,0.82,"#bf{Pseudoscalar med}");
-    tex->DrawLatex(0.75,0.79,"#bf{Dirac DM}");
-    tex->DrawLatex(0.75,0.75,"#bf{g_{q} = 0.25, g_{DM} = 1}");
-  }
+  if (coupling == "1")
+    tex->DrawLatex(0.225,0.82,"#bf{Pseudoscalar med, Dirac DM, g_{q} = 1, g_{DM} = 1}");
+  else
+    tex->DrawLatex(0.225,0.82,"#bf{Pseudoscalar med, Dirac DM, g_{q} = 0.25, g_{DM} = 1}");
   
   ///////                                                                                                                                                                                          
   canvas->SaveAs((outputDirectory+"/scanDD_pseudo_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");
