@@ -20,16 +20,14 @@ int code(double mh){
     return (int)(mh/100000000);
 }
 
+static float gq  = 1;
+static float gDM = 1;
 
 double vecF(double mMED,double mDM){  
-
   // Assume coupling only to t and b quakrs
   if (! (mMED>0)) return 10;    
   double mR = (0.939*mDM)/(0.939+mDM);
-  double fTG = 1. - 0.019 - 0.045 - 0.043;
-  double fn = (0.939/246.)*(1./(mMED*mMED))*(2./27)*fTG; //(4.7)
-  double c = 0.3984e-27;  // to cm2  
-  return c*mR*mR*fn*fn/3.14159;
+  return 6.9e-43*pow(gq*gDM/1,2)*pow(125/mMED,4)*mR*mR;
 }
 
 static float minX_dd = 1;
@@ -65,8 +63,6 @@ TGraph * makeOBV(TGraph *Graph1){
     pp++;
   }
 
-  gr->GetXaxis()->SetTitle("m_{DM}");
-  gr->GetYaxis()->SetTitle("#sigma_{SD}");
   gr->SetName(Form("%s_DD",Graph1->GetName()));
   gr->SetLineStyle(Graph1->GetLineStyle());
   gr->SetLineColor(Graph1->GetLineColor());
@@ -276,18 +272,18 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   TGraph *DDE_graph = makeOBV(lTotalE);
   TGraph *DD_graph  = makeOBV(lTotal);
 
-  TCanvas* canvas = new TCanvas("canvas","canvas",750,600);
+  TCanvas* canvas = new TCanvas("canvas","canvas",600,625);
   canvas->SetLogx();
   canvas->SetLogy();
 
   TH1* frame = canvas->DrawFrame(minX_dd,minY_dd,maxX_dd,maxY_dd,"");
   frame->GetYaxis()->SetTitle("#sigma^{SI}_{DM-nucleon} [cm^{2}]");
   frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
-  frame->GetXaxis()->SetLabelSize(0.035);
-  frame->GetYaxis()->SetLabelSize(0.035);
-  frame->GetXaxis()->SetTitleSize(0.045);
-  frame->GetYaxis()->SetTitleSize(0.045);
-  frame->GetYaxis()->SetTitleOffset(1.25);
+  frame->GetXaxis()->SetLabelSize(0.032);
+  frame->GetYaxis()->SetLabelSize(0.032);
+  frame->GetXaxis()->SetTitleSize(0.042);
+  frame->GetYaxis()->SetTitleSize(0.042);
+  frame->GetYaxis()->SetTitleOffset(1.65);
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->CenterTitle();
   frame->Draw();
@@ -310,13 +306,13 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 
-  gPad->SetRightMargin(0.28);
-  gPad->RedrawAxis();
+  gPad->SetLeftMargin(0.15);
+  gPad->RedrawAxis("sameaxis");
   gPad->Modified();
   gPad->Update();
 
 
-  TLegend *leg = new TLegend(0.75,0.45,0.97,0.72,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.54,0.50,0.83,0.76,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -328,7 +324,7 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   leg->AddEntry(lM3 ,"CRESST-II","L");
   leg->Draw("SAME");
 
-  CMS_lumi(canvas,"35.9",false,true,false,0,-0.22);
+  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
 
   TLatex * tex = new TLatex();
   tex->SetNDC();
@@ -336,14 +332,10 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   tex->SetLineWidth(2);
   tex->SetTextSize(0.030);
   tex->Draw();
-  if (coupling == "1"){
-    tex->DrawLatex(0.75,0.82,"#bf{Scalar med, Dirac DM,}");
-    tex->DrawLatex(0.75,0.78,"#bf{g_{q} = 1, g_{DM} = 1}");
-  }
-  else{
-    tex->DrawLatex(0.75,0.82,"#bf{Scalar med, Dirac DM,}");
-    tex->DrawLatex(0.75,0.78,"#bf{g_{q} = 0.25, g_{DM} = 1}");
-  }
+  if (coupling == "1")
+    tex->DrawLatex(0.225,0.81,"#bf{Scalar med, Dirac DM, g_{q} = 1, g_{DM} = 1}");
+  else
+    tex->DrawLatex(0.225,0.81,"#bf{Scalar med, Dirac DM, g_{q} = 0.25, g_{DM} = 1}");
 
   ///////                                                                                                                                                                                             
   canvas->SaveAs((outputDirectory+"/scanDD_scalar_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");

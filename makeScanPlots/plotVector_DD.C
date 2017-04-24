@@ -22,10 +22,14 @@ int code(double mh){
 
 // To convert mMED-mDM in DM-nucleons vs mDM
 
-double vecF(double mMED,double mDM){    
-    double mR = (0.939*mDM)/(0.939+mDM);
-    double c = 6.9e-41*1e12;
-    return c*(mR*mR)/(mMED*mMED*mMED*mMED);
+static float gq  = 0.25;
+static float gDM = 1.0;
+
+double vecF(double mMED,double mDM){  
+  if(mMED < 40) return vecF(40,mDM);
+  double mR = (0.939*mDM)/(0.939+mDM);
+  double c = 6.9e-41*1e12*pow((gq*gDM)/0.25,2);
+  return c*(mR*mR)/(mMED*mMED*mMED*mMED);
 }
 
 TGraph * makeOBV(TGraph *Graph1){
@@ -40,8 +44,6 @@ TGraph * makeOBV(TGraph *Graph1){
   }
   for (int p =0; p < Graph1->GetN(); p++){
     Graph1->GetPoint(p,X,Y);
-    if (!(X >0)) continue;
-    if (!(Y >0)) continue;
     gr->SetPoint(pp,Y,vecF(X,Y));
     pp++;
   }
@@ -92,9 +94,9 @@ static float minZ = 0.01;
 static float maxZ = 10;
 
 static float minX_dd = 1;
-static float maxX_dd = 1400;
-static double minY_dd = 5e-47;
-static double maxY_dd = 1e-35;
+static float maxX_dd = 1200;
+static double minY_dd = 1e-47;
+static double maxY_dd = 1e-31;
 static int reductionForContour = 20;
 static bool saveOutputFile = true;
 
@@ -104,6 +106,8 @@ TGraph* cdmslite();
 TGraph* panda();
 TGraph* cresst();
 
+
+//////
 void plotVector_DD (string inputFileName, string outputDirectory, string coupling = "025", string energy = "13") {
 
   gROOT->SetBatch(kTRUE);
@@ -265,18 +269,18 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   TGraph *DDE_graph = makeOBV(lTotalE);
   TGraph *DD_graph  = makeOBV(lTotal);
 
-  TCanvas* canvas = new TCanvas("canvas","canvas",750,600);
+  TCanvas* canvas = new TCanvas("canvas","canvas",600,625);
   canvas->SetLogx();
   canvas->SetLogy();
 
   TH1* frame = canvas->DrawFrame(minX_dd,minY_dd,maxX_dd,maxY_dd,"");
   frame->GetYaxis()->SetTitle("#sigma^{SI}_{DM-nucleon} [cm^{2}]");
   frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
-  frame->GetXaxis()->SetLabelSize(0.035);
-  frame->GetYaxis()->SetLabelSize(0.035);
-  frame->GetXaxis()->SetTitleSize(0.045);
-  frame->GetYaxis()->SetTitleSize(0.045);
-  frame->GetYaxis()->SetTitleOffset(1.25);
+  frame->GetXaxis()->SetLabelSize(0.032);
+  frame->GetYaxis()->SetLabelSize(0.032);
+  frame->GetXaxis()->SetTitleSize(0.042);
+  frame->GetYaxis()->SetTitleSize(0.042);
+  frame->GetYaxis()->SetTitleOffset(1.65);
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->CenterTitle();
   frame->Draw();
@@ -299,12 +303,13 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
 
-  gPad->SetRightMargin(0.28);
+  //gPad->SetRightMargin(0.28);
+  gPad->SetLeftMargin(0.15);
   gPad->RedrawAxis();
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.75,0.45,0.97,0.72,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.28,0.50,0.54,0.78,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -316,7 +321,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   leg->AddEntry(lM3 ,"CRESST-II","L");
   leg->Draw("SAME");
 
-  CMS_lumi(canvas,"35.9",false,true,false,0,-0.22);
+  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
 
   canvas->RedrawAxis("samesaxis");
 
@@ -326,14 +331,10 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   tex->SetLineWidth(2);
   tex->SetTextSize(0.030);
   tex->Draw();
-  if (coupling == "1"){
-    tex->DrawLatex(0.75,0.82,"#bf{Vector med, Dirac DM,}");
-    tex->DrawLatex(0.75,0.78,"#bf{g_{q} = 1, g_{DM} = 1}");
-  }
-  else{
-    tex->DrawLatex(0.75,0.82,"#bf{Vector med, Dirac DM,}");
-    tex->DrawLatex(0.75,0.78,"#bf{g_{q} = 0.25, g_{DM} = 1}");
-  }
+  if (coupling == "1")
+    tex->DrawLatex(0.225,0.81,"#bf{Axial med, Dirac DM, g_{q} = 1, g_{DM} = 1}");
+  else
+    tex->DrawLatex(0.225,0.81,"#bf{Axial med, Dirac DM, g_{q} = 0.25, g_{DM} = 1}");
     
   ///////                                                                                                                                                                                             
   canvas->SaveAs((outputDirectory+"/scanDD_vector_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");

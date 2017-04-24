@@ -36,6 +36,9 @@ int code(double mh){
     return (int)(mh/100000000);
 }
 
+/////
+static float scaleLimit = 0.95;
+
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, string coupling = "025",string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
@@ -96,10 +99,9 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
     int medmass  = mmed(mh,c);
     int dmmass   = mdm(mh,c);
     
+    // for plotting reasons
     if (medmass < 2* dmmass) continue; // skip off-shell points
     if (dmmass != dmMass) continue; // skip points not belonging to the selected DM mass
-
-    // for plotting reasons
     if (medmass > 600) continue;
     
     // fill expected limit graph
@@ -113,34 +115,34 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
 
       if(medmass > medMax)
 	medMax = medmass;
-
+      
       medMassList.push_back(medmass);
     }
 
     else if (quantile == -1) {      
-      grobs->SetPoint(obscounter, double(medmass), limit);
+      grobs->SetPoint(obscounter, double(medmass), limit*scaleLimit);
       obscounter++;
     }
 
     // 1 sigma dw
     else if (quantile < 0.17 && quantile > 0.15 ) {
-      grexp_1sigma_dw->SetPoint(exp_down_counter_1s, double(medmass), limit);      
+      grexp_1sigma_dw->SetPoint(exp_down_counter_1s, double(medmass), limit*scaleLimit);      
       exp_down_counter_1s++;
     }
     // 1 sigma up
     else if (quantile < 0.85 && quantile > 0.83 ) {
-      grexp_1sigma_up->SetPoint(exp_up_counter_1s, double(medmass), limit);      
+      grexp_1sigma_up->SetPoint(exp_up_counter_1s, double(medmass), limit*scaleLimit);      
       exp_up_counter_1s++;
     }
 
     // 2 sigma dw
     else if (quantile < 0.04 && quantile > 0.02 ) {
-      grexp_2sigma_dw->SetPoint(exp_down_counter_2s, double(medmass), limit);      
+      grexp_2sigma_dw->SetPoint(exp_down_counter_2s, double(medmass), limit*scaleLimit);      
       exp_down_counter_2s++;
     }
     // 2 sigma up
     else if (quantile < 0.98 && quantile > 0.96 ) {
-      grexp_2sigma_up->SetPoint(exp_up_counter_2s, double(medmass), limit);      
+      grexp_2sigma_up->SetPoint(exp_up_counter_2s, double(medmass), limit*scaleLimit);      
       exp_up_counter_2s++;
     }    
   }
