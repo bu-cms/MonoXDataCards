@@ -52,13 +52,14 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool addRelicDensity = true;
 static bool saveOutputFile  = true;
+static bool addICHEPExpected = false;
 static float nbinsX = 1000;
 static float nbinsY = 600;
 static float minX = 0;
-static float minY = 1;
+static float minY = 4;
 static float maxX = 2500;
 static float maxY = 1200;
-static float minZ = 0.01;
+static double minZ = 0.01;
 static float maxZ = 10;
 static int reductionForContour = 20;
 
@@ -228,9 +229,9 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
 
 
   // fix mass points below min med mass generated
-  for (int i = 1; i   <= nbinsX; i++) {
-    for (int j = 1; j <= nbinsY; j++) {      
-      if(hexp->GetXaxis()->GetBinCenter(i) < minmass){
+  for (int i = 0; i   <= nbinsX; i++) {
+    for (int j = 0; j <= nbinsY; j++) {      
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass){	
 	hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass,hexp_up->GetYaxis()->GetBinCenter(j))));
 	hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass,hexp_down->GetYaxis()->GetBinCenter(j))));
 	hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
@@ -395,6 +396,16 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
   leg->AddEntry(contour_obs_up,"Observed #pm 1 s.d._{theory}","L");
   if(addRelicDensity)
     leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
+
+  if(addICHEPExpected){
+    TFile* ichepexp = TFile::Open("/afs/cern.ch/user/z/zdemirag/public/forRaffaele/scans/monojet_AV_MM_ICHEP2016_exp.root","READ");
+    TGraph* graph_exp = (TGraph*) ichepexp->Get("monojet_exp");
+    graph_exp->SetLineWidth(3);
+    graph_exp->SetLineStyle(7);
+    graph_exp->SetLineColor(kViolet);
+    graph_exp->Draw("Lsame");
+    leg->AddEntry(graph_exp,"ICHEP expected","L");
+  }
   leg->Draw("SAME");
 
   TLatex * tex = new TLatex();

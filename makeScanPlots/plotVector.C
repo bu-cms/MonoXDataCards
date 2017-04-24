@@ -49,8 +49,9 @@ TGraph* produceContour (const int & reduction){
 }
 
 /////////
-static bool saveOutputFile = true;
-static bool addRelicDensity = true;
+static bool saveOutputFile   = true;
+static bool addRelicDensity  = true;
+static bool addICHEPExpected = false;
 static float nbinsX = 1000;
 static float nbinsY = 600;
 static float minX = 0;
@@ -386,6 +387,17 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   leg->AddEntry(contour_obs_up,"Observed #pm 1 s.d._{theory}","L");
    if(addRelicDensity)
     leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
+
+  if(addICHEPExpected){
+    TFile* ichepexp = TFile::Open("/afs/cern.ch/user/z/zdemirag/public/forRaffaele/scans/monojet_V_MM_ICHEP2016_exp.root","READ");
+    TGraph* graph_exp = (TGraph*) ichepexp->Get("monojet_exp");
+    graph_exp->SetLineWidth(3);
+    graph_exp->SetLineStyle(7);
+    graph_exp->SetLineColor(kViolet);
+    graph_exp->Draw("Lsame");
+    leg->AddEntry(graph_exp,"ICHEP expected","L");    
+  }
+
   leg->Draw("SAME");
 
   TLatex * tex = new TLatex();
