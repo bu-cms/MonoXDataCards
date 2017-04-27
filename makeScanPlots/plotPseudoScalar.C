@@ -50,10 +50,10 @@ TGraph* produceContour (const int & reduction){
 
 
 /////////
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 static bool addRelicDensity = true;
-static float nbinsX = 400;
-static float nbinsY = 250;
+static float nbinsX = 600;
+static float nbinsY = 300;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
@@ -149,7 +149,8 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
   int obscounter       = 0;
-  int minmass = 10000;
+  int minmass_obs      = 10000;
+  int minmass_exp      = 10000;
   double minObs;
 
   for (int i = 0; i < tree->GetEntries(); i++){
@@ -175,6 +176,9 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
+      if(medmass <= minmass_exp and dmmass < medmass/2){// not consider off-shell points
+	minmass_exp = medmass;
+      }
     }
     
     if (quantile < 0.17 && quantile > 0.14 ) { 
@@ -192,9 +196,9 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       obscounter++;   
-      if(medmass <= minmass and dmmass < medmass/2){
+      if(medmass <= minmass_obs and dmmass < medmass/2){
 	minObs = limit;
-	minmass = medmass;
+	minmass_obs = medmass;
       }
     }
   }
@@ -216,7 +220,7 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
       hobu->SetBinContent(i,j,grobu->Interpolate(hobu->GetXaxis()->GetBinCenter(i),hobu->GetYaxis()->GetBinCenter(j)));
       hobd->SetBinContent(i,j,grobd->Interpolate(hobd->GetXaxis()->GetBinCenter(i),hobd->GetYaxis()->GetBinCenter(j)));      
-      
+      /*      
       if(hexp->GetXaxis()->GetBinCenter(i) <= 30 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
 	hexp_up->SetBinContent(i,j,minObs);
 	hexp_down->SetBinContent(i,j,minObs);
@@ -225,11 +229,30 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
 	hobu->SetBinContent(i,j,minObs);
 	hobd->SetBinContent(i,j,minObs);
       }
+      */
     }
   }
 
+  //////// fix mass points below min med mass generated                                                                                                                            
+  for (int i = 1; i   <= nbinsX; i++) {
+    for (int j = 1; j <= nbinsY; j++) {
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_exp){
+        hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass,hexp_up->GetYaxis()->GetBinCenter(j))));
+        hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass,hexp_down->GetYaxis()->GetBinCenter(j))));
+        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
+      }
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_obs){
+        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass,hobs->GetYaxis()->GetBinCenter(j))));
+        hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass,hobd->GetYaxis()->GetBinCenter(j))));
+        hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass,hobu->GetYaxis()->GetBinCenter(j))));
+      }
+    }
+  }
+  
+  ////////////////  
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
+
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
       if(hexp_up -> GetBinContent(i,j) <= 0) hexp_up->SetBinContent(i,j,maxZ);
@@ -357,8 +380,6 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   contour_obs_dw->Draw("Lsame");
   contour_obs->Draw("Lsame");
 
-
-
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
 
   TLegend *leg = new TLegend(0.175,0.58,0.70,0.78);
@@ -407,12 +428,12 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
     outputFile->cd();
     hexp->Write("scan_expected");
     hobs->Write("scan_observed");
-    hexp->Write("contour_expected");
-    hobs->Write("contour_observed");
     grexp->Write("graph_expected");
     grexp_up->Write("graph_expected_p1s");
     grexp_down->Write("graph_expected_m1s");
     grobs->Write("graph_observed");
+    contour_exp->Write("contour_expected");
+    contour_obs->Write("contour_observed");
 
     outputFile->Write();
 
@@ -420,125 +441,126 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
 
 }
 TGraph*relic_g1_1(){
-    double *x = new double[2000];
-    double *y = new double[2000];
 
-
- x[0]=23.6425; y[0]=5.54;
-x[1]=24.0621; y[1]=6.62;
-x[2]=24.157; y[2]=6.86423;
-x[3]=24.5248; y[3]=7.7;
-x[4]=26.335; y[4]=8.3572;
-x[5]=28.513; y[5]=8.42117;
-x[6]=30.691; y[6]=8.48513;
-x[7]=31.3224; y[7]=8.78;
-x[8]=32.869; y[8]=9.25435;
-x[9]=35.047; y[9]=9.65454;
-x[10]=37.225; y[10]=9.73608;
-x[11]=39.403; y[11]=9.81762;
-x[12]=40.535; y[12]=9.86;
-x[13]=41.581; y[13]=10.0982;
-x[14]=43.759; y[14]=10.7828;
-x[15]=44.4517; y[15]=10.94;
-x[16]=45.4898; y[16]=12.02;
-x[17]=45.937; y[17]=12.4853;
-x[18]=46.7665; y[18]=13.1;
-x[19]=48.115; y[19]=13.4943;
-x[20]=50.293; y[20]=13.7892;
-x[21]=52.471; y[21]=14.084;
-x[22]=52.7679; y[22]=14.18;
-x[23]=54.649; y[23]=14.7231;
-x[24]=56.7653; y[24]=15.26;
-x[25]=56.827; y[25]=15.3193;
-x[26]=57.888; y[26]=16.34;
-x[27]=59.005; y[27]=17.4146;
-x[28]=59.0144; y[28]=17.42;
-x[29]=61.183; y[29]=17.9844;
-x[30]=63.361; y[30]=18.3836;
-x[31]=63.7194; y[31]=18.5;
-x[32]=65.539; y[32]=19.091;
-x[33]=66.6793; y[33]=19.58;
-x[34]=67.717; y[34]=20.0389;
-x[35]=69.3961; y[35]=20.66;
-x[36]=69.895; y[36]=21.1128;
-x[37]=70.5861; y[37]=21.74;
-x[38]=72.073; y[38]=22.4174;
-x[39]=73.9083; y[39]=22.82;
-x[40]=74.251; y[40]=22.8936;
-x[41]=76.429; y[41]=23.5869;
-x[42]=76.869; y[42]=23.9;
-x[43]=78.607; y[43]=24.6054;
-x[44]=80.2547; y[44]=24.98;
-x[45]=80.785; y[45]=25.4169;
-x[46]=81.5655; y[46]=26.06;
-x[47]=82.963; y[47]=27.0238;
-x[48]=83.2853; y[48]=27.14;
-x[49]=85.141; y[49]=27.5805;
-x[50]=87.2103; y[50]=28.22;
-x[51]=87.319; y[51]=28.2536;
-x[52]=89.0832; y[52]=29.3;
-x[53]=89.497; y[53]=29.4948;
-x[54]=91.675; y[54]=30.2249;
-x[55]=92.1378; y[55]=30.38;
-x[56]=93.4315; y[56]=31.46;
-x[57]=93.853; y[57]=31.6952;
-x[58]=96.031; y[58]=32.3999;
-x[59]=96.4996; y[59]=32.54;
-x[60]=98.209; y[60]=33.0511;
-x[61]=99.0055; y[61]=33.62;
-x[62]=100.387; y[62]=34.3045;
-x[63]=101.689; y[63]=34.7;
-x[64]=102.565; y[64]=35.158;
-x[65]=103.755; y[65]=35.78;
-x[66]=104.743; y[66]=36.5786;
-x[67]=105.311; y[67]=36.86;
-x[68]=106.921; y[68]=37.317;
-x[69]=109.077; y[69]=37.94;
-x[70]=109.099; y[70]=37.9463;
-x[71]=110.657; y[71]=39.02;
-x[72]=111.277; y[72]=39.3108;
-x[73]=113.455; y[73]=39.9767;
-x[74]=113.858; y[74]=40.1;
-x[75]=115.233; y[75]=41.18;
-x[76]=115.633; y[76]=41.4477;
-x[77]=117.645; y[77]=42.26;
-x[78]=117.811; y[78]=42.3065;
-x[79]=119.989; y[79]=42.9191;
-x[80]=120.598; y[80]=43.34;
-x[81]=122.167; y[81]=44.2473;
-x[82]=122.619; y[82]=44.42;
-x[83]=124.345; y[83]=45.1405;
-x[84]=125.206; y[84]=45.5;
-x[85]=126.523; y[85]=46.5086;
-x[86]=126.64; y[86]=46.58;
-x[87]=128.701; y[87]=47.3485;
-x[88]=129.768; y[88]=47.66;
-x[89]=130.879; y[89]=47.984;
-x[90]=132.019; y[90]=48.74;
-x[91]=133.057; y[91]=49.2528;
-x[92]=134.704; y[92]=49.82;
-x[93]=135.235; y[93]=50.1418;
-x[94]=136.486; y[94]=50.9;
-x[95]=137.413; y[95]=51.5937;
-x[96]=138.174; y[96]=51.98;
-x[97]=139.591; y[97]=52.4318;
-x[98]=141.679; y[98]=53.06;
-x[99]=141.769; y[99]=53.0872;
-x[100]=143.436; y[100]=54.14;
-x[101]=143.947; y[101]=54.3893;
-x[102]=146.125; y[102]=55.1751;
-x[103]=146.25; y[103]=55.22;
-x[104]=147.722; y[104]=56.3;
-x[105]=148.303; y[105]=56.6781;
-x[106]=149.948; y[106]=57.38;
-x[107]=150.481; y[107]=57.5445;
-x[108]=152.659; y[108]=58.2171;
-x[109]=153.056; y[109]=58.46;
-x[110]=154.837; y[110]=59.407;
-x[111]=155.163; y[111]=59.54;
-x[112]=157.015; y[112]=60.4221;
-x[113]=157.43; y[113]=60.62;
-x[114]=158.931; y[114]=61.7;
+  double *x = new double[2000];
+  double *y = new double[2000];
+  
+  
+  x[0]=23.6425; y[0]=5.54;
+  x[1]=24.0621; y[1]=6.62;
+  x[2]=24.157; y[2]=6.86423;
+  x[3]=24.5248; y[3]=7.7;
+  x[4]=26.335; y[4]=8.3572;
+  x[5]=28.513; y[5]=8.42117;
+  x[6]=30.691; y[6]=8.48513;
+  x[7]=31.3224; y[7]=8.78;
+  x[8]=32.869; y[8]=9.25435;
+  x[9]=35.047; y[9]=9.65454;
+  x[10]=37.225; y[10]=9.73608;
+  x[11]=39.403; y[11]=9.81762;
+  x[12]=40.535; y[12]=9.86;
+  x[13]=41.581; y[13]=10.0982;
+  x[14]=43.759; y[14]=10.7828;
+  x[15]=44.4517; y[15]=10.94;
+  x[16]=45.4898; y[16]=12.02;
+  x[17]=45.937; y[17]=12.4853;
+  x[18]=46.7665; y[18]=13.1;
+  x[19]=48.115; y[19]=13.4943;
+  x[20]=50.293; y[20]=13.7892;
+  x[21]=52.471; y[21]=14.084;
+  x[22]=52.7679; y[22]=14.18;
+  x[23]=54.649; y[23]=14.7231;
+  x[24]=56.7653; y[24]=15.26;
+  x[25]=56.827; y[25]=15.3193;
+  x[26]=57.888; y[26]=16.34;
+  x[27]=59.005; y[27]=17.4146;
+  x[28]=59.0144; y[28]=17.42;
+  x[29]=61.183; y[29]=17.9844;
+  x[30]=63.361; y[30]=18.3836;
+  x[31]=63.7194; y[31]=18.5;
+  x[32]=65.539; y[32]=19.091;
+  x[33]=66.6793; y[33]=19.58;
+  x[34]=67.717; y[34]=20.0389;
+  x[35]=69.3961; y[35]=20.66;
+  x[36]=69.895; y[36]=21.1128;
+  x[37]=70.5861; y[37]=21.74;
+  x[38]=72.073; y[38]=22.4174;
+  x[39]=73.9083; y[39]=22.82;
+  x[40]=74.251; y[40]=22.8936;
+  x[41]=76.429; y[41]=23.5869;
+  x[42]=76.869; y[42]=23.9;
+  x[43]=78.607; y[43]=24.6054;
+  x[44]=80.2547; y[44]=24.98;
+  x[45]=80.785; y[45]=25.4169;
+  x[46]=81.5655; y[46]=26.06;
+  x[47]=82.963; y[47]=27.0238;
+  x[48]=83.2853; y[48]=27.14;
+  x[49]=85.141; y[49]=27.5805;
+  x[50]=87.2103; y[50]=28.22;
+  x[51]=87.319; y[51]=28.2536;
+  x[52]=89.0832; y[52]=29.3;
+  x[53]=89.497; y[53]=29.4948;
+  x[54]=91.675; y[54]=30.2249;
+  x[55]=92.1378; y[55]=30.38;
+  x[56]=93.4315; y[56]=31.46;
+  x[57]=93.853; y[57]=31.6952;
+  x[58]=96.031; y[58]=32.3999;
+  x[59]=96.4996; y[59]=32.54;
+  x[60]=98.209; y[60]=33.0511;
+  x[61]=99.0055; y[61]=33.62;
+  x[62]=100.387; y[62]=34.3045;
+  x[63]=101.689; y[63]=34.7;
+  x[64]=102.565; y[64]=35.158;
+  x[65]=103.755; y[65]=35.78;
+  x[66]=104.743; y[66]=36.5786;
+  x[67]=105.311; y[67]=36.86;
+  x[68]=106.921; y[68]=37.317;
+  x[69]=109.077; y[69]=37.94;
+  x[70]=109.099; y[70]=37.9463;
+  x[71]=110.657; y[71]=39.02;
+  x[72]=111.277; y[72]=39.3108;
+  x[73]=113.455; y[73]=39.9767;
+  x[74]=113.858; y[74]=40.1;
+  x[75]=115.233; y[75]=41.18;
+  x[76]=115.633; y[76]=41.4477;
+  x[77]=117.645; y[77]=42.26;
+  x[78]=117.811; y[78]=42.3065;
+  x[79]=119.989; y[79]=42.9191;
+  x[80]=120.598; y[80]=43.34;
+  x[81]=122.167; y[81]=44.2473;
+  x[82]=122.619; y[82]=44.42;
+  x[83]=124.345; y[83]=45.1405;
+  x[84]=125.206; y[84]=45.5;
+  x[85]=126.523; y[85]=46.5086;
+  x[86]=126.64; y[86]=46.58;
+  x[87]=128.701; y[87]=47.3485;
+  x[88]=129.768; y[88]=47.66;
+  x[89]=130.879; y[89]=47.984;
+  x[90]=132.019; y[90]=48.74;
+  x[91]=133.057; y[91]=49.2528;
+  x[92]=134.704; y[92]=49.82;
+  x[93]=135.235; y[93]=50.1418;
+  x[94]=136.486; y[94]=50.9;
+  x[95]=137.413; y[95]=51.5937;
+  x[96]=138.174; y[96]=51.98;
+  x[97]=139.591; y[97]=52.4318;
+  x[98]=141.679; y[98]=53.06;
+  x[99]=141.769; y[99]=53.0872;
+  x[100]=143.436; y[100]=54.14;
+  x[101]=143.947; y[101]=54.3893;
+  x[102]=146.125; y[102]=55.1751;
+  x[103]=146.25; y[103]=55.22;
+  x[104]=147.722; y[104]=56.3;
+  x[105]=148.303; y[105]=56.6781;
+  x[106]=149.948; y[106]=57.38;
+  x[107]=150.481; y[107]=57.5445;
+  x[108]=152.659; y[108]=58.2171;
+  x[109]=153.056; y[109]=58.46;
+  x[110]=154.837; y[110]=59.407;
+  x[111]=155.163; y[111]=59.54;
+ x[112]=157.015; y[112]=60.4221;
+ x[113]=157.43; y[113]=60.62;
+ x[114]=158.931; y[114]=61.7;
 x[115]=159.193; y[115]=61.8466;
 x[116]=161.371; y[116]=62.6792;
 x[117]=161.69; y[117]=62.78;

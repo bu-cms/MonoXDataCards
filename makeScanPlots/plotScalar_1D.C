@@ -37,8 +37,6 @@ int code(double mh){
 }
 
 /////
-static float scaleLimit = 0.95;
-
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, string coupling = "025",string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
@@ -99,10 +97,14 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
     int medmass  = mmed(mh,c);
     int dmmass   = mdm(mh,c);
     
-    // for plotting reasons
+    // for plotting reasons --> smooth plot
     if (medmass < 2* dmmass) continue; // skip off-shell points
     if (dmmass != dmMass) continue; // skip points not belonging to the selected DM mass
     if (medmass > 600) continue;
+    if (medmass == 40) continue;
+    if (medmass == 110) continue;
+    if (medmass == 175) continue;
+    if (medmass == 315) continue;
     
     // fill expected limit graph
     if (quantile == 0.5) {
@@ -120,34 +122,32 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
     }
 
     else if (quantile == -1) {      
-      grobs->SetPoint(obscounter, double(medmass), limit*scaleLimit);
+      grobs->SetPoint(obscounter, double(medmass), limit);
       obscounter++;
     }
 
     // 1 sigma dw
     else if (quantile < 0.17 && quantile > 0.15 ) {
-      grexp_1sigma_dw->SetPoint(exp_down_counter_1s, double(medmass), limit*scaleLimit);      
+      grexp_1sigma_dw->SetPoint(exp_down_counter_1s, double(medmass), limit);      
       exp_down_counter_1s++;
     }
     // 1 sigma up
     else if (quantile < 0.85 && quantile > 0.83 ) {
-      grexp_1sigma_up->SetPoint(exp_up_counter_1s, double(medmass), limit*scaleLimit);      
+      grexp_1sigma_up->SetPoint(exp_up_counter_1s, double(medmass), limit);      
       exp_up_counter_1s++;
     }
 
     // 2 sigma dw
     else if (quantile < 0.04 && quantile > 0.02 ) {
-      grexp_2sigma_dw->SetPoint(exp_down_counter_2s, double(medmass), limit*scaleLimit);      
+      grexp_2sigma_dw->SetPoint(exp_down_counter_2s, double(medmass), limit);      
       exp_down_counter_2s++;
     }
     // 2 sigma up
     else if (quantile < 0.98 && quantile > 0.96 ) {
-      grexp_2sigma_up->SetPoint(exp_up_counter_2s, double(medmass), limit*scaleLimit);      
+      grexp_2sigma_up->SetPoint(exp_up_counter_2s, double(medmass), limit);      
       exp_up_counter_2s++;
     }    
   }
-
-  //cout<<"Found: NexpLim "<<expcounter<<" NObsLim "<<obscounter<<" 1sigmaUp "<<exp_up_counter_1s<<" 1sigmaDw "<<exp_down_counter_1s<<" 2sigmaUp "<<exp_up_counter_2s<<" 2sigmDw "<<exp_up_counter_2s<<" for mDM "<<dmMass<<" medMin "<<medMin<<" medMax "<<medMax<<endl;
 
   tree->ResetBranchAddresses();
 
@@ -221,7 +221,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   frame->GetYaxis()->SetTitle("95%  CL upper limit on #sigma/#sigma_{theory}");
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->SetTitleOffset(1.10);  
+  frame->GetYaxis()->SetTitleOffset(1.07);  
   frame->Draw();
   CMS_lumi(canvas,"35.9");
 
@@ -236,7 +236,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   grexp->SetLineColor(kBlack);
   grexp->SetLineStyle(7);
   grexp->SetLineWidth(2);
-  grexp->Draw("Csame");
+  grexp->Draw("Lsame");
 
   grobs->SetLineColor(kBlack);
   grobs->SetLineWidth(2);

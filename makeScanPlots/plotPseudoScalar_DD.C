@@ -239,12 +239,12 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
 
 
     if (quantile == 0.5) {
-      expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
+      expcounter++;
     }
     if (quantile == -1) {
-      obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      obscounter++;
 
       if(medmass <= minmass and dmmass < medmass/2){
         minObs = limit;
@@ -377,10 +377,8 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
     hexp2->Write("contour_exp");
     lTotalE->Write("contour_exp_graph");
     lTotal->Write("contour_obs_graph");
-    DDE_graph->SetName("expected");
-    DD_graph->SetName("observed");
-    DDE_graph->Write();
-    DD_graph->Write();
+    DDE_graph->Write("expected_dd");
+    DD_graph->Write("observed_dd");
     outfile->Write();
     outfile->Close();    
   }

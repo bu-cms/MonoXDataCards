@@ -98,7 +98,7 @@ static float maxZ = 10;
 static float minX_dd = 1;
 static float maxX_dd = 1200;
 static double minY_dd = 1e-45;
-static double maxY_dd = 1e-29;
+static double maxY_dd = 1e-28;
 
 static bool saveOutputFile      = true;
 static int  reductionForContour = 20;
@@ -193,12 +193,12 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     if(medmass == 525  and dmmass >= 275) continue;
 
     if (quantile == 0.5) {
-      expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
+      expcounter++;
     }
     if (quantile == -1) {
-      obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      obscounter++;
       if(medmass <= minmass) minmass = medmass;
      }
   }
@@ -315,7 +315,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.57,0.52,0.87,0.78,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.25,0.52,0.55,0.78,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -352,10 +352,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     hexp2->Write("contour_exp");
     lTotalE->Write("contour_exp_graph");
     lTotal->Write("contour_obs_graph");
-    DDE_graph->SetName("expected");
-    DD_graph->SetName("observed");
-    DDE_graph->Write();
-    DD_graph->Write();
+    DDE_graph->Write("expected_dd");
+    DD_graph->Write("observed_dd");
     outfile->Write();
     outfile->Close();
 

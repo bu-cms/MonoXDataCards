@@ -50,15 +50,15 @@ TGraph* produceContour (const int & reduction){
 
 
 /////////
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 static bool addRelicDensity = false;
-static float nbinsX = 400;
-static float nbinsY = 250;
+static float nbinsX = 1000;
+static float nbinsY = 600;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
 static float maxY = 300;
-static float minZ = 0.1;
+static float minZ = 0.5;
 static float maxZ = 10;
 static int   reductionForContour = 20;
 
@@ -142,17 +142,19 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   if(npoints == 6)
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
   
+  /////////////-----
   int expcounter       = 0;
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
   int obscounter       = 0;
-  double minObs = 0;
-  double minmass = 100000;
+  double minmass_exp = 100000;
+  double minmass_obs = 100000;
+  double min_exp = 100000;
+  double min_obs = 100000;
 
   for (int i = 0; i < tree->GetEntries(); i++){
 
-    tree->GetEntry(i);
-    
+    tree->GetEntry(i);    
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
@@ -170,8 +172,14 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
     
     if (quantile == 0.5) { // expected limit
+      if(medmass <= 100 and limit > 1.0) continue;
+      if(medmass >  100 and limit < 1.0) continue;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
+      if(medmass <= minmass_exp){
+        minmass_exp = medmass;
+	min_exp = limit;
+      }
     }
     
     if (quantile < 0.17 && quantile > 0.14 ) { 
@@ -185,19 +193,21 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
 
     if (quantile == -1) { // observed
+      if(medmass <= 150 and limit > 1.0) continue;
+      if(medmass >  150 and limit < 1.0) continue;
+
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       obscounter++;      
-      if(medmass <= minmass and dmmass < medmass/2){
-        minObs = limit;
-        minmass = medmass;
+      if(medmass <= minmass_obs){
+        minmass_obs = medmass;
+	min_obs = limit;
       }
     }
   }
-
-  tree->ResetBranchAddresses();
   
+  tree->ResetBranchAddresses();  
   TH2D* hexp       = new TH2D("hexp", "",      nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hexp_up    = new TH2D("hexp_up", "",   nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hexp_down  = new TH2D("hexp_down", "", nbinsX, minX, maxX, nbinsY, minY, maxY);
@@ -214,20 +224,29 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
       hobu->SetBinContent(i,j,grobu->Interpolate(hobu->GetXaxis()->GetBinCenter(i),hobu->GetYaxis()->GetBinCenter(j)));
       hobd->SetBinContent(i,j,grobd->Interpolate(hobd->GetXaxis()->GetBinCenter(i),hobd->GetYaxis()->GetBinCenter(j)));
+    }
+  }
 
-      if(hexp->GetXaxis()->GetBinCenter(i) <= 40 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
-	hexp_up->SetBinContent(i,j,minObs);
-	hexp_down->SetBinContent(i,j,minObs);
-	hexp->SetBinContent(i,j,minObs);
-	hobs->SetBinContent(i,j,minObs);
-	hobu->SetBinContent(i,j,minObs);
-	hobd->SetBinContent(i,j,minObs);
+  // fix mass points below min med mass generated                                                                                                                                                     
+  for (int i = 1; i   <= nbinsX; i++) {
+    for (int j = 1; j <= nbinsY; j++) {
+      if(hexp->GetXaxis()->GetBinCenter(i) <= max(minmass_exp,30.) and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
+	hexp_up->SetBinContent(i,j,min_exp);
+	hexp_down->SetBinContent(i,j,min_exp);
+	hexp->SetBinContent(i,j,min_exp);
+      }
+      if(hobs->GetXaxis()->GetBinCenter(i) <= max(minmass_obs,30.) and hobs->GetYaxis()->GetBinCenter(j) < hobs->GetXaxis()->GetBinCenter(i)/2){
+	hobs->SetBinContent(i,j,min_obs);
+	hobd->SetBinContent(i,j,min_obs);
+	hobu->SetBinContent(i,j,min_obs);
       }
     }
   }
 
+  //////////
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
+
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
       if(hexp_up -> GetBinContent(i,j) <= 0) hexp_up->SetBinContent(i,j,maxZ);
@@ -407,6 +426,8 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     grexp_up->Write("graph_expected_p1s");
     grexp_down->Write("graph_expected_m1s");
     grobs->Write("graph_observed");
+    contour_exp->Write("contour_exp");
+    contour_obs->Write("contour_obs");
 
     outputFile->Write();
 

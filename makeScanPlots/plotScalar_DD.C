@@ -204,7 +204,7 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     if (quantile == 0.5) {
       expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
-      }
+    }
     if (quantile == -1) {
       obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
@@ -348,8 +348,8 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     hexp2->Write("contour_exp");
     lTotalE->Write("contour_exp_graph");
     lTotal->Write("contour_obs_graph");
-    DDE_graph->SetName("expected");
-    DD_graph->SetName("observed");
+    DDE_graph->Write("expected_dd");
+    DD_graph->Write("observed_dd");
     outfile->Write();
     outfile->Close();
   }

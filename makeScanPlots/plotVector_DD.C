@@ -332,9 +332,9 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   tex->SetTextSize(0.030);
   tex->Draw();
   if (coupling == "1")
-    tex->DrawLatex(0.225,0.81,"#bf{Axial med, Dirac DM, g_{q} = 1, g_{DM} = 1}");
+    tex->DrawLatex(0.225,0.81,"#bf{Vector med, Dirac DM, g_{q} = 1, g_{DM} = 1}");
   else
-    tex->DrawLatex(0.225,0.81,"#bf{Axial med, Dirac DM, g_{q} = 0.25, g_{DM} = 1}");
+    tex->DrawLatex(0.225,0.81,"#bf{Vector med, Dirac DM, g_{q} = 0.25, g_{DM} = 1}");
     
   ///////                                                                                                                                                                                             
   canvas->SaveAs((outputDirectory+"/scanDD_vector_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");
@@ -347,10 +347,8 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     hexp2->Write("contour_exp");
     lTotalE->Write("contour_exp_graph");
     lTotal->Write("contour_obs_graph");
-    DDE_graph->SetName("expected");
-    DD_graph->SetName("observed");
-    DDE_graph->Write();
-    DD_graph->Write();
+    DDE_graph->Write("expected_dd");
+    DD_graph->Write("observed_dd");
     outfile->Write();
     outfile->Close();
   }
