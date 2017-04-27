@@ -68,7 +68,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   TGraph* grexp_2sigma_up   = new TGraphErrors();
   TGraph* grexp_1sigma_dw   = new TGraphErrors();
   TGraph* grexp_2sigma_dw   = new TGraphErrors();
-  
+
   double mh;
   double limit;
   float  quantile;
@@ -84,8 +84,8 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   int exp_down_counter_2s = 0;
   int obscounter          = 0;
 
-  int medMin = 100000;
-  int medMax = 0;
+  double medMin = 100000;
+  double medMax = 0;
 
   cout<<"Loop on the limit tree entries: mass points and quantiles "<<endl;
 
@@ -101,27 +101,30 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
     if (medmass < 2* dmmass) continue; // skip off-shell points
     if (dmmass != dmMass) continue; // skip points not belonging to the selected DM mass
     if (medmass > 600) continue;
-    if (medmass == 40) continue;
-    if (medmass == 110) continue;
-    if (medmass == 175) continue;
-    if (medmass == 315) continue;
-    
-    // fill expected limit graph
-    if (quantile == 0.5) {
 
+    // fill expected limit graph
+    if(quantile != -1){
+      if (medmass == 30  and dmmass == 1) continue;
+      if (medmass == 100 and dmmass == 1) continue;
+      if (medmass == 125 and dmmass == 1) continue;
+      if (medmass == 315 and dmmass == 1) continue;
+
+    }
+    if (quantile == 0.5) {      
       grexp->SetPoint(expcounter, double(medmass), limit);
       expcounter++;
       // find max and min for frame
       if(medmass < medMin)
 	medMin = medmass;
-
       if(medmass > medMax)
-	medMax = medmass;
-      
+	medMax = medmass;      
       medMassList.push_back(medmass);
     }
 
     else if (quantile == -1) {      
+      if (medmass == 40  and dmmass == 1) continue;
+      if (medmass == 175 and dmmass == 1) continue;
+      if (medmass == 315 and dmmass == 1) continue;
       grobs->SetPoint(obscounter, double(medmass), limit);
       obscounter++;
     }
@@ -151,7 +154,16 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
 
   tree->ResetBranchAddresses();
 
-  // Make 1 and 2 sigma brazilian bands
+  //// make a spline
+  TSpline3 *splineexp = new TSpline3("splineexp",grexp->GetX(),grexp->GetY(),grexp->GetN());
+  splineexp->SetLineColor(kBlack);
+  splineexp->SetLineStyle(7);
+  splineexp->SetLineWidth(2);
+
+  TSpline3 *splineobs = new TSpline3("splineobs",grobs->GetX(),grobs->GetY(),grobs->GetN());
+  splineobs->SetLineColor(kBlack);
+  splineobs->SetLineWidth(2);
+
   TGraphAsymmErrors* graph_1sigma_band = new TGraphAsymmErrors();
   TGraphAsymmErrors* graph_2sigma_band = new TGraphAsymmErrors();
 
@@ -213,9 +225,10 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
     return;
   }
   
+  
   //////////// All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
-  TH1* frame = canvas->DrawFrame(medMin,TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
+  TH1* frame = canvas->DrawFrame(min(medMin,0.),TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
 				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*1.5, "");
   frame->GetYaxis()->CenterTitle();
   frame->GetXaxis()->SetTitle("m_{med} [GeV]");
@@ -232,24 +245,17 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
   
   graph_2sigma_band->Draw("3same");
   graph_1sigma_band->Draw("3same");
+  splineexp->Draw("Lsame");
+  splineobs->Draw("Lsame");
 
-  grexp->SetLineColor(kBlack);
-  grexp->SetLineStyle(7);
-  grexp->SetLineWidth(2);
-  grexp->Draw("Lsame");
-
-  grobs->SetLineColor(kBlack);
-  grobs->SetLineWidth(2);
-  grobs->Draw("Csame");
-
-  TF1* line = new TF1 ("line","1",medMin,medMax);
+  TF1* line = new TF1 ("line","1",min(medMin,0.),medMax);
   line->SetLineColor(kRed);
   line->SetLineWidth(2);
   line->Draw("L same");
 
   TLegend *leg = new TLegend(0.175,0.5,0.57,0.77);  
-  leg->AddEntry(grobs,"Observed 95% CL","L");
-  leg->AddEntry(grexp,"Median expected 95% CL","L");
+  leg->AddEntry(splineobs,"Observed 95% CL","L");
+  leg->AddEntry(splineexp,"Median expected 95% CL","L");
   leg->AddEntry(graph_1sigma_band,"68% expected","F");
   leg->AddEntry(graph_2sigma_band,"95% expected","F");
   leg->AddEntry(line,"#mu = 1","L");

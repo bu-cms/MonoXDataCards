@@ -60,7 +60,12 @@ static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.5;
 static float maxZ = 10;
-static int   reductionForContour = 20;
+static int   reductionForContour = 10;
+
+// to smooth the plot
+static float maxup_exp = 100;
+static float maxup_obs = 125;
+static bool  forceSmoothing = true;
 
 void plotScalar(string inputFileName, string outputDIR, string coupling = "1", string energy = "13") {
 
@@ -172,8 +177,12 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
     
     if (quantile == 0.5) { // expected limit
-      if(medmass <= 100 and limit > 1.0) continue;
-      if(medmass >  100 and limit < 1.0) continue;
+
+      // performed looking at the 1D plot vs dmmass
+      if(forceSmoothing){
+	if(medmass <= maxup_exp and limit > 1.0) continue;
+	if(medmass >  maxup_exp and limit < 1.0) continue;      
+      }
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
       if(medmass <= minmass_exp){
@@ -193,8 +202,15 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
 
     if (quantile == -1) { // observed
-      if(medmass <= 150 and limit > 1.0) continue;
-      if(medmass >  150 and limit < 1.0) continue;
+
+      //looking at the 1D plot vs dmmass
+      if(forceSmoothing){
+	if(medmass <= maxup_obs and limit > 1.0) continue;
+	if(medmass >  maxup_obs and limit < 1.0) continue;      
+	if(medmass == 160 and dmmass < 10) continue;
+	if(medmass == 80  and dmmass == 5) continue;
+	if(medmass == 60  and dmmass == 10) continue;
+      }
 
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
@@ -206,7 +222,10 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       }
     }
   }
-  
+
+  // fix the minimum on x-axis
+  minX = max(minmass_obs,minmass_exp);
+
   tree->ResetBranchAddresses();  
   TH2D* hexp       = new TH2D("hexp", "",      nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hexp_up    = new TH2D("hexp_up", "",   nbinsX, minX, maxX, nbinsY, minY, maxY);
@@ -227,21 +246,6 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
   }
 
-  // fix mass points below min med mass generated                                                                                                                                                     
-  for (int i = 1; i   <= nbinsX; i++) {
-    for (int j = 1; j <= nbinsY; j++) {
-      if(hexp->GetXaxis()->GetBinCenter(i) <= max(minmass_exp,30.) and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
-	hexp_up->SetBinContent(i,j,min_exp);
-	hexp_down->SetBinContent(i,j,min_exp);
-	hexp->SetBinContent(i,j,min_exp);
-      }
-      if(hobs->GetXaxis()->GetBinCenter(i) <= max(minmass_obs,30.) and hobs->GetYaxis()->GetBinCenter(j) < hobs->GetXaxis()->GetBinCenter(i)/2){
-	hobs->SetBinContent(i,j,min_obs);
-	hobd->SetBinContent(i,j,min_obs);
-	hobu->SetBinContent(i,j,min_obs);
-      }
-    }
-  }
 
   //////////
   for(int i = 0; i < nbinsX; i++){
@@ -330,17 +334,17 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   hobs2->GetZaxis()->SetLabelSize(0);
   hobs2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs = produceContour(1);
+  TGraph* contour_obs = produceContour(reductionForContour);
 
   hobu2->GetZaxis()->SetLabelSize(0);
   hobu2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_up = produceContour(1);
+  TGraph* contour_obs_up = produceContour(reductionForContour);
 
   hobd2->GetZaxis()->SetLabelSize(0);
   hobd2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_dw = produceContour(1);
+  TGraph* contour_obs_dw = produceContour(reductionForContour);
 
   frame->Draw();
   hobs->Draw("COLZ SAME");

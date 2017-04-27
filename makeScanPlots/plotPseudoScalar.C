@@ -236,15 +236,15 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   //////// fix mass points below min med mass generated                                                                                                                            
   for (int i = 1; i   <= nbinsX; i++) {
     for (int j = 1; j <= nbinsY; j++) {
-      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_exp){
-        hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass,hexp_up->GetYaxis()->GetBinCenter(j))));
-        hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass,hexp_down->GetYaxis()->GetBinCenter(j))));
-        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_exp and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
+        hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass_exp,hexp_up->GetYaxis()->GetBinCenter(j))));
+        hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass_exp,hexp_down->GetYaxis()->GetBinCenter(j))));
+        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass_exp,hexp->GetYaxis()->GetBinCenter(j))));
       }
-      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_obs){
-        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass,hobs->GetYaxis()->GetBinCenter(j))));
-        hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass,hobd->GetYaxis()->GetBinCenter(j))));
-        hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass,hobu->GetYaxis()->GetBinCenter(j))));
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_obs and hobs->GetYaxis()->GetBinCenter(j) < hobs->GetXaxis()->GetBinCenter(i)/2){
+        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass_obs,hobs->GetYaxis()->GetBinCenter(j))));
+        hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass_obs,hobd->GetYaxis()->GetBinCenter(j))));
+        hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass_obs,hobu->GetYaxis()->GetBinCenter(j))));
       }
     }
   }
