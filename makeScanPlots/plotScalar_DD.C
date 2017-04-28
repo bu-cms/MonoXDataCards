@@ -30,6 +30,8 @@ double vecF(double mMED,double mDM){
   return 6.9e-43*pow(gq*gDM/1,2)*pow(125/mMED,4)*mR*mR;
 }
 
+///////////////
+
 static float minX_dd = 1;
 static float maxX_dd = 1400;
 static double minY_dd = 5e-47;
@@ -46,17 +48,11 @@ TGraph * makeOBV(TGraph *Graph1){
     gr->SetPoint(pp,MDM,vecF(X,MDM));
     pp++;
   }
-
   for (int p =0;p<Graph1->GetN()-1;p++){
-    Graph1->GetPoint(p,X,Y);
-    // to correctly get the contour in case of a bad limit
-    if (X < 20) continue;
-    if (X > 85 and X < 1000) continue;
-    
+    Graph1->GetPoint(p,X,Y);    
     gr->SetPoint(pp,Y,vecF(X,Y));
     pp++;
   }
-  
   for (double MDM=minX_dd;MDM>=0.01;MDM-=0.01){
     X = 2*MDM;
     gr->SetPoint(pp,MDM,vecF(X,MDM));
@@ -107,15 +103,21 @@ TGraph *cresst();
 TGraph *cdmslite();
 
 static bool saveOutputFile = true;
-static float nbinsX = 400;
-static float nbinsY = 250;
+static float nbinsX = 600;
+static float nbinsY = 300;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
 static float maxZ = 10;
-static int  reductionForContour = 2;
+static int  reductionForContour = 10;
+
+
+// to smooth the plot                                                                                                                                                                                 
+static float maxup_exp = 100;
+static float maxup_obs = 125;
+static bool  forceSmoothing = true;
 
 ///////////
 void plotScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
@@ -167,11 +169,14 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   if(npoints == 6)
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
 
+  /////////////
   
   int expcounter = 0;
   int obscounter = 0;
-  double minObs = 0;
-  double minmass = 100000;
+  double minmass_exp = 100000;
+  double minmass_obs = 100000;
+  double min_exp = 100000;
+  double min_obs = 100000;
 
   for (int i = 0; i < tree->GetEntries(); i++){
     
@@ -196,27 +201,52 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     }
 
 
-    if(medmass < 50) continue; //avoid bad points
-    if(medmass == 60  and dmmass == 20) continue; //avoid bad points
-    if(medmass == 70  and dmmass == 10) continue; //avoid bad points
-    if(medmass == 125 and dmmass == 1) continue; //avoid bad points
+    //if(medmass < 50) continue; //avoid bad points
+    //if(medmass == 60  and dmmass == 20) continue; //avoid bad points
+    //if(medmass == 70  and dmmass == 10) continue; //avoid bad points
+    //if(medmass == 125 and dmmass == 1) continue; //avoid bad points
     
     if (quantile == 0.5) {
+      // performed looking at the 1D plot vs dmmass                                                                                                                                                   
+      if(forceSmoothing){
+        if(medmass <= maxup_exp and limit > 1.0) continue;
+        if(medmass >  maxup_exp and limit < 1.0) continue;
+      }
+      grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);      
       expcounter++;
-      grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
+      if(medmass <= minmass_exp){
+        minmass_exp = medmass;
+        min_exp = limit;
       }
+      if(medmass <= minmass_exp){
+        minmass_exp = medmass;
+        min_exp = limit;
+      }  
+    }
     if (quantile == -1) {
-      obscounter++;
-      grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
-      if(medmass <= minmass and dmmass < medmass/2){
-        minObs = limit;
-        minmass = medmass;
+      
+      //looking at the 1D plot vs dmmass                                                                                                                                                              
+      if(forceSmoothing){
+        if(medmass <= maxup_obs and limit > 1.0) continue;
+        if(medmass >  maxup_obs and limit < 1.0) continue;
+        if(medmass == 160 and dmmass < 10) continue;
+        if(medmass == 80  and dmmass == 5) continue;
+        if(medmass == 60  and dmmass == 10) continue;
       }
+
+      grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      obscounter++;
+      if(medmass <= minmass_obs){
+        minmass_obs = medmass;
+        min_obs = limit;
+      }      
     }
   }
   
   tree->ResetBranchAddresses();
-  
+
+  minX = max(minmass_obs,minmass_exp);
+
   ///                                                                                                                                                                                               
   TH2D* hexp = new TH2D("hexp", "", nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hobs = new TH2D("hobs", "", nbinsX, minX, maxX, nbinsY, minY, maxY);
@@ -226,10 +256,6 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     for (int j = 1; j <= nbinsY; j++) {
       hexp->SetBinContent(i,j,grexp->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetYaxis()->GetBinCenter(j)));
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
-      if(hexp->GetXaxis()->GetBinCenter(i) < 50 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
-	hexp->SetBinContent(i,j,minObs);
-	hobs->SetBinContent(i,j,minObs);
-      }
     }
   }
   
@@ -348,8 +374,8 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
     hexp2->Write("contour_exp");
     lTotalE->Write("contour_exp_graph");
     lTotal->Write("contour_obs_graph");
-    DDE_graph->SetName("expected");
-    DD_graph->SetName("observed");
+    DDE_graph->Write("expected_dd");
+    DD_graph->Write("observed_dd");
     outfile->Write();
     outfile->Close();
   }

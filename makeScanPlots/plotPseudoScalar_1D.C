@@ -83,8 +83,8 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   int exp_down_counter_2s = 0;
   int obscounter          = 0;
 
-  int medMin = 100000;
-  int medMax = 0;
+  double medMin = 100000;
+  double medMax = 0;
 
   cout<<"Loop on the limit tree entries: mass points and quantiles "<<endl;
 
@@ -97,19 +97,17 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
     int dmmass   = mdm(mh,c);
     
     if (medmass < 2* dmmass) continue; // skip off-shell points
-    if (dmmass != dmMass) continue; // skip points not belonging to the selected DM mass
-
-    if(medmass > 600) continue;
+    if (dmmass != dmMass) continue; // skip points not belonging to the selected DM mas
+    if (medmass > 600) continue;
+    if (medmass == 70 and dmmass == 1) continue;
 
     // fill expected limit graph
-    if (quantile == 0.5) {
-
+    if (quantile == 0.5) {      
       grexp->SetPoint(expcounter, double(medmass), limit);
       expcounter++;
       // find max and min for frame
       if(medmass < medMin)
 	medMin = medmass;
-
       if(medmass > medMax)
 	medMax = medmass;
 
@@ -117,6 +115,7 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
     }
 
     else if (quantile == -1) {      
+      cout<<"medmass "<<medmass<<" dmmass "<<dmmass<<" limit "<<limit<<endl;
       grobs->SetPoint(obscounter, double(medmass), limit);
       obscounter++;
     }
@@ -144,9 +143,18 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
     }    
   }
 
-  //  cout<<"Found: NexpLim "<<expcounter<<" NObsLim "<<obscounter<<" 1sigmaUp "<<exp_up_counter_1s<<" 1sigmaDw "<<exp_down_counter_1s<<" 2sigmaUp "<<exp_up_counter_2s<<" 2sigmDw "<<exp_up_counter_2s<<" for mDM "<<dmMass<<" medMin "<<medMin<<" medMax "<<medMax<<endl;
-
   tree->ResetBranchAddresses();
+
+  //// make a spline                                                                                                                                                                                  
+  TSpline3 *splineexp = new TSpline3("splineexp",grexp->GetX(),grexp->GetY(),grexp->GetN());
+  splineexp->SetLineColor(kBlack);
+  splineexp->SetLineStyle(7);
+  splineexp->SetLineWidth(2);
+
+  TSpline3 *splineobs = new TSpline3("splineobs",grobs->GetX(),grobs->GetY(),grobs->GetN());
+  splineobs->SetLineColor(kBlack);
+  splineobs->SetLineWidth(2);
+
 
   // Make 1 and 2 sigma brazilian bands
   TGraphAsymmErrors* graph_1sigma_band = new TGraphAsymmErrors();
@@ -212,13 +220,13 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   
   //////////// All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
-  TH1* frame = canvas->DrawFrame(medMin,TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
+  TH1* frame = canvas->DrawFrame(min(medMin,0.),TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
 				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*1.5, "");
   frame->GetYaxis()->CenterTitle();
   frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   frame->GetYaxis()->SetTitle("95%  CL upper limit on #sigma/#sigma_{theory}");
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->SetTitleOffset(1.10);  
+  frame->GetYaxis()->SetTitleOffset(1.07);  
   frame->Draw();
   CMS_lumi(canvas,"35.9");
 
@@ -239,7 +247,7 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   grobs->SetLineWidth(2);
   grobs->Draw("Lsame");
 
-  TF1* line = new TF1 ("line","1",medMin,medMax);
+  TF1* line = new TF1 ("line","1",min(medMin,0.),medMax);
   line->SetLineColor(kRed);
   line->SetLineWidth(2);
   line->Draw("L same");

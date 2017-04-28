@@ -76,8 +76,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   bool useNicksPalette = false;
   int ncontours = 999;
 
-  if (useNicksPalette) {
-    
+  if (useNicksPalette) {    
       TColor::InitializeColors();
       Double_t stops[9] = { 0.0000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000};
       Double_t red[9]   = { 243./255., 243./255., 240./255., 240./255., 241./255., 239./255., 186./255., 151./255., 129./255.};
@@ -151,7 +150,8 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
   int obscounter       = 0;
-  double minmass       = 100000;
+  double minmass_exp   = 100000;
+  double minmass_obs   = 100000;
 
   for(int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
@@ -172,7 +172,6 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
       continue;
     }
 
-
     // remove some point by hand
     if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
     if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
@@ -184,6 +183,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
+      if(medmass <= minmass_exp) minmass_exp = medmass;
     }
     
     if (quantile < 0.17 && quantile > 0.14 ) { 
@@ -201,7 +201,7 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       obscounter++;      
-      if(medmass <= minmass) minmass = medmass;
+      if(medmass <= minmass_obs) minmass_obs = medmass;
     }
   }
 
@@ -230,13 +230,15 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
   // fix mass points below min med mass generated                                                                                                                                                 
   for (int i = 1; i   <= nbinsX; i++) {
     for (int j = 1; j <= nbinsY; j++) {
-      if(hexp->GetXaxis()->GetBinCenter(i) < minmass){
-        hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass,hexp_up->GetYaxis()->GetBinCenter(j))));
-        hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass,hexp_down->GetYaxis()->GetBinCenter(j))));
-        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass,hexp->GetYaxis()->GetBinCenter(j))));
-        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass,hobs->GetYaxis()->GetBinCenter(j))));
-        hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass,hobd->GetYaxis()->GetBinCenter(j))));
-        hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass,hobu->GetYaxis()->GetBinCenter(j))));
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_exp){
+        hexp_up->SetBinContent(i,j,hexp_up->GetBinContent(hexp_up->FindBin(minmass_exp,hexp_up->GetYaxis()->GetBinCenter(j))));
+        hexp_down->SetBinContent(i,j,hexp_down->GetBinContent(hexp_down->FindBin(minmass_exp,hexp_down->GetYaxis()->GetBinCenter(j))));
+        hexp->SetBinContent(i,j,hexp->GetBinContent(hexp->FindBin(minmass_exp,hexp->GetYaxis()->GetBinCenter(j))));
+      }
+      if(hexp->GetXaxis()->GetBinCenter(i) < minmass_obs){
+        hobs->SetBinContent(i,j,hobs->GetBinContent(hobs->FindBin(minmass_obs,hobs->GetYaxis()->GetBinCenter(j))));
+        hobd->SetBinContent(i,j,hobd->GetBinContent(hobd->FindBin(minmass_obs,hobd->GetYaxis()->GetBinCenter(j))));
+        hobu->SetBinContent(i,j,hobu->GetBinContent(hobu->FindBin(minmass_obs,hobu->GetYaxis()->GetBinCenter(j))));
       }
     }
   }
@@ -431,12 +433,12 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     outputFile->cd();
     hexp->Write("scan_expected");
     hobs->Write("scan_observed");
-    hexp->Write("contour_expected");
-    hobs->Write("contour_observed");
     grexp->Write("graph_expected");
     grexp_up->Write("graph_expected_p1s");
     grexp_down->Write("graph_expected_m1s");
     grobs->Write("graph_observed");
+    contour_exp->Write("contour_expected");
+    contour_obs->Write("contour_observed");
 
     outputFile->Write();
 

@@ -50,19 +50,24 @@ TGraph* produceContour (const int & reduction){
 
 
 /////////
-static bool saveOutputFile = false;
+static bool saveOutputFile = true;
 static bool addRelicDensity = false;
-static float nbinsX = 400;
-static float nbinsY = 250;
+static float nbinsX = 1000;
+static float nbinsY = 600;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
 static float maxY = 300;
-static float minZ = 0.1;
+static float minZ = 0.3;
 static float maxZ = 10;
 static int   reductionForContour = 20;
 
-void plotScalar(string inputFileName, string outputDIR, string coupling = "1", string energy = "13") {
+// to smooth the plot
+static float maxup_exp = 100;
+static float maxup_obs = 125;
+static bool  forceSmoothing = true;
+
+void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, string coupling = "1", string energy = "13") {
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -142,17 +147,19 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   if(npoints == 6)
     goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
   
+  /////////////-----
   int expcounter       = 0;
   int exp_up_counter   = 0;
   int exp_down_counter = 0;
   int obscounter       = 0;
-  double minObs = 0;
-  double minmass = 100000;
+  double minmass_exp = 100000;
+  double minmass_obs = 100000;
+  double min_exp = 100000;
+  double min_obs = 100000;
 
   for (int i = 0; i < tree->GetEntries(); i++){
 
-    tree->GetEntry(i);
-    
+    tree->GetEntry(i);    
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
@@ -168,13 +175,27 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
       continue;
     }
+
+    // skip off-shell for DMF model
+    if(isDMF and medmass < 2*dmmass) continue;
     
     if (quantile == 0.5) { // expected limit
+      // performed looking at the 1D plot vs dmmass
+      if(forceSmoothing and not isDMF){
+	if(medmass <= maxup_exp and limit > 1.0) continue;
+	if(medmass >  maxup_exp and limit < 1.0) continue;      
+      }
+
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
+      if(medmass <= minmass_exp){
+        minmass_exp = medmass;
+	min_exp = limit;
+      }
     }
     
     if (quantile < 0.17 && quantile > 0.14 ) { 
+      if(isDMF and medmass == 200 and dmmass == 5) continue;
       grexp_down->SetPoint(exp_down_counter, double(medmass), double(dmmass), limit);
       exp_down_counter++;      
     }
@@ -185,19 +206,55 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
 
     if (quantile == -1) { // observed
-      grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
-      grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
-      grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
-      obscounter++;      
-      if(medmass <= minmass and dmmass < medmass/2){
-        minObs = limit;
-        minmass = medmass;
+
+      //looking at the 1D plot vs dmmass
+      if(forceSmoothing and not isDMF){
+	if(medmass <= maxup_obs and limit > 1.0) continue;
+	if(medmass >  maxup_obs and limit < 1.0) continue;      
+	if(medmass == 160 and dmmass < 10) continue;
+	if(medmass == 80  and dmmass == 5) continue;
+	if(medmass == 60  and dmmass == 10) continue;
       }
+      if(isDMF){
+	if(medmass == 50 and dmmass == 10) continue;
+	if(medmass == 60 and dmmass == 1) continue;
+	if(medmass == 100 and dmmass == 50) continue;
+      }
+      grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      obscounter++;      
+
+      if(medmass <= minmass_obs){
+        minmass_obs = medmass;
+	min_obs = limit;
+      }
+
+      if(isDMF){
+	if(medmass == 70 and dmmass == 15) continue;
+	if(medmass == 80 and dmmass == 35) continue;
+	if(medmass == 90 and dmmass == 10) continue;
+	if(medmass == 90 and dmmass == 15) continue;
+	if(medmass == 90 and dmmass == 25) continue;
+	if(medmass == 100 and dmmass == 25) continue;
+	if(medmass == 100 and dmmass == 35) continue;
+	grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
+      }
+      else
+	grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
+      // specific for the down variation
+      if(isDMF){
+	if(medmass == 200 and dmmass == 5) continue;
+	if(medmass == 200 and dmmass == 10) continue;
+	grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
+      }
+      else
+	grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
     }
   }
 
-  tree->ResetBranchAddresses();
-  
+  // fix the minimum on x-axis
+  minX = max(minmass_obs,minmass_exp);
+
+  tree->ResetBranchAddresses();  
   TH2D* hexp       = new TH2D("hexp", "",      nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hexp_up    = new TH2D("hexp_up", "",   nbinsX, minX, maxX, nbinsY, minY, maxY);
   TH2D* hexp_down  = new TH2D("hexp_down", "", nbinsX, minX, maxX, nbinsY, minY, maxY);
@@ -214,20 +271,14 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
       hobu->SetBinContent(i,j,grobu->Interpolate(hobu->GetXaxis()->GetBinCenter(i),hobu->GetYaxis()->GetBinCenter(j)));
       hobd->SetBinContent(i,j,grobd->Interpolate(hobd->GetXaxis()->GetBinCenter(i),hobd->GetYaxis()->GetBinCenter(j)));
-
-      if(hexp->GetXaxis()->GetBinCenter(i) <= 40 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
-	hexp_up->SetBinContent(i,j,minObs);
-	hexp_down->SetBinContent(i,j,minObs);
-	hexp->SetBinContent(i,j,minObs);
-	hobs->SetBinContent(i,j,minObs);
-	hobu->SetBinContent(i,j,minObs);
-	hobd->SetBinContent(i,j,minObs);
-      }
     }
   }
 
+
+  //////////
   for(int i = 0; i < nbinsX; i++){
     for(int j = 0; j < nbinsY; j++){
+
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
       if(hexp_up -> GetBinContent(i,j) <= 0) hexp_up->SetBinContent(i,j,maxZ);
@@ -311,17 +362,17 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   hobs2->GetZaxis()->SetLabelSize(0);
   hobs2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs = produceContour(1);
+  TGraph* contour_obs = produceContour(reductionForContour);
 
   hobu2->GetZaxis()->SetLabelSize(0);
   hobu2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_up = produceContour(1);
+  TGraph* contour_obs_up = produceContour(reductionForContour);
 
   hobd2->GetZaxis()->SetLabelSize(0);
   hobd2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_dw = produceContour(1);
+  TGraph* contour_obs_dw = produceContour(reductionForContour);
 
   frame->Draw();
   hobs->Draw("COLZ SAME");
@@ -341,7 +392,9 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   contour_exp->SetLineStyle(7);
   contour_exp_dw->SetLineStyle(7);
 
-  contour_exp_up->Draw("Lsame");
+  if(not isDMF){
+    contour_exp_up->Draw("Lsame");
+  }
   contour_exp_dw->Draw("Lsame");
   contour_exp->Draw("Lsame");
 
@@ -358,7 +411,7 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
 
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
 
-  TLegend *leg = new TLegend(0.175,0.58,0.45,0.78);
+  TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -407,6 +460,8 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     grexp_up->Write("graph_expected_p1s");
     grexp_down->Write("graph_expected_m1s");
     grobs->Write("graph_observed");
+    contour_exp->Write("contour_exp");
+    contour_obs->Write("contour_obs");
 
     outputFile->Write();
 

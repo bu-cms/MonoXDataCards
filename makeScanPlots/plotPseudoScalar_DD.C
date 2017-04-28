@@ -152,9 +152,9 @@ static float minZ = 0.1;
 static float maxZ = 10;
 
 static float minX_dd  = 5;
-static float maxX_dd  = 400;
+static float maxX_dd  = 300;
 static double minY_dd = 1e-31;
-static double maxY_dd = 1e-20;
+static double maxY_dd = 2e-25;
 static int  reductionForContour = 3;
 
 void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
@@ -239,12 +239,12 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
 
 
     if (quantile == 0.5) {
-      expcounter++;
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
+      expcounter++;
     }
     if (quantile == -1) {
-      obscounter++;
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
+      obscounter++;
 
       if(medmass <= minmass and dmmass < medmass/2){
         minObs = limit;
@@ -345,7 +345,7 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.23,0.57,0.54,0.75,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.55,0.22,0.88,0.48,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -362,10 +362,14 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   tex->SetLineWidth(2);
   tex->SetTextSize(0.030);
   tex->Draw();
-  if (coupling == "1")
-    tex->DrawLatex(0.225,0.82,"#bf{Pseudoscalar med, Dirac DM, g_{q} = 1, g_{DM} = 1}");
-  else
-    tex->DrawLatex(0.225,0.82,"#bf{Pseudoscalar med, Dirac DM, g_{q} = 0.25, g_{DM} = 1}");
+  if (coupling == "1"){
+    tex->DrawLatex(0.225,0.68,"#bf{Pseudoscalar med, Dirac DM}");
+    tex->DrawLatex(0.225,0.64,"#bf{g_{q} = 1, g_{DM} = 1}");
+  }
+  else{
+    tex->DrawLatex(0.225,0.68,"#bf{Pseudoscalar med, Dirac DM}");
+    tex->DrawLatex(0.225,0.64,"#bf{g_{q} = 0.25, g_{DM} = 1}");
+  }
   
   ///////                                                                                                                                                                                          
   canvas->SaveAs((outputDirectory+"/scanDD_pseudo_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");
@@ -377,10 +381,8 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
     hexp2->Write("contour_exp");
     lTotalE->Write("contour_exp_graph");
     lTotal->Write("contour_obs_graph");
-    DDE_graph->SetName("expected");
-    DD_graph->SetName("observed");
-    DDE_graph->Write();
-    DD_graph->Write();
+    DDE_graph->Write("expected_dd");
+    DD_graph->Write("observed_dd");
     outfile->Write();
     outfile->Close();    
   }
