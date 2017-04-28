@@ -58,16 +58,16 @@ static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
 static float maxY = 300;
-static float minZ = 0.5;
+static float minZ = 0.3;
 static float maxZ = 10;
-static int   reductionForContour = 10;
+static int   reductionForContour = 20;
 
 // to smooth the plot
 static float maxup_exp = 100;
 static float maxup_obs = 125;
 static bool  forceSmoothing = true;
 
-void plotScalar(string inputFileName, string outputDIR, string coupling = "1", string energy = "13") {
+void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, string coupling = "1", string energy = "13") {
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -175,14 +175,17 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
       cout<<"Bad limit value: medmass "<<medmass<<" dmmass "<<dmmass<<endl;
       continue;
     }
+
+    // skip off-shell for DMF model
+    if(isDMF and medmass < 2*dmmass) continue;
     
     if (quantile == 0.5) { // expected limit
-
       // performed looking at the 1D plot vs dmmass
-      if(forceSmoothing){
+      if(forceSmoothing and not isDMF){
 	if(medmass <= maxup_exp and limit > 1.0) continue;
 	if(medmass >  maxup_exp and limit < 1.0) continue;      
       }
+
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
       if(medmass <= minmass_exp){
@@ -192,6 +195,7 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     }
     
     if (quantile < 0.17 && quantile > 0.14 ) { 
+      if(isDMF and medmass == 200 and dmmass == 5) continue;
       grexp_down->SetPoint(exp_down_counter, double(medmass), double(dmmass), limit);
       exp_down_counter++;      
     }
@@ -204,22 +208,46 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
     if (quantile == -1) { // observed
 
       //looking at the 1D plot vs dmmass
-      if(forceSmoothing){
+      if(forceSmoothing and not isDMF){
 	if(medmass <= maxup_obs and limit > 1.0) continue;
 	if(medmass >  maxup_obs and limit < 1.0) continue;      
 	if(medmass == 160 and dmmass < 10) continue;
 	if(medmass == 80  and dmmass == 5) continue;
 	if(medmass == 60  and dmmass == 10) continue;
       }
-
+      if(isDMF){
+	if(medmass == 50 and dmmass == 10) continue;
+	if(medmass == 60 and dmmass == 1) continue;
+	if(medmass == 100 and dmmass == 50) continue;
+      }
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
-      grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
-      grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
       obscounter++;      
+
       if(medmass <= minmass_obs){
         minmass_obs = medmass;
 	min_obs = limit;
       }
+
+      if(isDMF){
+	if(medmass == 70 and dmmass == 15) continue;
+	if(medmass == 80 and dmmass == 35) continue;
+	if(medmass == 90 and dmmass == 10) continue;
+	if(medmass == 90 and dmmass == 15) continue;
+	if(medmass == 90 and dmmass == 25) continue;
+	if(medmass == 100 and dmmass == 25) continue;
+	if(medmass == 100 and dmmass == 35) continue;
+	grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
+      }
+      else
+	grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
+      // specific for the down variation
+      if(isDMF){
+	if(medmass == 200 and dmmass == 5) continue;
+	if(medmass == 200 and dmmass == 10) continue;
+	grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
+      }
+      else
+	grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
     }
   }
 
@@ -364,7 +392,9 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
   contour_exp->SetLineStyle(7);
   contour_exp_dw->SetLineStyle(7);
 
-  contour_exp_up->Draw("Lsame");
+  if(not isDMF){
+    contour_exp_up->Draw("Lsame");
+  }
   contour_exp_dw->Draw("Lsame");
   contour_exp->Draw("Lsame");
 
@@ -381,7 +411,7 @@ void plotScalar(string inputFileName, string outputDIR, string coupling = "1", s
 
   CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
 
-  TLegend *leg = new TLegend(0.175,0.58,0.45,0.78);
+  TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);

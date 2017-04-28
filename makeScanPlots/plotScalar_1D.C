@@ -37,7 +37,7 @@ int code(double mh){
 }
 
 /////
-void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, string coupling = "025",string postfix = "COMB") {
+void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "025",string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -103,13 +103,18 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
     if (medmass > 600) continue;
 
     // fill expected limit graph
-    if(quantile != -1){
+    if(quantile != -1 and not isDMF){
       if (medmass == 30  and dmmass == 1) continue;
       if (medmass == 100 and dmmass == 1) continue;
       if (medmass == 125 and dmmass == 1) continue;
       if (medmass == 315 and dmmass == 1) continue;
-
     }
+    else if (quantile == -1 and not isDMF) {      
+      if (medmass == 40  and dmmass == 1) continue;
+      if (medmass == 175 and dmmass == 1) continue;
+      if (medmass == 315 and dmmass == 1) continue;
+    }
+
     if (quantile == 0.5) {      
       grexp->SetPoint(expcounter, double(medmass), limit);
       expcounter++;
@@ -120,11 +125,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, strin
 	medMax = medmass;      
       medMassList.push_back(medmass);
     }
-
-    else if (quantile == -1) {      
-      if (medmass == 40  and dmmass == 1) continue;
-      if (medmass == 175 and dmmass == 1) continue;
-      if (medmass == 315 and dmmass == 1) continue;
+    else if (quantile == -1){
       grobs->SetPoint(obscounter, double(medmass), limit);
       obscounter++;
     }
