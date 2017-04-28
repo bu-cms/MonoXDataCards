@@ -311,27 +311,28 @@ void plotADD_exc(string inputFileName, string outputDIR) {
 
   h_exp_2sigma_dw->GetYaxis()->SetRangeUser(0,16);
   h_exp_2sigma_dw->GetXaxis()->SetNdivisions(5);
-  h_exp_2sigma_dw->SetLineColor(kYellow);
-  h_exp_2sigma_dw->SetFillColor(kYellow);
+  h_exp_2sigma_dw->SetLineColor(kOrange);
+  h_exp_2sigma_dw->SetFillColor(kOrange);
   h_exp_2sigma_dw->Draw(); 
-  h_exp_1sigma_dw->SetLineColor(kGreen);
-  h_exp_1sigma_dw->SetFillColor(kGreen);
+  h_exp_1sigma_dw->SetLineColor(kGreen+1);
+  h_exp_1sigma_dw->SetFillColor(kGreen+1);
   h_exp_1sigma_dw->Draw("sames");
 
-  h_exp_2sigma_up->SetLineColor(kGreen);
-  h_exp_2sigma_up->SetFillColor(kGreen);
+  h_exp_2sigma_up->SetLineColor(kGreen+1);
+  h_exp_2sigma_up->SetFillColor(kGreen+1);
   h_exp_2sigma_up->Draw("sames");
-  h_exp_1sigma_up->SetLineColor(kYellow);
-  h_exp_1sigma_up->SetFillColor(kYellow);
+  h_exp_1sigma_up->SetLineColor(kOrange);
+  h_exp_1sigma_up->SetFillColor(kOrange);
   h_exp_1sigma_up->Draw("sames");
   h_exp_2sigma_up->SetLineColor(10);
   h_exp_2sigma_up->SetFillColor(10);
   h_exp_2sigma_up->Draw("sames");
   
-  h_exp->SetLineColor(kRed);
+  h_exp->SetLineColor(kBlack);
   h_exp->SetLineWidth(2);
   h_exp->SetLineStyle(2);
   h_exp->Draw("sames");
+  h_obs->SetLineColor(kRed);
   h_obs->SetLineWidth(2);
   h_obs->Draw("sames");
   h_obs_8TeV->SetLineWidth(2);
@@ -344,6 +345,7 @@ void plotADD_exc(string inputFileName, string outputDIR) {
   leg->AddEntry(h_exp,"Median expected 95% CL","L");
   leg->AddEntry(h_exp_1sigma_dw,"68% expected","F");
   leg->AddEntry(h_exp_1sigma_up,"95% expected","F");
+  leg->AddEntry(h_obs_8TeV,"CMS, 8 TeV, 19.7 fb^{-1}","L");  
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -367,7 +369,7 @@ void plotADD_exc(string inputFileName, string outputDIR) {
   
   canvas->SaveAs((outputDIR+"/Exc_ADD"+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/Exc_ADD"+".png").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/Exc_ADD"+".C").c_str(),"pdf");
+  //canvas->SaveAs((outputDIR+"/Exc_ADD"+".C").c_str(),"pdf");
 
 }
 
