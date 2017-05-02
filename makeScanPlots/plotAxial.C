@@ -70,7 +70,7 @@ TGraph* relic_g25_1();
 TGraph* relic_g25_2();
 
 ///////////
-void plotAxial(string inputFileName, string outputDIR, string coupling = "025", string energy = "13") {
+void plotAxial(string inputFileName, string outputDIR, bool isDMF = false, string coupling = "025", string energy = "13") {
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -179,11 +179,13 @@ void plotAxial(string inputFileName, string outputDIR, string coupling = "025", 
     }
 
     // skip some bad points for a smoother contour
-    if(medmass == 1800 and (dmmass == 1 or dmmass == 5)) continue;
-    if(medmass == 1125 and dmmass >= 600) continue;
-    if(medmass == 800  and dmmass >= 400) continue;
-    if(medmass == 525  and dmmass == 275) continue;
-    
+    if(not isDMF){
+      if(medmass == 1800 and (dmmass == 1 or dmmass == 5)) continue;
+      if(medmass == 1125 and dmmass >= 600) continue;
+      if(medmass == 800  and dmmass >= 400) continue;
+      if(medmass == 525  and dmmass == 275) continue;
+    }
+
     // filter out some bad mass points
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);

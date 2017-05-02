@@ -66,11 +66,13 @@ TGraph*relic_g1();
 TGraph*relic_g25();
 
 ///////////////
-void plotVector(string inputFileName, string outputDIR, string coupling = "025", string energy = "13") {
+void plotVector(string inputFileName, string outputDIR, bool isDMF = false, string coupling = "025", string energy = "13") {
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
   setTDRStyle();
+
+  if(isDMF) minY = 5;
 
   // Set the color palette
   bool useNicksPalette = false;
@@ -173,13 +175,20 @@ void plotVector(string inputFileName, string outputDIR, string coupling = "025",
     }
 
     // remove some point by hand
-    if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
-    if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
-    if(medmass == 1525 and dmmass > 600) continue;
-    if(medmass == 1125 and dmmass > 600) continue;
-    if(medmass == 600  and dmmass == 350) continue;
-    if(medmass == 525  and dmmass == 275) continue;
+    if(not isDMF){
+      if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
+      if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
+      if(medmass == 1525 and dmmass > 600) continue;
+      if(medmass == 1125 and dmmass > 600) continue;
+      if(medmass == 600  and dmmass == 350) continue;
+      if(medmass == 525  and dmmass == 275) continue;
+    }
+    else{
+      if(medmass == 1400 and dmmass == 400) continue;
+      if(medmass == 1400 and dmmass == 500) continue;
+    }
 
+    
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;
