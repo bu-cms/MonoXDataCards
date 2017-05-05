@@ -328,13 +328,12 @@ void plotADD_exc(string inputFileName, string outputDIR) {
   h_exp_2sigma_up->SetFillColor(10);
   h_exp_2sigma_up->Draw("sames");
   
-  h_exp->SetLineColor(1);
+  h_exp->SetLineColor(kBlack);
   h_exp->SetLineWidth(2);
-  h_exp->SetLineStyle(7);
+  h_exp->SetLineStyle(2);
   h_exp->Draw("sames");
+  h_obs->SetLineColor(kRed);
   h_obs->SetLineWidth(2);
-  h_obs->SetLineColor(2);
-  h_obs->SetLineStyle(1);
   h_obs->Draw("sames");
   h_obs_8TeV->SetLineWidth(2);
   h_obs_8TeV->SetLineColor(4);
@@ -346,6 +345,7 @@ void plotADD_exc(string inputFileName, string outputDIR) {
   leg->AddEntry(h_exp,"Median expected 95% CL","L");
   leg->AddEntry(h_exp_1sigma_dw,"68% expected","F");
   leg->AddEntry(h_exp_1sigma_up,"95% expected","F");
+  leg->AddEntry(h_obs_8TeV,"CMS, 8 TeV, 19.7 fb^{-1}","L");  
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -369,7 +369,7 @@ void plotADD_exc(string inputFileName, string outputDIR) {
   
   canvas->SaveAs((outputDIR+"/Exc_ADD"+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/Exc_ADD"+".png").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/Exc_ADD"+".C").c_str(),"pdf");
+  //canvas->SaveAs((outputDIR+"/Exc_ADD"+".C").c_str(),"pdf");
 
 }
 

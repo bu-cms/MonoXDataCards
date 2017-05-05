@@ -252,8 +252,8 @@ void plotADDv2_1D(string inputFileName, string outputDIR, int dmMass = 1) {
   
   //////////// All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",600,600);
-  TH1* frame = canvas->DrawFrame(medMin,TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
-				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*1.5, "");
+  TH1* frame = canvas->DrawFrame(medMin,TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.1,
+				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*6.5, "");
   frame->GetYaxis()->CenterTitle();
   frame->GetXaxis()->SetTitle("M_{D} [TeV]");
   frame->GetYaxis()->SetTitle("95%  CL upper limit on #sigma");
@@ -278,14 +278,13 @@ void plotADDv2_1D(string inputFileName, string outputDIR, int dmMass = 1) {
   grobs->SetLineColor(kRed);
   grobs->SetLineWidth(2);
   grobs->Draw("Lsame");
-  grtheo->SetLineColor(kBlack);
+  grtheo->SetLineColor(kBlue);
   grtheo->SetLineWidth(2);
   grtheo->SetLineStyle(1);
   grtheo->Draw("Lsame");  
 
-  TF1* line = new TF1 ("line","1",medMin,medMax);
-  line->SetLineColor(kRed);
-  line->SetLineWidth(2);
+  //line->SetLineColor(kRed);
+  //line->SetLineWidth(2);
   //line->Draw("L same");
   TLegend *leg = new TLegend(0.5317726,0.5706806,0.9264214,0.8411867,NULL,"brNDC");
 
@@ -316,14 +315,14 @@ void plotADDv2_1D(string inputFileName, string outputDIR, int dmMass = 1) {
   gPad->Modified(); 
   gPad->Update();
   
-  //canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+".pdf").c_str(),"pdf");
-  //canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+".png").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+".pdf").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+".png").c_str(),"pdf");
 
   canvas->SetLogy();
   frame->GetYaxis()->SetRangeUser(TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.1,
 				  TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*200);
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+"_log.pdf").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+"_log.png").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+"_log.C").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+"_log.pdf").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+"_log.png").c_str(),"pdf");
+  //canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+"_log.C").c_str(),"pdf");
 }
 

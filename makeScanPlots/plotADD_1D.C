@@ -257,16 +257,16 @@ void plotADD_1D(string inputFileName, string outputDIR, int dmMass = 1) {
   graph_1sigma_band->Draw("3same");
 
   grexp->SetLineColor(kBlack);
-  grexp->SetLineStyle(7);
+  grexp->SetLineStyle(2);
   grexp->SetLineWidth(2);
   grexp->Draw("Lsame");
 
-  grobs->SetLineColor(kBlack);
+  grobs->SetLineColor(kRed);
   grobs->SetLineWidth(2);
   grobs->Draw("Lsame");
 
   TF1* line = new TF1 ("line","1",medMin,medMax);
-  line->SetLineColor(kRed);
+  line->SetLineColor(kBlue);
   line->SetLineWidth(2);
   line->Draw("L same");
 
@@ -293,13 +293,13 @@ void plotADD_1D(string inputFileName, string outputDIR, int dmMass = 1) {
   gPad->Modified(); 
   gPad->Update();
   
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+".pdf").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+".png").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+".pdf").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+".png").c_str(),"pdf");
 
   canvas->SetLogy();
   frame->GetYaxis()->SetRangeUser(TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.1,
 				  TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*200);
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+"_log.pdf").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_ADD_1D_dmMass_"+to_string(dmMass)+"_log.png").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+"_log.pdf").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/ADD_1D_d_"+to_string(dmMass)+"_log.png").c_str(),"pdf");
 }
 
