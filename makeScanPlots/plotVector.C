@@ -60,7 +60,9 @@ static float maxX = 2500;
 static float maxY = 1200;
 static float minZ = 0.01;
 static float maxZ = 10;
-static int reductionForContour = 20;
+static int   reductionForContour = 20;
+static bool  addPreliminary = true;
+static bool  whiteOut = true;
 
 TGraph*relic_g1();
 TGraph*relic_g25();
@@ -235,7 +237,7 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
       hobd->SetBinContent(i,j,grobd->Interpolate(hobd->GetXaxis()->GetBinCenter(i),hobd->GetYaxis()->GetBinCenter(j)));
     }
   }
-
+  
   // fix mass points below min med mass generated                                                                                                                                                 
   for (int i = 1; i   <= nbinsX; i++) {
     for (int j = 1; j <= nbinsY; j++) {
@@ -253,8 +255,8 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   }
 
   ////////////
-  for(int i = 0; i < nbinsX; i++){
-    for(int j = 0; j < nbinsY; j++){
+  for(int i = 1; i <= nbinsX; i++){
+    for(int j = 1; j <= nbinsY; j++){
 
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
@@ -318,8 +320,12 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   frame->GetYaxis()->SetTitleOffset(1.20);
   frame->Draw();
 
-  hobs->SetMinimum(minZ);
-  hobs->SetMaximum(maxZ);
+  hobs->GetZaxis()->SetRangeUser(minZ,maxZ);
+  hexp->GetZaxis()->SetRangeUser(minZ,maxZ);
+  hobu->GetZaxis()->SetRangeUser(minZ,maxZ);
+  hobd->GetZaxis()->SetRangeUser(minZ,maxZ);
+  hexp_up->GetZaxis()->SetRangeUser(minZ,maxZ);
+  hexp_down->GetZaxis()->SetRangeUser(minZ,maxZ);
 
   hexp2_up->GetZaxis()->SetLabelSize(0);
   hexp2_up->Draw("contz list same");
@@ -350,6 +356,58 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   hobd2->Draw("contz list same");
   canvas->Update();
   TGraph* contour_obs_dw = produceContour(reductionForContour);
+
+  /// to white out
+  if(whiteOut){
+    for(int i = 1; i <= nbinsX; i++){
+      for(int j = 1; j <= nbinsY; j++){
+	if(hexp -> GetXaxis()->GetBinCenter(i) < 2*hexp -> GetYaxis()->GetBinCenter(j) and hexp -> GetBinContent(i,j) == maxZ) hexp->SetBinContent(i,j,minZ*0.01);
+	if(hexp_up -> GetXaxis()->GetBinCenter(i) < 2*hexp_up -> GetYaxis()->GetBinCenter(j) and hexp_up -> GetBinContent(i,j) == maxZ) hexp_up->SetBinContent(i,j,minZ*0.01);
+	if(hexp_down -> GetXaxis()->GetBinCenter(i) < 2*hexp_down -> GetYaxis()->GetBinCenter(j) and hexp_down -> GetBinContent(i,j) == maxZ) hexp_down->SetBinContent(i,j,minZ*0.01);
+	if(hobs -> GetXaxis()->GetBinCenter(i) < 2*hobs -> GetYaxis()->GetBinCenter(j) and hobs -> GetBinContent(i,j) == maxZ) hobs->SetBinContent(i,j,minZ*0.01);
+	if(hobu -> GetXaxis()->GetBinCenter(i) < 2*hobu -> GetYaxis()->GetBinCenter(j) and hobu -> GetBinContent(i,j) == maxZ) hobu->SetBinContent(i,j,minZ*0.01);
+	if(hobd -> GetXaxis()->GetBinCenter(i) < 2*hobd -> GetYaxis()->GetBinCenter(j) and hobd -> GetBinContent(i,j) == maxZ) hobd->SetBinContent(i,j,minZ*0.01);
+      } 
+    }
+
+    // more fix by hand
+    if(not isDMF){
+      for(int i = 1; i <= nbinsX; i++){
+	for(int j = 1; j <= nbinsY; j++){
+	  
+	  // low mass part
+	  if(hexp -> GetXaxis()->GetBinCenter(i) < 250 and hexp -> GetYaxis()->GetBinCenter(j) > 220) hexp->SetBinContent(i,j,minZ*0.01);
+	  if(hexp_up -> GetXaxis()->GetBinCenter(i) < 250 and hexp_up -> GetYaxis()->GetBinCenter(j) > 220) hexp_up->SetBinContent(i,j,minZ*0.01);
+	  if(hexp_down -> GetXaxis()->GetBinCenter(i) < 250 and hexp_down -> GetYaxis()->GetBinCenter(j) > 220) hexp_down->SetBinContent(i,j,minZ*0.01);
+	  if(hobs -> GetXaxis()->GetBinCenter(i) < 250 and hobs -> GetYaxis()->GetBinCenter(j) > 220) hobs->SetBinContent(i,j,minZ*0.01);
+	  if(hobu -> GetXaxis()->GetBinCenter(i) < 250 and hobu -> GetYaxis()->GetBinCenter(j) > 220) hobu->SetBinContent(i,j,minZ*0.01);
+	  if(hobd -> GetXaxis()->GetBinCenter(i) < 250 and hobd -> GetYaxis()->GetBinCenter(j) > 220) hobd->SetBinContent(i,j,minZ*0.01);
+
+	  // low mass part
+	  if(hexp -> GetXaxis()->GetBinCenter(i) > 250 and hexp -> GetYaxis()->GetBinCenter(j) > hexp -> GetXaxis()->GetBinCenter(i)/2 + 100) hexp->SetBinContent(i,j,minZ*0.01);
+	  if(hobs -> GetXaxis()->GetBinCenter(i) > 250 and hobs -> GetYaxis()->GetBinCenter(j) > hobs -> GetXaxis()->GetBinCenter(i)/2 + 100) hobs->SetBinContent(i,j,minZ*0.01);
+	  if(hexp_up -> GetXaxis()->GetBinCenter(i) > 250 and hexp_up -> GetYaxis()->GetBinCenter(j) > hexp_up -> GetXaxis()->GetBinCenter(i)/2+100) hexp_up->SetBinContent(i,j,minZ*0.01);
+	  if(hexp_down -> GetXaxis()->GetBinCenter(i) > 250 and hexp_down-> GetYaxis()->GetBinCenter(j) > hexp_down -> GetXaxis()->GetBinCenter(i)/2+100) hexp_down->SetBinContent(i,j,minZ*0.01);
+	  if(hobu -> GetXaxis()->GetBinCenter(i) > 250 and hobu -> GetYaxis()->GetBinCenter(j) > hobu -> GetXaxis()->GetBinCenter(i)/2+100) hobu->SetBinContent(i,j,minZ*0.01);
+	  if(hobd -> GetXaxis()->GetBinCenter(i) > 250 and hobd -> GetYaxis()->GetBinCenter(j) > hobd -> GetXaxis()->GetBinCenter(i)/2+100) hobd->SetBinContent(i,j,minZ*0.01);    
+	} 
+      }
+    }
+    if(isDMF){
+      for(int i = 1; i <= nbinsX; i++){
+	for(int j = 1; j <= nbinsY; j++){
+	  
+	  // low mass part
+	  if(hexp -> GetXaxis()->GetBinCenter(i) < 250 and hexp -> GetYaxis()->GetBinCenter(j) > 350) hexp->SetBinContent(i,j,minZ*0.01);
+	  if(hexp_up -> GetXaxis()->GetBinCenter(i) < 250 and hexp_up -> GetYaxis()->GetBinCenter(j) > 350) hexp_up->SetBinContent(i,j,minZ*0.01);
+	  if(hexp_down -> GetXaxis()->GetBinCenter(i) < 250 and hexp_down -> GetYaxis()->GetBinCenter(j) > 350) hexp_down->SetBinContent(i,j,minZ*0.01);
+	  if(hobs -> GetXaxis()->GetBinCenter(i) < 250 and hobs -> GetYaxis()->GetBinCenter(j) > 350) hobs->SetBinContent(i,j,minZ*0.01);
+	    if(hobu -> GetXaxis()->GetBinCenter(i) < 250 and hobu -> GetYaxis()->GetBinCenter(j) > 350) hobu->SetBinContent(i,j,minZ*0.01);
+	    if(hobd -> GetXaxis()->GetBinCenter(i) < 250 and hobd -> GetYaxis()->GetBinCenter(j) > 350) hobd->SetBinContent(i,j,minZ*0.01);
+	}
+      }      
+    }    
+  }
 
   frame->Draw();
   hobs->Draw("COLZ SAME");
@@ -385,7 +443,10 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   contour_obs->Draw("Lsame");
 
 
-  CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+  if(not addPreliminary)
+    CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+  else
+    CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
   TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
   leg->SetFillColor(0);

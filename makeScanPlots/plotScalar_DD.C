@@ -118,6 +118,7 @@ static int  reductionForContour = 10;
 static float maxup_exp = 100;
 static float maxup_obs = 125;
 static bool  forceSmoothing = true;
+static bool  addPreliminary = true;
 
 ///////////
 void plotScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
@@ -350,7 +351,10 @@ void plotScalar_DD(string inputFileName, string outputDirectory, string coupling
   leg->AddEntry(lM3 ,"CRESST-II","L");
   leg->Draw("SAME");
 
-  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
+  if(addPreliminary)
+    CMS_lumi(canvas,"35.9",false,false,false,0.05,0);
+  else
+    CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
 
   TLatex * tex = new TLatex();
   tex->SetNDC();

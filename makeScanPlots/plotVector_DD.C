@@ -99,6 +99,7 @@ static double minY_dd = 1e-47;
 static double maxY_dd = 1e-31;
 static int reductionForContour = 20;
 static bool saveOutputFile = true;
+static bool addPreliminary = true;
 
 TGraph* superCDMS();
 TGraph* lux();
@@ -321,7 +322,10 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   leg->AddEntry(lM3 ,"CRESST-II","L");
   leg->Draw("SAME");
 
-  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
+  if(addPreliminary)
+    CMS_lumi(canvas,"35.9",false,false,false,0.05,0);
+  else
+    CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
 
   canvas->RedrawAxis("samesaxis");
 

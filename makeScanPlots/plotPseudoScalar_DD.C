@@ -156,6 +156,7 @@ static float maxX_dd  = 300;
 static double minY_dd = 1e-31;
 static double maxY_dd = 2e-25;
 static int  reductionForContour = 3;
+static bool addPreliminary = true;
 
 void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
 
@@ -354,8 +355,11 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   leg->AddEntry(grdd ,"FermiLAT","L");
   
   leg->Draw("SAME");
-  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
-    
+  if(addPreliminary)
+    CMS_lumi(canvas,"35.9",false,false,false,0.05,0);
+  else
+    CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
+
   TLatex * tex = new TLatex();
   tex->SetNDC();
   tex->SetTextFont(42);

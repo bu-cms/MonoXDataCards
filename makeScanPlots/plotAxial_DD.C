@@ -102,6 +102,7 @@ static double maxY_dd = 1e-28;
 
 static bool saveOutputFile      = true;
 static int  reductionForContour = 20;
+static bool addPreliminary = true;
 
 TGraph* Pico2L();
 TGraph* Pico60();
@@ -271,6 +272,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   TGraph  *lM1 = PicassoFinalGraph(); 
   TGraph  *lM2 = IceCubebb();
   TGraph  *lM3 = SuperKbb();
+  TGraph  *lM4 = IceCubett();
 
   lM0->SetLineColor(kBlue);
   lM1->SetLineColor(kBlue+2);
@@ -278,6 +280,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM2->SetLineStyle(7);
   lM3->SetLineColor(kAzure+8);
   lM3->SetLineStyle(7);
+  lM4->SetLineColor(kAzure-7);
+  lM4->SetLineStyle(7);
 
   TGraph *DDE_graph = makeOBA(lTotalE);
   TGraph *DD_graph  = makeOBA(lTotal);
@@ -302,6 +306,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM1->Draw("L SAME");  
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
+  lM4->Draw("L SAME");
 
   DDE_graph->Draw("C SAME");
   DD_graph->Draw("C SAME");
@@ -325,9 +330,13 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   leg->AddEntry(lM1 ,"Picasso","L");
   leg->AddEntry(lM2 ,"IceCube b#bar{b}","L");
   leg->AddEntry(lM3 ,"Super-K b#bar{b}","L");
+  leg->AddEntry(lM4 ,"Super-K t#bar{t}","L");
     
   leg->Draw("SAME");
-  CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
+  if(addPreliminary)
+    CMS_lumi(canvas,"35.9",false,false,false,0.05,0);
+  else
+    CMS_lumi(canvas,"35.9",false,true,false,0.05,0);
 
   canvas->RedrawAxis("samesaxis");
 

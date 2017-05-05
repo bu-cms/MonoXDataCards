@@ -36,6 +36,8 @@ int code(double mh){
     return (int)(mh/100000000);
 }
 
+static bool addPreliminary = true;
+
 void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, string coupling = "025", string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
@@ -228,7 +230,11 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->SetTitleOffset(1.07);  
   frame->Draw();
-  CMS_lumi(canvas,"35.9");
+
+  if(not addPreliminary)
+    CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+  else
+    CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
   graph_2sigma_band->SetFillColor(kOrange);
   graph_1sigma_band->SetFillColor(kGreen+1);

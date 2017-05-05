@@ -53,14 +53,16 @@ TGraph* produceContour (const int & reduction){
 static bool saveOutputFile = true;
 static bool addRelicDensity = true;
 static float nbinsX = 600;
-static float nbinsY = 300;
+static float nbinsY = 400;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
-static float maxY = 300;
+static float maxY = 400;
 static float minZ = 0.1;
 static float maxZ = 10;
 static int   reductionForContour = 20;
+static bool  whiteOut = true;
+static bool  addPreliminary = true;
 
 TGraph*relic_g1_2();
 TGraph*relic_g1_1();
@@ -220,16 +222,6 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
       hobs->SetBinContent(i,j,grobs->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetYaxis()->GetBinCenter(j)));
       hobu->SetBinContent(i,j,grobu->Interpolate(hobu->GetXaxis()->GetBinCenter(i),hobu->GetYaxis()->GetBinCenter(j)));
       hobd->SetBinContent(i,j,grobd->Interpolate(hobd->GetXaxis()->GetBinCenter(i),hobd->GetYaxis()->GetBinCenter(j)));      
-      /*      
-      if(hexp->GetXaxis()->GetBinCenter(i) <= 30 and hexp->GetYaxis()->GetBinCenter(j) < hexp->GetXaxis()->GetBinCenter(i)/2){
-	hexp_up->SetBinContent(i,j,minObs);
-	hexp_down->SetBinContent(i,j,minObs);
-	hexp->SetBinContent(i,j,minObs);
-	hobs->SetBinContent(i,j,minObs);
-	hobu->SetBinContent(i,j,minObs);
-	hobd->SetBinContent(i,j,minObs);
-      }
-      */
     }
   }
 
@@ -250,8 +242,8 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   }
   
   ////////////////  
-  for(int i = 0; i < nbinsX; i++){
-    for(int j = 0; j < nbinsY; j++){
+  for(int i = 1; i <= nbinsX; i++){
+    for(int j = 1; j <= nbinsY; j++){
 
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
@@ -347,6 +339,21 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   canvas->Update();
   TGraph* contour_obs_dw = produceContour(1);
 
+  /// to white out                                                                                                                                                                                      
+  if(whiteOut){
+    for(int i = 1; i <= nbinsX; i++){
+      for(int j = 1; j <= nbinsY; j++){
+        if(hexp -> GetXaxis()->GetBinCenter(i) < 2*hexp -> GetYaxis()->GetBinCenter(j) and hexp -> GetBinContent(i,j) == maxZ) hexp->SetBinContent(i,j,minZ*0.01);
+        if(hexp_up -> GetXaxis()->GetBinCenter(i) < 2*hexp_up -> GetYaxis()->GetBinCenter(j) and hexp_up -> GetBinContent(i,j) == maxZ) hexp_up->SetBinContent(i,j,minZ*0.01);
+        if(hexp_down -> GetXaxis()->GetBinCenter(i) < 2*hexp_down -> GetYaxis()->GetBinCenter(j) and hexp_down -> GetBinContent(i,j) == maxZ) hexp_down->SetBinContent(i,j,minZ*0.01);
+        if(hobs -> GetXaxis()->GetBinCenter(i) < 2*hobs -> GetYaxis()->GetBinCenter(j) and hobs -> GetBinContent(i,j) == maxZ) hobs->SetBinContent(i,j,minZ*0.01);
+        if(hobu -> GetXaxis()->GetBinCenter(i) < 2*hobu -> GetYaxis()->GetBinCenter(j) and hobu -> GetBinContent(i,j) == maxZ) hobu->SetBinContent(i,j,minZ*0.01);
+        if(hobd -> GetXaxis()->GetBinCenter(i) < 2*hobd -> GetYaxis()->GetBinCenter(j) and hobd -> GetBinContent(i,j) == maxZ) hobd->SetBinContent(i,j,minZ*0.01);
+      }
+    }
+  }
+
+
   frame->Draw();
   hobs->Draw("COLZ same");
 
@@ -380,11 +387,13 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   contour_obs_dw->Draw("Lsame");
   contour_obs->Draw("Lsame");
 
-  CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+  if(not addPreliminary)
+    CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+  else
+    CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
-  TLegend *leg = new TLegend(0.175,0.58,0.70,0.78);
-  leg->SetNColumns(2);
-  leg->SetColumnSeparation(0.05);
+
+  TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);

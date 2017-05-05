@@ -66,6 +66,8 @@ static int   reductionForContour = 20;
 static float maxup_exp = 100;
 static float maxup_obs = 125;
 static bool  forceSmoothing = true;
+static bool  whiteOut = true;
+static bool  addPreliminary = true;
 
 void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, string coupling = "1", string energy = "13") {
 
@@ -276,8 +278,8 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
 
 
   //////////
-  for(int i = 0; i < nbinsX; i++){
-    for(int j = 0; j < nbinsY; j++){
+  for(int i = 1; i <= nbinsX; i++){
+    for(int j = 1; j <= nbinsY; j++){
 
       if(hexp -> GetBinContent(i,j) <= 0) hexp->SetBinContent(i,j,maxZ);
       if(hexp_down -> GetBinContent(i,j) <= 0) hexp_down->SetBinContent(i,j,maxZ);
@@ -374,6 +376,19 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
   canvas->Update();
   TGraph* contour_obs_dw = produceContour(reductionForContour);
 
+  if(whiteOut){
+    for(int i = 1; i <= nbinsX; i++){
+      for(int j = 1; j <= nbinsY; j++){
+        if(hexp -> GetXaxis()->GetBinCenter(i) < 2*hexp -> GetYaxis()->GetBinCenter(j) and hexp -> GetBinContent(i,j) == maxZ) hexp->SetBinContent(i,j,minZ*0.01);
+	if(hexp_up -> GetXaxis()->GetBinCenter(i) < 2*hexp_up -> GetYaxis()->GetBinCenter(j) and hexp_up -> GetBinContent(i,j) == maxZ) hexp_up->SetBinContent(i,j,minZ*0.01);
+        if(hexp_down -> GetXaxis()->GetBinCenter(i) < 2*hexp_down -> GetYaxis()->GetBinCenter(j) and hexp_down -> GetBinContent(i,j) == maxZ) hexp_down->SetBinContent(i,j,minZ*0.01);
+	if(hobs -> GetXaxis()->GetBinCenter(i) < 2*hobs -> GetYaxis()->GetBinCenter(j) and hobs -> GetBinContent(i,j) == maxZ) hobs->SetBinContent(i,j,minZ*0.01);
+        if(hobu -> GetXaxis()->GetBinCenter(i) < 2*hobu -> GetYaxis()->GetBinCenter(j) and hobu -> GetBinContent(i,j) == maxZ) hobu->SetBinContent(i,j,minZ*0.01);
+        if(hobd -> GetXaxis()->GetBinCenter(i) < 2*hobd -> GetYaxis()->GetBinCenter(j) and hobd -> GetBinContent(i,j) == maxZ) hobd->SetBinContent(i,j,minZ*0.01);
+      }
+    }
+  }
+
   frame->Draw();
   hobs->Draw("COLZ SAME");
 
@@ -409,7 +424,11 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
   contour_obs_dw->Draw("Lsame");
   contour_obs->Draw("Lsame");
 
-  CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+
+  if(not addPreliminary)
+    CMS_lumi(canvas,"35.9",false,true,false,0,-0.09);
+  else
+    CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
   TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
   leg->SetFillColor(0);

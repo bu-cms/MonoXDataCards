@@ -37,6 +37,8 @@ int code(double mh){
 }
 
 /////
+static bool  addPreliminary = true;
+
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "025",string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
@@ -237,7 +239,11 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->SetTitleOffset(1.07);  
   frame->Draw();
-  CMS_lumi(canvas,"35.9");
+
+  if(not addPreliminary)
+    CMS_lumi(canvas,"35.9",false,true);
+  else
+    CMS_lumi(canvas,"35.9",false,false);
 
   graph_2sigma_band->SetFillColor(kOrange);
   graph_1sigma_band->SetFillColor(kGreen+1);
