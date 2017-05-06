@@ -329,8 +329,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   leg->AddEntry(lM0 ,"PICO-60","L");
   leg->AddEntry(lM1 ,"Picasso","L");
   leg->AddEntry(lM2 ,"IceCube b#bar{b}","L");
+  leg->AddEntry(lM4 ,"IceCube t#bar{t}","L");
   leg->AddEntry(lM3 ,"Super-K b#bar{b}","L");
-  leg->AddEntry(lM4 ,"Super-K t#bar{t}","L");
     
   leg->Draw("SAME");
   if(addPreliminary)
