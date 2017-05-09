@@ -54,7 +54,7 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool addRelicDensity = true;
 static bool saveOutputFile  = true;
-static bool addICHEPExpected = false;
+static bool addICHEPContours = true;
 static float nbinsX = 1000;
 static float nbinsY = 600;
 static float minX = 0;
@@ -441,20 +441,20 @@ void plotAxial(string inputFileName, string outputDIR, bool isDMF = false, strin
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
-  leg->AddEntry(contour_exp_up,"Expected #pm 1 s.d._{experiment}","L");
+  leg->AddEntry(contour_exp_up,"68% expected","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
-  leg->AddEntry(contour_obs_up,"Observed #pm 1 s.d._{theory}","L");
+  leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
   if(addRelicDensity)
     leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
 
-  if(addICHEPExpected){
+  if(addICHEPContours){
     TFile* ichepexp = TFile::Open("/afs/cern.ch/user/z/zdemirag/public/forRaffaele/scans/monojet_AV_MM_ICHEP2016_exp.root","READ");
     TGraph* graph_exp = (TGraph*) ichepexp->Get("monojet_exp");
     graph_exp->SetLineWidth(3);
     graph_exp->SetLineStyle(7);
     graph_exp->SetLineColor(kViolet);
     graph_exp->Draw("Lsame");
-    leg->AddEntry(graph_exp,"ICHEP expected","L");
+    leg->AddEntry(graph_exp,"EXO-16-037 expected","L");
   }
   leg->Draw("SAME");
 
@@ -486,12 +486,12 @@ void plotAxial(string inputFileName, string outputDIR, bool isDMF = false, strin
   if(saveOutputFile){
     TFile* outputFile = new TFile((outputDIR+"/fullLikelihood_scan_axial.root").c_str(),"RECREATE");
     outputFile->cd();
-    hexp->Write("scan_expected");
-    hobs->Write("scan_observed");
-    grexp->Write("graph_expected");
-    grexp_up->Write("graph_expected_p1s");
-    grexp_down->Write("graph_expected_m1s");
-    grobs->Write("graph_observed");
+    //hexp->Write("scan_expected");
+    //hobs->Write("scan_observed");
+    //grexp->Write("graph_expected");
+    //grexp_up->Write("graph_expected_p1s");
+    //grexp_down->Write("graph_expected_m1s");
+    //grobs->Write("graph_observed");
     contour_exp->Write("contour_expected");
     contour_obs->Write("contour_observed");
     outputFile->Write();

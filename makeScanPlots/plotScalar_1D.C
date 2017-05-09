@@ -38,6 +38,7 @@ int code(double mh){
 
 /////
 static bool  addPreliminary = true;
+static bool  saveOutputFile = true;
 
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "025",string postfix = "COMB") {
   
@@ -295,4 +296,13 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
 				  TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*100);
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.png").c_str(),"png");
+
+  if(saveOutputFile){
+    TFile* outputFile = new TFile((outputDIR+"/limit_scalar_1D.root").c_str(),"RECREATE");
+    outputFile->cd();
+    splineexp->Write("expected_limit");
+    splineobs->Write("observed_limit");
+    outputFile->Close();
+  }
+
 }

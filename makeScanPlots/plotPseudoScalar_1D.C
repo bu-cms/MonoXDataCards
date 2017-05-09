@@ -37,6 +37,7 @@ int code(double mh){
 }
 
 static bool addPreliminary = true;
+static bool saveOutputFile = true;
 
 void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, string coupling = "025", string postfix = "COMB") {
   
@@ -117,7 +118,6 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
     }
 
     else if (quantile == -1) {      
-      cout<<"medmass "<<medmass<<" dmmass "<<dmmass<<" limit "<<limit<<endl;
       grobs->SetPoint(obscounter, double(medmass), limit);
       obscounter++;
     }
@@ -247,11 +247,13 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   grexp->SetLineColor(kBlack);
   grexp->SetLineStyle(7);
   grexp->SetLineWidth(2);
-  grexp->Draw("Lsame");
+  splineexp->Draw("Lsame");
+  //grexp->Draw("Lsame");
 
   grobs->SetLineColor(kBlack);
   grobs->SetLineWidth(2);
-  grobs->Draw("Lsame");
+  splineobs->Draw("Lsame");
+  //grobs->Draw("Lsame");
 
   TF1* line = new TF1 ("line","1",min(medMin,0.),medMax);
   line->SetLineColor(kRed);
@@ -286,11 +288,19 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   
   canvas->SaveAs((outputDIR+"/scan_pseudoScalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_pseudoScalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".png").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_pseudoScalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".C").c_str(),"C");
 
   canvas->SetLogy();
   frame->GetYaxis()->SetRangeUser(TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.01,
 				  TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*100);
   canvas->SaveAs((outputDIR+"/scan_pseudoScalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_pseudoScalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.png").c_str(),"pdf");
+
+  if(saveOutputFile){
+    TFile* outputFile = new TFile((outputDIR+"/limit_pseudoscalar_1D.root").c_str(),"RECREATE");
+    outputFile->cd();
+    splineexp->Write("expected_limit");
+    splineobs->Write("observed_limit");
+    outputFile->Close();
+  }
+
 }

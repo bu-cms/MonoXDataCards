@@ -436,9 +436,9 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
-  leg->AddEntry(contour_exp_up,"Expected #pm 1 s.d._{experiment}","L");
+  leg->AddEntry(contour_exp_up,"68% expected","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
-  leg->AddEntry(contour_obs_up,"Observed #pm 1 s.d._{theory}","L");
+  leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
   if(addRelicDensity)
     leg->AddEntry(wm   ,"Planck+WMAP Relic","F");
   leg->Draw("SAME");
