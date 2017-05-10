@@ -168,7 +168,7 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   TFile *file = TFile::Open(inputFileName.c_str(),"READ");
   TTree *tree = (TTree*)file->Get("limit");
   
-  TFile* file2 = new TFile("FermiLat.root");
+  TFile* file2 = new TFile("externalFiles/FermiLat.root");
   TGraph* grdd = (TGraph*)file2->Get("FermiLAT8Y");   
   
   TGraph2D* grexp = new TGraph2D();

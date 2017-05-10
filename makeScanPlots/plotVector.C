@@ -431,6 +431,24 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   contour_exp->SetLineStyle(7);
   contour_exp_dw->SetLineStyle(7);
 
+  TGraph* graph_obs_ichep = NULL;
+  TGraph* graph_exp_ichep = NULL;
+
+  if(addICHEPContours){
+    TFile* ichepobs = TFile::Open("externalFiles/monojet_V_MM_ICHEP2016_obs.root","READ");
+    graph_obs_ichep = (TGraph*) ichepobs->Get("monojet_obs");
+    graph_obs_ichep->SetLineWidth(3);
+    graph_obs_ichep->SetLineStyle(1);
+    graph_obs_ichep->SetLineColor(kViolet);
+    graph_obs_ichep->Draw("Lsame");
+    TFile* ichepexp = TFile::Open("externalFiles/monojet_V_MM_ICHEP2016_exp.root","READ");
+    graph_exp_ichep = (TGraph*) ichepexp->Get("monojet_exp");
+    graph_exp_ichep->SetLineWidth(3);
+    graph_exp_ichep->SetLineStyle(7);
+    graph_exp_ichep->SetLineColor(kViolet);
+    graph_exp_ichep->Draw("Lsame");
+  }
+
   contour_exp_up->Draw("Lsame");
   contour_exp_dw->Draw("Lsame");
   contour_exp->Draw("Lsame");
@@ -452,7 +470,11 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   else
     CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
-  TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
+  TLegend *leg = NULL;
+  if(not addICHEPContours)
+    leg = new TLegend(0.175,0.48,0.50,0.75);
+  else
+    leg = new TLegend(0.175,0.46,0.50,0.78);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -461,18 +483,13 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   leg->AddEntry(contour_exp_up,"68% expected","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
   leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
+  if(addICHEPContours){
+    leg->AddEntry(graph_obs_ichep,"EXO-16-037 observed","L");
+    leg->AddEntry(graph_exp_ichep,"EXO-16-037 expected","L");
+  }
    if(addRelicDensity)
     leg->AddEntry(wm   ,"#Omega_{c}#timesh^{2} #geq 0.12","F");
 
-  if(addICHEPContours){
-    TFile* ichepexp = TFile::Open("/afs/cern.ch/user/z/zdemirag/public/forRaffaele/scans/monojet_V_MM_ICHEP2016_exp.root","READ");
-    TGraph* graph_exp = (TGraph*) ichepexp->Get("monojet_exp");
-    graph_exp->SetLineWidth(3);
-    graph_exp->SetLineStyle(7);
-    graph_exp->SetLineColor(kViolet);
-    graph_exp->Draw("Lsame");
-    leg->AddEntry(graph_exp,"EXO-16-037 expected","L");    
-  }
 
   leg->Draw("SAME");
 
