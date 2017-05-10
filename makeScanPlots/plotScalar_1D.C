@@ -39,6 +39,7 @@ int code(double mh){
 /////
 static bool  addPreliminary = true;
 static bool  saveOutputFile = true;
+static bool addICHEPContours = true;
 
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "025",string postfix = "COMB") {
   
@@ -250,9 +251,26 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   graph_1sigma_band->SetFillColor(kGreen+1);
   graph_2sigma_band->SetLineColor(kOrange);
   graph_1sigma_band->SetLineColor(kGreen+1);
-  
+
   graph_2sigma_band->Draw("3same");
   graph_1sigma_band->Draw("3same");
+
+  TGraph* graph_obs_ichep = NULL;
+  TGraph* graph_exp_ichep = NULL;
+  if(addICHEPContours){
+    TFile* icheplines = TFile::Open("externalFiles/monojet_S_1D_ICHEP2016.root","READ");
+    graph_obs_ichep = (TGraph*) icheplines->Get("obs");
+    graph_obs_ichep->SetLineWidth(2);
+    graph_obs_ichep->SetLineStyle(1);
+    graph_obs_ichep->SetLineColor(kBlue);
+    graph_obs_ichep->Draw("Lsame");
+    graph_exp_ichep = (TGraph*) icheplines->Get("exp");
+    graph_exp_ichep->SetLineWidth(2);
+    graph_exp_ichep->SetLineStyle(7);
+    graph_exp_ichep->SetLineColor(kBlue);
+    graph_exp_ichep->Draw("Lsame");
+  }  
+
   splineexp->Draw("Lsame");
   splineobs->Draw("Lsame");
 
@@ -261,11 +279,20 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   line->SetLineWidth(2);
   line->Draw("L same");
 
-  TLegend *leg = new TLegend(0.175,0.5,0.57,0.77);  
+  TLegend *leg = NULL;
+  if(not addICHEPContours)
+    leg = new TLegend(0.175,0.5,0.57,0.77);  
+  else
+    leg = new TLegend(0.175,0.45,0.57,0.77);  
+
   leg->AddEntry(splineobs,"Observed 95% CL","L");
   leg->AddEntry(splineexp,"Median expected 95% CL","L");
   leg->AddEntry(graph_1sigma_band,"68% expected","F");
   leg->AddEntry(graph_2sigma_band,"95% expected","F");
+  if(addICHEPContours){
+    leg->AddEntry(graph_obs_ichep,"EXO-16-037 observed","L");
+    leg->AddEntry(graph_exp_ichep,"EXO-16-037 expected","L");  
+  }
   leg->AddEntry(line,"#mu = 1","L");
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
