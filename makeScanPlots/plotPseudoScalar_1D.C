@@ -278,9 +278,9 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   tex->SetTextSize(0.030);
   tex->Draw();
   if (coupling == "1")
-    tex->DrawLatex(0.175,0.80,("#bf{PseudoScalar med, Dirac DM, m_{med} = "+to_string(dmMass)+" GeV g_{q} = 1, g_{DM} = 1}").c_str());
+    tex->DrawLatex(0.175,0.80,("#bf{PseudoScalar med, Dirac DM, m_{DM} = "+to_string(dmMass)+" GeV g_{q} = 1, g_{DM} = 1}").c_str());
   else
-    tex->DrawLatex(0.175,0.80,("#bf{PseudoScalar med, Dirac DM, m_{med} = "+to_string(dmMass)+" GeV g_{q} = 0.25, g_{DM} = 1}").c_str());
+    tex->DrawLatex(0.175,0.80,("#bf{PseudoScalar med, Dirac DM, m_{DM} = "+to_string(dmMass)+" GeV g_{q} = 0.25, g_{DM} = 1}").c_str());
   
   gPad->RedrawAxis();
   gPad->Modified(); 

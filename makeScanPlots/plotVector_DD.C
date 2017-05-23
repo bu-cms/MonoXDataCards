@@ -24,9 +24,9 @@ int code(double mh){
 
 static float gq  = 0.25;
 static float gDM = 1.0;
+static float mMED_min = 15;
 
-double vecF(double mMED,double mDM){  
-  if(mMED < 40) return vecF(40,mDM);
+double vecF(double mMED,double mDM){    
   double mR = (0.939*mDM)/(0.939+mDM);
   double c = 6.9e-41*1e12*pow((gq*gDM)/0.25,2);
   return c*(mR*mR)/(mMED*mMED*mMED*mMED);
@@ -44,6 +44,7 @@ TGraph * makeOBV(TGraph *Graph1){
   }
   for (int p =0; p < Graph1->GetN(); p++){
     Graph1->GetPoint(p,X,Y);
+    if(X <= mMED_min) continue;
     gr->SetPoint(pp,Y,vecF(X,Y));
     pp++;
   }
@@ -349,8 +350,8 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
     TFile*outfile = new TFile((outputDirectory+"/vector_g"+coupling+"_DD.root").c_str(),"RECREATE");
     //hobs2->Write("contour_obs");
     //hexp2->Write("contour_exp");
-    //lTotalE->Write("contour_exp_graph");
-    //lTotal->Write("contour_obs_graph");
+    lTotalE->Write("contour_exp_graph");
+    lTotal->Write("contour_obs_graph");
     DDE_graph->Write("expected_dd");
     DD_graph->Write("observed_dd");
     outfile->Write();

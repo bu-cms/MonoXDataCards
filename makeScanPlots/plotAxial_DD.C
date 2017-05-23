@@ -23,12 +23,13 @@ int code(double mh){
 /// formulas for DD limit
 
 double axialF(double mMED,double mDM){  
-  if (mMED < 12) return axialF(12,mDM);
   mMED/=1000;
   double mR = (0.939*mDM)/(0.939+mDM);
   double c = 2.4E-42;//4.6E-41;
   return c*mR*mR/(mMED*mMED*mMED*mMED);    
 }
+
+static float med_min = 20;
 
 TGraph * makeOBA(TGraph *Graph1){
 
@@ -43,7 +44,7 @@ TGraph * makeOBA(TGraph *Graph1){
   }
   for (int p =1;p<Graph1->GetN();p++){
     Graph1->GetPoint(p,X,Y);
-    if(X < 100) continue;
+    if(X < med_min) continue;
     gr->SetPoint(pp,Y,axialF(X,Y));
     pp++;
   }
@@ -359,8 +360,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
     TFile*outfile = new TFile((outputDirectory+"/axial_g"+coupling+"_DD.root").c_str(),"RECREATE");
     //hobs2->Write("contour_obs");
     //hexp2->Write("contour_exp");
-    //lTotalE->Write("contour_exp_graph");
-    //lTotal->Write("contour_obs_graph");
+    lTotalE->Write("contour_exp_graph");
+    lTotal->Write("contour_obs_graph");
     DDE_graph->Write("expected_dd");
     DD_graph->Write("observed_dd");
     outfile->Write();
