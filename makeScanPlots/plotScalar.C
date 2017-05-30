@@ -64,10 +64,10 @@ static int   reductionForContour = 20;
 // to smooth the plot
 static float maxup_exp = 100;
 static float maxup_obs = 125;
-static bool  forceSmoothing = true;
 static bool  whiteOut = true;
 static bool  addPreliminary = true;
-static bool  addICHEPContours = true;
+static bool  addICHEPContours = false;
+static bool  skipPoints = false;
 
 TGraph*relic_g1_2();
 TGraph*relic_g1_1();
@@ -185,7 +185,7 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
     
     if (quantile == 0.5) { // expected limit
       // performed looking at the 1D plot vs dmmass
-      if(forceSmoothing and not isDMF){
+      if(skipPoints and not isDMF){
 	if(medmass <= maxup_exp and limit > 1.0) continue;
 	if(medmass >  maxup_exp and limit < 1.0) continue;      
       }
@@ -212,18 +212,21 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
     if (quantile == -1) { // observed
 
       //looking at the 1D plot vs dmmass
-      if(forceSmoothing and not isDMF){
-	if(medmass <= maxup_obs and limit > 1.0) continue;
-	if(medmass >  maxup_obs and limit < 1.0) continue;      
-	if(medmass == 160 and dmmass < 10) continue;
-	if(medmass == 80  and dmmass == 5) continue;
-	if(medmass == 60  and dmmass == 10) continue;
+      if(skipPoints){
+	if(not isDMF){
+	  if(medmass <= maxup_obs and limit > 1.0) continue;
+	  if(medmass >  maxup_obs and limit < 1.0) continue;      
+	  if(medmass == 160 and dmmass < 10) continue;
+	  if(medmass == 80  and dmmass == 5) continue;
+	  if(medmass == 60  and dmmass == 10) continue;
+	}
+	else{
+	  if(medmass == 50 and dmmass == 10) continue;
+	  if(medmass == 60 and dmmass == 1) continue;
+	  if(medmass == 100 and dmmass == 50) continue;
+	}
       }
-      if(isDMF){
-	if(medmass == 50 and dmmass == 10) continue;
-	if(medmass == 60 and dmmass == 1) continue;
-	if(medmass == 100 and dmmass == 50) continue;
-      }
+
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       obscounter++;      
 

@@ -51,7 +51,7 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool saveOutputFile   = true;
 static bool addRelicDensity  = true;
-static bool addICHEPContours = true;
+static bool addICHEPContours = false;
 static float nbinsX = 1000;
 static float nbinsY = 600;
 static float minX = 0;
@@ -62,7 +62,8 @@ static float minZ = 0.01;
 static float maxZ = 10;
 static int   reductionForContour = 20;
 static bool  addPreliminary = true;
-static bool  whiteOut = true;
+static bool  whiteOut       = true;
+static bool  skipPoints     = true;
 
 TGraph* relic_g1();
 TGraph* relic_g25();
@@ -177,24 +178,39 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
     }
 
     // remove some point by hand
-    if(not isDMF){
-      if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
-      if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
-      if(medmass == 1525 and dmmass > 600) continue;
-      if(medmass == 1125 and dmmass > 600) continue;
-      if(medmass == 600  and dmmass == 350) continue;
-      if(medmass == 525  and dmmass == 275) continue;
-      if(quantile == -1 and medmass == 1925 and dmmass == 200) continue;
-      if(quantile == -1 and medmass == 1925 and dmmass == 250) continue;
-      if(quantile == -1 and medmass == 1800 and dmmass == 300) continue;
-      if(quantile == -1 and medmass == 2000 and dmmass == 200) continue;
-    }
-    else{
-      if(medmass == 1400 and dmmass == 400) continue;
-      if(medmass == 1400 and dmmass == 500) continue;
+    if(skipPoints){
+      if(not isDMF and coupling == "025"){
+	if(medmass == 1800 and (dmmass == 200 or dmmass == 250 or dmmass == 350 or dmmass == 400 or dmmass == 800)) continue;
+	if(medmass == 1725 and (dmmass == 200 or dmmass > 700)) continue;
+	if(medmass == 1525 and dmmass > 600) continue;
+	if(medmass == 1125 and dmmass > 600) continue;
+	if(medmass == 600  and dmmass == 350) continue;
+	if(medmass == 525  and dmmass == 275) continue;
+	if(quantile == -1 and medmass == 1925 and dmmass == 200) continue;
+	if(quantile == -1 and medmass == 1925 and dmmass == 250) continue;
+	if(quantile == -1 and medmass == 1800 and dmmass == 300) continue;
+	if(quantile == -1 and medmass == 2000 and dmmass == 200) continue;
+
+      }
+      else if(not isDMF and coupling == "1"){
+	if(medmass == 1925  and dmmass == 1000) continue;
+	if(medmass == 1800  and dmmass == 1000) continue;
+	if(medmass == 1750  and dmmass == 900) continue;
+	if(medmass == 1725  and dmmass == 900) continue;
+	if(medmass == 1600  and dmmass == 800) continue;
+	if(medmass == 1500  and dmmass == 800) continue;
+	if(medmass == 1325  and dmmass == 600) continue;
+	if(medmass == 1200  and dmmass == 600) continue;
+	if(medmass == 1000  and dmmass == 550) continue;
+	if(medmass == 925   and dmmass == 500) continue;
+      }
+      else{
+	if(medmass == 1400 and dmmass == 400) continue;
+	if(medmass == 1400 and dmmass == 500) continue;
+      }      
     }
 
-    
+
     if (quantile == 0.5) { // expected limit
       grexp->SetPoint(expcounter, double(medmass), double(dmmass), limit);
       expcounter++;

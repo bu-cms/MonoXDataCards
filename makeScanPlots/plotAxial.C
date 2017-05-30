@@ -54,7 +54,7 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool addRelicDensity = true;
 static bool saveOutputFile  = true;
-static bool addICHEPContours = true;
+static bool addICHEPContours = false;
 static float nbinsX = 1000;
 static float nbinsY = 600;
 static float minX = 0;
@@ -66,6 +66,7 @@ static float maxZ = 10;
 static int reductionForContour = 20;
 static bool whiteOut = true;
 static bool addPreliminary = true;
+static bool skipPoints = false;
 
 TGraph* relic_g1();
 TGraph* relic_g25_1();
@@ -181,15 +182,17 @@ void plotAxial(string inputFileName, string outputDIR, bool isDMF = false, strin
     }
 
     // skip some bad points for a smoother contour
-    if(not isDMF){
-      if(medmass == 1800 and (dmmass == 1 or dmmass == 5)) continue;
-      if(medmass == 1125 and dmmass >= 600) continue;
-      if(medmass == 800  and dmmass >= 400) continue;
-      if(medmass == 525  and dmmass == 275) continue;
-    }
-    else{
-      if(medmass == 2500 and dmmass == 325) continue;
-      if(medmass == 10 and dmmass == 100) continue;
+    if(skipPoints){
+      if(not isDMF){
+	if(medmass == 1800 and (dmmass == 1 or dmmass == 5)) continue;
+	if(medmass == 1125 and dmmass >= 600) continue;
+	if(medmass == 800  and dmmass >= 400) continue;
+	if(medmass == 525  and dmmass == 275) continue;
+      }
+      else{
+	if(medmass == 2500 and dmmass == 325) continue;
+	if(medmass == 10 and dmmass == 100) continue;
+      }
     }
 
     // filter out some bad mass points
