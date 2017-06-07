@@ -61,7 +61,7 @@ static float maxY = 1200;
 static float minZ = 0.01;
 static float maxZ = 10;
 static int   reductionForContour = 20;
-static bool  addPreliminary = true;
+static bool  addPreliminary = false;
 static bool  whiteOut       = true;
 static bool  skipPoints     = true;
 
@@ -186,11 +186,12 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
 	if(medmass == 1125 and dmmass > 600) continue;
 	if(medmass == 600  and dmmass == 350) continue;
 	if(medmass == 525  and dmmass == 275) continue;
+	if(medmass <= 400  and dmmass >= 400) continue;
 	if(quantile == -1 and medmass == 1925 and dmmass == 200) continue;
 	if(quantile == -1 and medmass == 1925 and dmmass == 250) continue;
 	if(quantile == -1 and medmass == 1800 and dmmass == 300) continue;
 	if(quantile == -1 and medmass == 2000 and dmmass == 200) continue;
-
+	
       }
       else if(not isDMF and coupling == "1"){
 	if(medmass == 1925  and dmmass == 1000) continue;

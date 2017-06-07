@@ -65,7 +65,7 @@ static double minZ = 0.01;
 static float maxZ = 10;
 static int reductionForContour = 20;
 static bool whiteOut = true;
-static bool addPreliminary = true;
+static bool addPreliminary = false;
 static bool skipPoints = false;
 
 TGraph* relic_g1();

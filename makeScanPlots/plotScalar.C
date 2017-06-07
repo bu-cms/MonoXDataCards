@@ -65,9 +65,9 @@ static int   reductionForContour = 20;
 static float maxup_exp = 100;
 static float maxup_obs = 125;
 static bool  whiteOut = true;
-static bool  addPreliminary = true;
-static bool  addICHEPContours = false;
-static bool  skipPoints = false;
+static bool  addPreliminary = false;
+static bool  addICHEPContours = true;
+static bool  skipPoints = true;
 
 TGraph*relic_g1_2();
 TGraph*relic_g1_1();
@@ -199,7 +199,7 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
     }
     
     if (quantile < 0.17 && quantile > 0.14 ) { 
-      if(isDMF and medmass == 200 and dmmass == 5) continue;
+     if(isDMF and medmass == 200 and dmmass == 5) continue;
       grexp_down->SetPoint(exp_down_counter, double(medmass), double(dmmass), limit);
       exp_down_counter++;      
     }

@@ -100,7 +100,7 @@ static double minY_dd = 1e-47;
 static double maxY_dd = 1e-31;
 static int reductionForContour = 20;
 static bool saveOutputFile = true;
-static bool addPreliminary = true;
+static bool addPreliminary = false;
 
 TGraph* superCDMS();
 TGraph* lux();

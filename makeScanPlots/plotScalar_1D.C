@@ -37,8 +37,8 @@ int code(double mh){
 }
 
 /////
-static bool  addPreliminary = true;
-static bool  saveOutputFile = true;
+static bool addPreliminary = false;
+static bool saveOutputFile = true;
 static bool addICHEPContours = true;
 
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "025",string postfix = "COMB") {
