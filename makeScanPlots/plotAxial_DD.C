@@ -98,7 +98,7 @@ static float maxZ = 10;
 
 static float minX_dd = 1;
 static float maxX_dd = 1200;
-static double minY_dd = 1e-45;
+static double minY_dd = 1e-46;
 static double maxY_dd = 1e-28;
 
 static bool saveOutputFile      = true;
@@ -112,6 +112,7 @@ TGraph* SuperKbb();
 TGraph* IceCubett();
 TGraph* IceCubebb();
 TGraph* PicassoFinalGraph();
+TGraph* Neutrino_floor();
 
 ////////
 void plotAxial_DD(string inputFileName, string outputDirectory, string coupling = "025", string energy = "13") {
@@ -274,6 +275,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   TGraph  *lM2 = IceCubebb();
   TGraph  *lM3 = SuperKbb();
   TGraph  *lM4 = IceCubett();
+  TGraph  *lM5 = Neutrino_floor();
 
   lM0->SetLineColor(kBlue);
   lM1->SetLineColor(kBlue+2);
@@ -283,6 +285,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM3->SetLineStyle(7);
   lM4->SetLineColor(kAzure-7);
   lM4->SetLineStyle(7);
+  lM5->SetLineColor(kGreen+2);
 
   TGraph *DDE_graph = makeOBA(lTotalE);
   TGraph *DD_graph  = makeOBA(lTotal);
@@ -308,6 +311,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
   lM4->Draw("L SAME");
+  lM5->Draw("L SAME");
 
   DDE_graph->Draw("C SAME");
   DD_graph->Draw("C SAME");
@@ -321,10 +325,11 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.25,0.52,0.55,0.78,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.22,0.60,0.80,0.78,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
+  leg->SetNColumns(2);
   leg->AddEntry(DDE_graph,"CMS exp. 90% CL","L");
   leg->AddEntry(DD_graph ,"CMS obs. 90% CL","L");
   leg->AddEntry(lM0 ,"PICO-60","L");
@@ -332,7 +337,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   leg->AddEntry(lM2 ,"IceCube b#bar{b}","L");
   leg->AddEntry(lM4 ,"IceCube t#bar{t}","L");
   leg->AddEntry(lM3 ,"Super-K b#bar{b}","L");
-    
+  leg->AddEntry(lM5 ,"Neutrino floor", "L"); 
+
   leg->Draw("SAME");
   if(addPreliminary)
     CMS_lumi(canvas,"35.9",false,false,false,0.05,0);
@@ -439,7 +445,6 @@ TGraph*Pico2L() {
   double *lX = new double[1000];
   double *lY = new double[1000];
 
-  //i0++;  lX[i0] = 3.3113e+00;   lY[i0] =   8.5638e-33;
   i0++;  lX[i0] = 3.6308e+00;   lY[i0] =   5.4104e-36;
   i0++;  lX[i0] = 3.9811e+00;   lY[i0] =   5.6411e-37;
   i0++;  lX[i0] = 4.3652e+00;   lY[i0] =   1.3643e-37;
@@ -567,10 +572,7 @@ TGraph* IceCubebb() {
   i0++; lX[i0] = 467.75874146675534; lY[i0] = 3.739937302478771e-39;
   i0++; lX[i0] = 975.192358771805; lY[i0] = 2.96730240818886e-39;
   i0++; lX[i0] = 1713.229154611073; lY[i0] = 5.052631065335618e-39;
-  // i0++; lX[i0] = 2978.114255518353; lY[i0] = 8.214343584919388e-39;
-  //  i0++; lX[i0] = 4319.202043243905; lY[i0] = 1.5702901247293776e-38;
-  //  i0++; lX[i0] = 6748.0252680719; lY[i0] = 3.292971255097108e-38;
-  //  i0++; lX[i0] = 9580.625677830956; lY[i0] = 6.294988990221836e-38;
+
   TGraph *lGraph = new TGraph(i0,lX,lY);
   lGraph->SetLineWidth(3);
   return lGraph;
@@ -592,8 +594,39 @@ TGraph* SuperKbb() {
   i0++; lX[i0] = 536.4267393150936; lY[i0] = 1.245883364294993e-38;
   i0++; lX[i0] = 972.9520978888768; lY[i0] = 2.171117945694492e-38;
   i0++; lX[i0] = 1800.5552913529386; lY[i0] = 1.0473708979594488e-37;
-  //i0++; lX[i0] = 4533.899422504216; lY[i0] = 9.221978823334266e-37;
+
   TGraph *lGraph = new TGraph(i0,lX,lY);
   lGraph->SetLineWidth(3);
   return lGraph;
+}
+
+TGraph* Neutrino_floor(){
+  int i0 = -1;
+  double *lX = new double[1000];
+  double *lY = new double[1000]; 
+  i0++; lX[i0] = 1.1050487599671617; lY[i0] = 8.502356198644393e-41;
+  i0++; lX[i0] = 1.4696820084393; lY[i0] = 4.848828865121339e-41;
+  i0++; lX[i0] = 1.8202942350620923; lY[i0] = 3.54924109489081e-41;
+  i0++; lX[i0] = 2.214664130318208; lY[i0] = 2.5979700872256447e-41;
+  i0++; lX[i0] = 3.2224233899185912; lY[i0] = 3.3345346170570327e-41;
+  i0++; lX[i0] = 5.217769944253682; lY[i0] = 3.3345346170570327e-41;
+  i0++; lX[i0] = 6.349437266584424; lY[i0] = 3.132816513467531e-41;
+  i0++; lX[i0] = 7.858476037453198; lY[i0] = 8.993516572898598e-42;
+  i0++; lX[i0] = 8.581690036016699; lY[i0] = 1.8898301102501317e-42;
+  i0++; lX[i0] = 9.371007964941954; lY[i0] = 3.730918121601405e-43;
+  i0++; lX[i0] = 11.191969954001724; lY[i0] = 1.1400150089399868e-43;
+  i0++; lX[i0] = 13.60882777833038; lY[i0] = 3.9464441591025993e-44;
+  i0++; lX[i0] = 17.777418660851176; lY[i0] = 1.9865659211570765e-44;
+  i0++; lX[i0] = 27.27257471510867; lY[i0] = 1.132923386873464e-44;
+  i0++; lX[i0] = 46.602619366402074; lY[i0] = 1.6474117833844688e-44;
+  i0++; lX[i0] = 90.2227509303646; lY[i0] = 2.1144783949800583e-44;
+  i0++; lX[i0] = 191.0141427891299; lY[i0] = 3.4834166236020267e-44;
+  i0++; lX[i0] = 458.1804272248432; lY[i0] = 5.06532185551949e-44;
+  i0++; lX[i0] = 1314.1742987993428; lY[i0] = 1.0710513627116436e-43;
+  i0++; lX[i0] = 3326.3184468836557; lY[i0] = 1.999000985068963e-43;
+  i0++; lX[i0] = 8125.981756125018; lY[i0] = 5.0970286316888605e-43;
+  TGraph *lLimit = new TGraph(i0,lX,lY);
+  lLimit->SetLineWidth(3);
+  return lLimit;
+
 }

@@ -305,17 +305,17 @@ void fillLimitGraphs(TTree* tree,
 
 
 ///////////////
-void plotVectorCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMass = false, float medOverDM = 3, string energy = "13") {
+void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMass = false, float medOverDM = 3, string energy = "13") {
 
-  string inputFileName1 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_1p0.root";
-  string inputFileName2 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p75.root";
-  string inputFileName3 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p5.root";
-  string inputFileName4 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p3.root";
-  string inputFileName5 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p25.root";
-  string inputFileName6 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p2.root";
-  string inputFileName7 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p1.root";
-  string inputFileName8 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p05.root";
-  string inputFileName9 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p01.root";
+  string inputFileName1 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_1p0.root";
+  string inputFileName2 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p75.root";
+  string inputFileName3 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p5.root";
+  string inputFileName4 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p3.root";
+  string inputFileName5 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p25.root";
+  string inputFileName6 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p2.root";
+  string inputFileName7 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p1.root";
+  string inputFileName8 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p05.root";
+  string inputFileName9 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p01.root";
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -447,101 +447,22 @@ void plotVectorCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMM
 
 	if(not useDMMass){
 	  
-	  /// fix bad limits for coupling 1.0
-	  if(grexp.at(igraph).first == 1.0){ 	  
-	    if((hexp->GetXaxis()->GetBinCenter(i) < 700 or hexp->GetXaxis()->GetBinCenter(i) > 780) and (hexp->GetXaxis()->GetBinCenter(i) < 450 or hexp->GetXaxis()->GetBinCenter(i) > 500)){	    
-
-	      grexp.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						grexp_2d.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));	    
-	      grexp_up.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						   grexp_2d_up.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));	    
-	      grexp_dw.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						   grexp_2d_dw.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));	    
-	      ipoint_exp++;
-	    }
-	    
-	    if((hobs->GetXaxis()->GetBinCenter(i) < 720 or hobs->GetXaxis()->GetBinCenter(i) > 800) and (hobs->GetXaxis()->GetBinCenter(i) < 450 or hobs->GetXaxis()->GetBinCenter(i) > 500)){
-
-	      grobs.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						grobs_2d.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      grobs_up.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						   grobs_2d_up.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      grobs_dw.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						   grobs_2d_dw.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      ipoint_obs++;
-	    }
-	  }
+	  grexp.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
+					    grexp_2d.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));	    
+	  grexp_up.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
+					       grexp_2d_up.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));	    
+	  grexp_dw.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
+					       grexp_2d_dw.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));	    
+	  ipoint_exp++;
 	  
-	  // skip some spikes for gq  = 0.25
-	  else if(grexp.at(igraph).first == 0.25){
-	    if((hexp->GetXaxis()->GetBinCenter(i) < 600 or hexp->GetXaxis()->GetBinCenter(i) > 800) and (hexp->GetXaxis()->GetBinCenter(i) < 60 or hexp->GetXaxis()->GetBinCenter(i) > 100) and 
-	       (hexp->GetXaxis()->GetBinCenter(i) < 30 or hexp->GetXaxis()->GetBinCenter(i) > 50) and (hexp->GetXaxis()->GetBinCenter(i) < 120 or hexp->GetXaxis()->GetBinCenter(i) > 300)){
-	      
-	      grexp.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						grexp_2d.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	      grexp_up.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						grexp_2d_up.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	      grexp_dw.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						grexp_2d_dw.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	      ipoint_exp++;
-	    }
-	    
-	    
-	    if((hobs->GetXaxis()->GetBinCenter(i) < 600 or hobs->GetXaxis()->GetBinCenter(i) > 800) and (hobs->GetXaxis()->GetBinCenter(i) < 60 or hobs->GetXaxis()->GetBinCenter(i) > 100) and 
-	       (hobs->GetXaxis()->GetBinCenter(i) < 30 or hobs->GetXaxis()->GetBinCenter(i) > 50) and (hobs->GetXaxis()->GetBinCenter(i) < 120 or hobs->GetXaxis()->GetBinCenter(i) > 300)){
-
-	      grobs.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),grobs_2d.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      grobs_up.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						   grobs_2d_up.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      grobs_dw.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						   grobs_2d_dw.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      ipoint_obs++;
-	    }
-	  }
-	  else if(grexp.at(igraph).first == 0.1){
-	    
-	    if(hexp->GetXaxis()->GetBinCenter(i) < 700 or hexp->GetXaxis()->GetBinCenter(i) > 780){
-
-	      grexp.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						grexp_2d.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	      grexp_up.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						   grexp_2d_up.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	      grexp_dw.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						   grexp_2d_dw.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	      ipoint_exp++;
-	    }
-	    
-	    if(hobs->GetXaxis()->GetBinCenter(i) < 700 or hobs->GetXaxis()->GetBinCenter(i) > 780){
-
-	      grobs.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						grobs_2d.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      grobs_up.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						   grobs_2d_up.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      grobs_dw.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						   grobs_2d_dw.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	      ipoint_obs++;
-	    }
-	  }
-	  else{
-	    grexp.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-					      grexp_2d.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	    grexp_up.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						 grexp_2d_up.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-	    grexp_dw.at(igraph).second->SetPoint(ipoint_exp,hexp->GetXaxis()->GetBinCenter(i),
-						 grexp_2d_dw.at(igraph).second->Interpolate(hexp->GetXaxis()->GetBinCenter(i),hexp->GetXaxis()->GetBinCenter(i)/3.));
-  
-	    ipoint_exp++;
-
-	    grobs.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-					      grobs_2d.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	    grobs_up.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						 grobs_2d_up.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-	    grobs_dw.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
-						 grobs_2d_dw.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
-       
-	    ipoint_obs++;
-	  }
-	}
+	  grobs.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
+					    grobs_2d.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
+	  grobs_up.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
+					       grobs_2d_up.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
+	  grobs_dw.at(igraph).second->SetPoint(ipoint_obs,hobs->GetXaxis()->GetBinCenter(i),
+					       grobs_2d_dw.at(igraph).second->Interpolate(hobs->GetXaxis()->GetBinCenter(i),hobs->GetXaxis()->GetBinCenter(i)/3.));
+	  ipoint_obs++;
+	}	
 	else{
 
 	  grexp.at(igraph).second->SetPoint(i,hexp->GetXaxis()->GetBinCenter(i)/3,
@@ -934,7 +855,7 @@ void plotVectorCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMM
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->SetTextSize(0.0243902);
-  leg->SetHeader("#bf{Vector med, Dirac DM, g_{DM} = 1, m_{med} = 3 #times m_{DM}}");
+  leg->SetHeader("#bf{Axial med, Dirac DM, g_{DM} = 1, m_{med} = 3 #times m_{DM}}");
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
   leg->AddEntry(contour_exp_up,"68% expected","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
@@ -952,11 +873,11 @@ void plotVectorCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMM
 
   canvas->RedrawAxis("sameaxis");
 
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV.pdf").c_str());
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV.png").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV.pdf").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV.png").c_str());
 
   canvas->SetLogy();
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
 
 }

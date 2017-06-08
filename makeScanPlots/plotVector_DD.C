@@ -97,7 +97,7 @@ static float maxZ = 10;
 static float minX_dd = 1;
 static float maxX_dd = 1200;
 static double minY_dd = 1e-47;
-static double maxY_dd = 1e-31;
+static double maxY_dd = 1e-27;
 static int reductionForContour = 20;
 static bool saveOutputFile = true;
 static bool addPreliminary = false;
@@ -107,7 +107,7 @@ TGraph* lux();
 TGraph* cdmslite();
 TGraph* panda();
 TGraph* cresst();
-
+TGraph* neutrino_floor();
 
 //////
 void plotVector_DD (string inputFileName, string outputDirectory, string coupling = "025", string energy = "13") {
@@ -291,16 +291,19 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   TGraph *lM1 = cdmslite();
   TGraph *lM2 = panda();
   TGraph *lM3 = cresst();
+  TGraph *lM4 = neutrino_floor();
 
   lM0->SetLineColor(kBlue);
   lM1->SetLineColor(kBlue+2);
   lM2->SetLineColor(kAzure+1);
   lM3->SetLineColor(kAzure+8);
+  lM4->SetLineColor(kGreen+2);
 
   lM0->Draw("L SAME");
   lM1->Draw("L SAME");
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
+  lM4->Draw("L SAME");
 
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
@@ -311,16 +314,18 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.28,0.50,0.54,0.78,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.22,0.60,0.80,0.78,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
+  leg->SetNColumns(2);
   leg->AddEntry(DDE_graph,"CMS exp. 90% CL","L");
   leg->AddEntry(DD_graph ,"CMS obs. 90% CL","L");
   leg->AddEntry(lM0 ,"LUX","L");
   leg->AddEntry(lM1 ,"CDMSLite","L");
   leg->AddEntry(lM2 ,"Panda-X II","L");
   leg->AddEntry(lM3 ,"CRESST-II","L");
+  leg->AddEntry(lM4 ,"Neutrino floor","L");
   leg->Draw("SAME");
 
   if(addPreliminary)
@@ -572,4 +577,60 @@ TGraph *lux(){
   lLimit->SetLineWidth(3.);
   return lLimit;
     
+}
+
+TGraph* neutrino_floor(){
+
+  int i0 = -1;
+  double *lX = new double[1000];
+  double *lY = new double[1000];
+  
+  i0++; lX[i0] = 0.30482158919260427; lY[i0] = 6.299697963699192e-44;
+  i0++; lX[i0] = 0.3603946561512068;  lY[i0] =  4.0949150623804635e-44;
+  i0++; lX[i0] = 0.43984751685789686; lY[i0] = 5.779692884153241e-44;
+  i0++; lX[i0] = 0.5200746924731524; lY[i0] =  4.4633389000179914e-44;
+  i0++; lX[i0] = 0.6411993957422804; lY[i0] =  2.7789296403176915e-44;
+  i0++; lX[i0] = 0.7988323339256767; lY[i0] =  1.5873776897913385e-44;
+  i0++; lX[i0] = 1.0162579107120813; lY[i0] =  8.318940674880885e-45;
+  i0++; lX[i0] = 1.2793860690880594; lY[i0] =  4.3596917354484964e-45;
+  i0++; lX[i0] = 1.7516637252854315; lY[i0] =  2.958614867885203e-45;
+  i0++; lX[i0] = 2.2289068055528998; lY[i0] =  2.5999559286685708e-45;
+  i0++; lX[i0] = 2.8964966553873484; lY[i0] =  2.833876712454476e-45;
+  i0++; lX[i0] = 4.268822489777; lY[i0] =      3.999823395608993e-45;
+  i0++; lX[i0] = 5.724444577448171; lY[i0] =   4.1758827810524175e-45;
+  i0++; lX[i0] = 6.839499775885055; lY[i0] =   2.833876712454476e-45;
+  i0++; lX[i0] = 8.17073546776026; lY[i0] =    1.4225293134853725e-45;
+  i0++; lX[i0] = 8.97476948447229; lY[i0] =    4.845896673409914e-46;
+  i0++; lX[i0] = 9.25839860916086; lY[i0] =    2.2317187169684525e-46;
+  i0++; lX[i0] = 9.550140289895431; lY[i0] =   8.286427728546935e-47;
+  i0++; lX[i0] = 9.851777264155823; lY[i0] =   3.6553180422141624e-47;
+  i0++; lX[i0] = 10.162941309378429; lY[i0] =  1.612437883662069e-47;
+  i0++; lX[i0] = 10.484120160024952; lY[i0] =  7.425886368281569e-48;
+  i0++; lX[i0] = 10.814485589904205; lY[i0] =  2.7572502862167695e-48;
+  i0++; lX[i0] = 11.157050406504503; lY[i0] =  1.5085907086001826e-48;
+  i0++; lX[i0] = 11.509440928960965; lY[i0] =  6.654711796333953e-49;
+  i0++; lX[i0] = 12.251893114554521; lY[i0] =  2.811768697974256e-49;;
+  i0++; lX[i0] = 14.637115109229152; lY[i0] =  1.5384196906973548e-49;
+  i0++; lX[i0] = 18.046079725235675; lY[i0] =  9.578390020327465e-50;
+  i0++; lX[i0] = 22.722595717571664; lY[i0] =  7.722449945836317e-50;
+  i0++; lX[i0] = 31.44380379973561; lY[i0] =   8.062367401460673e-50;
+  i0++; lX[i0] = 42.61450002802649; lY[i0] =   1.089971057280838e-49;
+  i0++; lX[i0] = 64.13479538097116; lY[i0] =   1.5384196906973548e-49;
+  i0++; lX[i0] = 96.52970659121127; lY[i0] =   2.5796728079999194e-49;
+  i0++; lX[i0] = 132.19839802285773; lY[i0] =  3.340484983513337e-49;
+  i0++; lX[i0] = 235.2858107825558; lY[i0] =   5.365273145287781e-49;
+  i0++; lX[i0] = 401.5785603427742; lY[i0] =   8.996666725006114e-49;
+  i0++; lX[i0] = 989.1533688824095; lY[i0] =   1.953513093877141e-48;
+  i0++; lX[i0] =  1488.6751897112276; lY[i0] =  2.7572502862167695e-48;
+  i0++; lX[i0] = 2312.1664768828095; lY[i0] =  4.6234480949599336e-48;
+  i0++; lX[i0] = 3516.4629174691013; lY[i0] =  6.525681155193038e-48;
+  i0++; lX[i0] = 4866.731114703792; lY[i0] =   9.210553176894823e-48;
+  i0++; lX[i0] = 6459.013016462642; lY[i0] =   1.3000066630116841e-47;
+  i0++; lX[i0] = 10031.23380395163; lY[i0] =   1.8348706005132336e-47;
+
+  TGraph *lLimit = new TGraph(i0,lX,lY);
+  lLimit->SetLineWidth(3.);
+  return lLimit;
+  
+ 
 }
