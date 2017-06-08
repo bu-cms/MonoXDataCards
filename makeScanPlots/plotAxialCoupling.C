@@ -57,7 +57,7 @@ static float minY = 1;
 static float maxX = 2000;
 static float maxY = 1000;
 static float nCoupling   = 100;
-static float minCoupling = 0.02;
+static float minCoupling = 0.01;
 static float maxCoupling = 1;
 static float minZ = 0.3;
 static float maxZ = 100;
@@ -65,6 +65,7 @@ static int   reductionForContour = 20;
 static bool  addPreliminary = false;
 static bool  whiteOut       = true;
 static bool  skipPoints     = true;
+static bool  addRelicDensity = true;
 
 void fillLimitGraphs(TTree* tree,
 		     TGraph2D* grexp, TGraph2D* grexp_up, TGraph2D* grexp_dw,
@@ -78,7 +79,7 @@ void fillLimitGraphs(TTree* tree,
   tree->SetBranchAddress("mh",&mh);
   tree->SetBranchAddress("limit",&limit);
   tree->SetBranchAddress("quantileExpected",&quantile);
-  
+
   // identify bad limits
   vector<pair<int,int> > goodMassPoint;
   int currentmedmass = -1;
@@ -306,6 +307,35 @@ void fillLimitGraphs(TTree* tree,
 
 ///////////////
 void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMass = false, float medOverDM = 3, string energy = "13") {
+
+  TGraph* relic_graph_g1 = new TGraph();
+  TGraph* relic_graph_g2 = new TGraph();
+
+  if(addRelicDensity){
+    TFile* inputRelicDensity = TFile::Open("externalFiles/relic_v6_A_Res_v2.root","READ");
+    TTree* relic = (TTree*) inputRelicDensity->Get("relic");
+    TTreeReader reader(relic);
+    TTreeReaderValue<float> mmed (reader,"med.lMed");
+    TTreeReaderValue<float> mdm  (reader,"dm.lMDM");
+    TTreeReaderValue<float> gq1  (reader,"gq1.lGQ1");
+    TTreeReaderValue<float> gq2  (reader,"gq2.lGQ2");
+    int npoints = 0;
+    while(reader.Next()){
+      if(*mmed != medOverDM*(*mdm)) continue;
+      if(not useDMMass){
+	relic_graph_g1->SetPoint(npoints,*mmed,exp(*gq1));
+	relic_graph_g2->SetPoint(npoints,*mmed,exp(*gq2));
+      }
+      else{
+	relic_graph_g1->SetPoint(npoints,*mdm,exp(*gq1));
+	relic_graph_g2->SetPoint(npoints,*mdm,exp(*gq2));		
+      }				 
+      npoints++;
+    }
+
+    relic_graph_g1->Sort();
+    relic_graph_g2->Sort();
+  }
 
   string inputFileName1 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_1p0.root";
   string inputFileName2 = "LimitsForPaperCoupling/higgsCombine_COMB_Axial_gq_0p75.root";
@@ -550,7 +580,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
 		      medOverDM,useDMMass);
     
   }
-  
+
   //// make a spline to further smooth                                                                                                                                                          
   vector<pair<double,TSpline3*> > splineexp;
   vector<pair<double,TSpline3*> > splineexp_up;
@@ -591,15 +621,15 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
   }
 
   // fill coupling
-  TGraph2D* grexp_coupling = new TGraph2D();
+  TGraph2D* grexp_coupling    = new TGraph2D();
   TGraph2D* grexp_coupling_up = new TGraph2D();
   TGraph2D* grexp_coupling_dw = new TGraph2D();
-  TGraph2D* grobs_coupling = new TGraph2D();
+  TGraph2D* grobs_coupling    = new TGraph2D();
   TGraph2D* grobs_coupling_up = new TGraph2D();
   TGraph2D* grobs_coupling_dw = new TGraph2D();
 
-  int npoints;  
-  int ngraph = 0;
+  int npoints = 0;  
+  int ngraph  = 0;
   for(auto gr : grexp){
     int ipoint = 0;
     for(int i = 0; i < gr.second->GetN(); i++){
@@ -612,7 +642,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
     ngraph++;
   }
 
-  ngraph = 0;
+  ngraph  = 0;
   npoints = 0;
   for(auto gr : grexp_up){
     int ipoint = 0;
@@ -626,7 +656,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
     ngraph++;
   }
   
-  ngraph = 0;
+  ngraph  = 0;
   npoints = 0;
   for(auto gr : grexp_dw){
     int ipoint = 0;
@@ -642,7 +672,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
 
   float min_xaxis = 9999;
   float max_xaxis = -1;
-  ngraph = 0;
+  ngraph  = 0;
   npoints = 0;
   for(auto gr : grobs){
     int ipoint = 0;
@@ -658,7 +688,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
     ngraph++;
   }
 
-  ngraph = 0;
+  ngraph  = 0;
   npoints = 0;
   for(auto gr : grobs_up){
     int ipoint = 0;
@@ -672,7 +702,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
     ngraph++;
   }
 
-  ngraph = 0;
+  ngraph  = 0;
   npoints = 0;
   for(auto gr : grobs_dw){
     int ipoint = 0;
@@ -687,12 +717,12 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
   }
 
   /////
-  TH2D* hexp_coupling = new TH2D("hexp_coupling", "",npoints,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
-  TH2D* hobs_coupling = new TH2D("hobs_coupling", "",npoints,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
-  TH2D* hexp_coupling_up = new TH2D("hexp_coupling_up", "",npoints,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
-  TH2D* hobs_coupling_up = new TH2D("hobs_coupling_up", "",npoints,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
-  TH2D* hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",npoints,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
-  TH2D* hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",npoints,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
+  TH2D* hexp_coupling = new TH2D("hexp_coupling", "",nbinsX,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
+  TH2D* hobs_coupling = new TH2D("hobs_coupling", "",nbinsX,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
+  TH2D* hexp_coupling_up = new TH2D("hexp_coupling_up", "",nbinsX,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
+  TH2D* hobs_coupling_up = new TH2D("hobs_coupling_up", "",nbinsX,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
+  TH2D* hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nbinsX,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
+  TH2D* hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,min_xaxis,max_xaxis,nCoupling,minCoupling,maxCoupling);
 
   for(int i = 1; i < hexp_coupling->GetNbinsX(); i++){
     for(int j = 1; j < hexp_coupling->GetNbinsY(); j++){
@@ -704,7 +734,7 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
       hobs_coupling_dw->SetBinContent(i,j,grobs_coupling_dw->Interpolate(hobs_coupling_dw->GetXaxis()->GetBinCenter(i),hobs_coupling_dw->GetYaxis()->GetBinCenter(j)));
     }
   }
-
+  
   // contour
   hexp_coupling->Smooth();
   hobs_coupling->Smooth();
@@ -713,6 +743,17 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
   hexp_coupling_dw->Smooth();
   hobs_coupling_dw->Smooth();
 
+  // extend the relic density line
+  TGraph* relic_graph_g1_ext = new TGraph();
+  TGraph* relic_graph_g2_ext = new TGraph();
+  
+  int ipoint = 0;
+  for(int i = 1; i <= hexp_coupling->GetNbinsX(); i++){    
+    relic_graph_g1_ext->SetPoint(ipoint,hexp_coupling->GetXaxis()->GetBinCenter(i),relic_graph_g1->Eval(hexp_coupling->GetXaxis()->GetBinCenter(i)));
+    relic_graph_g2_ext->SetPoint(ipoint,hexp_coupling->GetXaxis()->GetBinCenter(i),relic_graph_g2->Eval(hexp_coupling->GetXaxis()->GetBinCenter(i)));
+    ipoint++;
+  }
+  
   ////////////                                                                                                                                                                                         
   for(int i = 1; i <= hexp_coupling->GetNbinsX(); i++){
     for(int j = 1; j <= hexp_coupling->GetNbinsY(); j++){
@@ -816,6 +857,19 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
 
   hobs_coupling->Draw("COLZ SAME");
 
+  if(addRelicDensity){
+    relic_graph_g1_ext->SetLineColor(16);
+    relic_graph_g2_ext->SetLineColor(16);
+    relic_graph_g1_ext->SetLineWidth(-802);
+    relic_graph_g2_ext->SetLineWidth(802);
+    relic_graph_g1_ext->SetFillStyle(3005);
+    relic_graph_g2_ext->SetFillStyle(3005);
+    relic_graph_g1_ext->SetFillColor(16);
+    relic_graph_g2_ext->SetFillColor(16);
+    relic_graph_g1_ext->Draw("L SAME");
+    //    relic_graph_g2_ext->Draw("L SAME");      
+  }
+
   contour_exp_up->SetLineColor(kBlack);
   contour_exp_up->SetLineWidth(2);
   contour_exp_up->SetLineStyle(7);
@@ -849,17 +903,27 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
   else
     CMS_lumi(canvas,"35.9",true,false,false,0,-0.09);
 
-  TLegend *leg = new TLegend(0.157,0.632,0.640,0.898);
+  TLegend* tex = new TLegend(0.15,0.81,0.64,0.87);
+  tex->SetFillColor(kWhite);
+  tex->SetFillStyle(1001);
+  tex->SetBorderSize(0);
+  tex->SetTextFont(42);
+  tex->SetTextSize(0.027);
+  tex->SetHeader("#bf{Axial med, Dirac DM, g_{DM} = 1, m_{med} = 3 #times m_{DM}}");
+  tex->Draw("same");
+
+  TLegend *leg = new TLegend(0.46,0.17,0.81,0.44);
   leg->SetFillColor(kWhite);
   leg->SetFillStyle(1001);
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->SetTextSize(0.0243902);
-  leg->SetHeader("#bf{Axial med, Dirac DM, g_{DM} = 1, m_{med} = 3 #times m_{DM}}");
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
   leg->AddEntry(contour_exp_up,"68% expected","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
   leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
+  if(addRelicDensity)
+    leg->AddEntry(relic_graph_g1_ext,"#Omega_{c}#timesh^{2} #geq 0.12","F");
   leg->Draw("same");
 
 
@@ -879,5 +943,4 @@ void plotAxialCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMMa
   canvas->SetLogy();
   canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
   canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
-
 }
