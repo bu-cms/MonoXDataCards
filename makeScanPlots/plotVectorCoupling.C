@@ -321,7 +321,7 @@ void plotVectorCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMM
     TTreeReaderValue<float> gq2  (reader,"gq2.lGQ2");
     int npoints = 0;
     while(reader.Next()){
-      if(*mmed != medOverDM*(*mdm)) continue;
+      if(fabs(*mmed - medOverDM*(*mdm))/(*mdm) > 0.01) continue;
       if(not useDMMass){
         relic_graph_g1->SetPoint(npoints,*mmed,exp(*gq1));
         relic_graph_g2->SetPoint(npoints,*mmed,exp(*gq2));
@@ -945,7 +945,7 @@ void plotVectorCoupling(string outputDIR, bool isFull2DGrid = false, bool useDMM
     relic_graph_g1_ext->SetFillColor(kGreen+3);
     relic_graph_g2_ext->SetFillColor(kGreen+3);
     relic_graph_g1_ext->Draw("L SAME");
-    //    relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
+    relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
   }
 
   contour_exp_up->SetLineColor(kBlack);
