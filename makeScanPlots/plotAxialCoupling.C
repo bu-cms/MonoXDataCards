@@ -58,7 +58,7 @@ static float minCoupling = 0.02;
 static float maxCoupling = 1;
 static float minZ        = 0.1;
 static float maxZ        = 100;
-static int   reductionForContour = 10;
+static int   reductionForContour = 12;
 static bool  addPreliminary   = false;
 static bool  addRelicDensity  = true;
 static int   nForInterpolateX = 70;
@@ -652,14 +652,14 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
 
   canvas->RedrawAxis("sameaxis");
 
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV.pdf").c_str());
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV.png").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV.pdf").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV.png").c_str());
 
   canvas->SetLogy();
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
+  canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
   
   outputTemp->Close();
-  system(("rm "+outputDIR+"/outputTemp.root").c_str());
+  system(("rm "+outputDIR+"/outputTemp_axial.root").c_str());
 
 }

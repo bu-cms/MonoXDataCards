@@ -20,8 +20,7 @@ int code(double mh){
   return (int)(mh/100000000);
 }
 
-/// formulas for DD limit
-
+/// formula for DD limit --> fixed coupling
 double axialF(double mMED,double mDM){  
   mMED/=1000;
   double mR = (0.939*mDM)/(0.939+mDM);
@@ -29,8 +28,52 @@ double axialF(double mMED,double mDM){
   return c*mR*mR/(mMED*mMED*mMED*mMED);    
 }
 
+// running coupling formula
+double axialF2(double mMED,double mDM, bool isproton){
+
+  // Formula : x-sec = 3 x fq^2 x gDM^2 x m^2 x (hc)^2 / (PI x M^4) --> Multiply by 1e4 to get in units of cm^2                                                                                       
+  // Formula : x-sec = 3 x fq^2 x gDM^2 x m^2 x (hc)^2 / (PI x M^4) --> Multiply by 1e-18 if the masses are in GeV                                                                                    
+  // Formula : x-sec = 3 x fq^2 x gDM^2 x m^2 x (hc)^2 / (PI x M^4) --> So basically Multiply by 1e-14                                                                                                
+
+  double gq  = 0.25;
+  double gDM = 1.0;
+  double m   = (0.939*mDM)/(0.939+mDM);
+  double hc  = 6.582e-16 * 3e8;   // in units of eV.m                                                                                                                                                  
+  
+  double Dup =  0.84;
+  double Ddp = -0.43;
+  double Dsp = -0.09;
+
+  double Ddn =  0.84;
+  double Dun = -0.43;
+  double Dsn = -0.09;
+
+  double mtop = 175.;
+  double mb   = 4.18;
+  double vev  = 246.0;
+  double at   = mtop*mtop / (2*3.1416 * vev*vev);
+  double ab   = mb*mb     / (2*3.1416 * vev*vev);
+  double mz   = 91.1876;
+
+  double ptscale = 200.0 + (mMED/5.0);
+  double scale   = sqrt(mMED*mMED + ptscale*ptscale) + ptscale;
+
+  double fq;
+  if(isproton)
+    fq = gq * (Dup + Ddp + Dsp) + (3.0*gq/(2.0*3.1416)) * (Ddp + Dsp - Dup) * (at*log(scale/mz) - ab*log(scale/m));
+  else
+    fq = gq * (Dun + Ddn + Dsn) + (3.0*gq/(2.0*3.1416)) * (Ddn + Dsn - Dun) * (at*log(scale/mz) - ab*log(scale/m));                                                                             
+ 
+  double xsec = (3.0 * fq*fq * gDM*gDM *m*m * hc*hc) / (3.1416 * mMED*mMED*mMED*mMED);
+ 
+  xsec *= 1e-14;
+
+  return xsec;
+}
+
 static float med_min = 20;
 
+/// for fixed couplings
 TGraph * makeOBA(TGraph *Graph1){
 
   TGraph *gr = new TGraph();
@@ -46,6 +89,33 @@ TGraph * makeOBA(TGraph *Graph1){
     Graph1->GetPoint(p,X,Y);
     if(X < med_min) continue;
     gr->SetPoint(pp,Y,axialF(X,Y));
+    pp++;
+  }
+
+  gr->SetName(Form("%s_DD",Graph1->GetName()));
+  gr->SetLineStyle(Graph1->GetLineStyle());
+  gr->SetLineColor(Graph1->GetLineColor());
+  gr->SetLineWidth(Graph1->GetLineWidth());
+  
+  return gr;
+}
+
+// for running couplings 
+TGraph * makeOBA2(TGraph *Graph1, bool isproton){
+
+  TGraph *gr = new TGraph();
+  double X;
+  double Y;
+  int pp=0;
+  Graph1->GetPoint(0,X,Y);
+  for (double MDM=1;MDM<=Y;MDM+=0.1){    
+    gr->SetPoint(pp,MDM,axialF2(X,MDM,isproton));
+    pp++;
+  }
+  for (int p =1;p<Graph1->GetN();p++){
+    Graph1->GetPoint(p,X,Y);
+    if(X < med_min) continue;
+    gr->SetPoint(pp,Y,axialF2(X,Y,isproton));
     pp++;
   }
 
@@ -115,7 +185,7 @@ TGraph* PicassoFinalGraph();
 TGraph* Neutrino_floor();
 
 ////////
-void plotAxial_DD(string inputFileName, string outputDirectory, string coupling = "025", string energy = "13") {
+void plotAxial_DD(string inputFileName, string outputDirectory, bool runningCoupling = false, string coupling = "025", string energy = "13") {
 
   gROOT->SetBatch(kTRUE);
   system(("mkdir -p "+outputDirectory).c_str());
@@ -290,6 +360,21 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   TGraph *DDE_graph = makeOBA(lTotalE);
   TGraph *DD_graph  = makeOBA(lTotal);
 
+  TGraph *DDE_graph_proton = NULL;
+  TGraph *DD_graph_proton  = NULL;
+  TGraph *DDE_graph_neutron = NULL;
+  TGraph *DD_graph_neutron  = NULL;
+
+  if(runningCoupling){
+    DDE_graph_proton  =  makeOBA2(lTotalE,true);
+    DD_graph_proton   =  makeOBA2(lTotal,true);
+    DDE_graph_neutron =  makeOBA2(lTotalE,false);
+    DD_graph_neutron  =  makeOBA2(lTotal,false);
+    DD_graph_proton->SetLineColor(kBlack);
+    DD_graph_neutron->SetLineColor(kViolet);
+  }
+
+
   TCanvas* canvas = new TCanvas("canvas","canvas",600,625);
   canvas->SetLogx();
   canvas->SetLogy();
@@ -313,9 +398,15 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   lM4->Draw("L SAME");
   lM5->Draw("L SAME");
 
-  DDE_graph->Draw("C SAME");
-  DD_graph->Draw("C SAME");
-
+  if(not runningCoupling){
+    DDE_graph->Draw("C SAME");
+    DD_graph->Draw("C SAME");
+  }
+  else{
+    DD_graph->Draw("C SAME");
+    DD_graph_proton->Draw("C SAME");
+    DD_graph_neutron->Draw("C SAME");
+  }
 
   canvas->SetLogx();
   canvas->SetLogy();
@@ -330,8 +421,15 @@ void plotAxial_DD(string inputFileName, string outputDirectory, string coupling 
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
   leg->SetNColumns(2);
-  leg->AddEntry(DDE_graph,"CMS exp. 90% CL","L");
-  leg->AddEntry(DD_graph ,"CMS obs. 90% CL","L");
+  if(not runningCoupling){
+    leg->AddEntry(DDE_graph,"CMS exp. 90% CL","L");
+    leg->AddEntry(DD_graph ,"CMS obs. 90% CL","L");
+  }
+  else if(runningCoupling){
+    leg->AddEntry(DD_graph ,"CMS obs. 90% CL g_{q} fix","L");
+    leg->AddEntry(DD_graph_proton ,"CMS obs. proton g_{q} run","L");
+    leg->AddEntry(DD_graph_neutron ,"CMS obs. neutron g_{q} run","L");
+  }
   leg->AddEntry(lM0 ,"PICO-60","L");
   leg->AddEntry(lM1 ,"Picasso","L");
   leg->AddEntry(lM2 ,"IceCube b#bar{b}","L");

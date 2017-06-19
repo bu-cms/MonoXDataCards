@@ -58,7 +58,7 @@ static float minCoupling = 0.02;
 static float maxCoupling = 1;
 static float minZ        = 0.1;
 static float maxZ        = 100;
-static int   reductionForContour = 10;
+static int   reductionForContour = 12;
 static bool  addPreliminary   = false;
 static bool  addRelicDensity  = true;
 static int   nForInterpolateX = 70;
@@ -661,7 +661,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
 
   outputTemp->Close();
-  system(("rm "+outputDIR+"/outputTemp.root").c_str());
+  system(("rm "+outputDIR+"/outputTemp_vector.root").c_str());
 
 
 }
