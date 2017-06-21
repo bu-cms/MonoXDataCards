@@ -52,7 +52,10 @@ TGraph* produceContour (const int & reduction){
 /////////
 static float nbinsX      = 1000;
 static float minX        = 1;
+static float minY        = 1;
 static float maxX        = 2000;
+static float maxY        = 700;
+static float nbinsY      = 350;
 static float nCoupling   = 100;
 static float minCoupling = 0.02;
 static float maxCoupling = 1;
@@ -67,6 +70,8 @@ static float minCoupling_spline = 0.01;
 static float maxCoupling_spline = 1.0;
 static float minX_spline = 1;
 static float maxX_spline = 2200;
+static float minY_spline = 0.5;
+static float maxY_spline = 800;
 
 void fillLimitGraphs(TTree* tree,
 		     TGraph* grexp, TGraph* grexp_up, TGraph* grexp_dw,
@@ -138,8 +143,9 @@ void fillLimitGraphs(TTree* tree,
     if(double(medmass) / double(dmmass) != medOverDM) continue;      
 
     if (quantile == 0.5) { // expected limit
-      if(useDMMass)
+      if(useDMMass){
 	grexp->SetPoint(expcounter, double(dmmass), limit);
+      }
       else
 	grexp->SetPoint(expcounter, double(medmass), limit);
       expcounter++;
@@ -271,6 +277,7 @@ void fixBinContent(TH2D* histo, const float & minZ, const float & maxZ){
   
 ///////////////
 static vector<float> gq_coupling = {1.0,0.75,0.5,0.3,0.25,0.2,0.1,0.05,0.01};
+static bool makeCOLZ = false;
 
 void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverDM = 3, bool useSplineND = true, string energy = "13") {
 
@@ -385,7 +392,6 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   float min_xaxis = 9999;
   float max_xaxis = -1;
   fill2DGraph(grobs_coupling,splineobs,grobs,min_xaxis,max_xaxis);
-
    
   ///// --> temp histograms 2D with some binning to perform linear interpolation
   TH2D* hexp_coupling = NULL;
@@ -396,20 +402,40 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   TH2D* hobs_coupling_dw = NULL;  
 
   if(useSplineND){
-    hexp_coupling = new TH2D("hexp_coupling", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
-    hobs_coupling = new TH2D("hobs_coupling", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
-    hexp_coupling_up = new TH2D("hexp_coupling_up", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
-    hobs_coupling_up = new TH2D("hobs_coupling_up", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
-    hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
-    hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+    if(not useDMMass){
+      hexp_coupling = new TH2D("hexp_coupling", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hobs_coupling = new TH2D("hobs_coupling", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hexp_coupling_up = new TH2D("hexp_coupling_up", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hobs_coupling_up = new TH2D("hobs_coupling_up", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+    }
+    else{
+      hexp_coupling = new TH2D("hexp_coupling", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hobs_coupling = new TH2D("hobs_coupling", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hexp_coupling_up = new TH2D("hexp_coupling_up", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hobs_coupling_up = new TH2D("hobs_coupling_up", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+    }
   }
   else{
-    hexp_coupling = new TH2D("hexp_coupling", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
-    hobs_coupling = new TH2D("hobs_coupling", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
-    hexp_coupling_up = new TH2D("hexp_coupling_up", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
-    hobs_coupling_up = new TH2D("hobs_coupling_up", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
-    hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
-    hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+    if(not useDMMass){
+      hexp_coupling = new TH2D("hexp_coupling", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling = new TH2D("hobs_coupling", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_up = new TH2D("hexp_coupling_up", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_up = new TH2D("hobs_coupling_up", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+    }
+    else{
+      hexp_coupling = new TH2D("hexp_coupling", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling = new TH2D("hobs_coupling", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_up = new TH2D("hexp_coupling_up", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_up = new TH2D("hobs_coupling_up", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+    }
   }
 
   for(int i = 1; i <= hexp_coupling->GetNbinsX(); i++){
@@ -435,29 +461,54 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   TFile* outputTemp = new TFile((outputDIR+"/outputTemp_vector.root").c_str(),"RECREATE");
   outputTemp->cd();
     
+  RooRealVar* xvar = NULL;
+  RooRealVar* yvar = NULL;
   if(useSplineND){
     
-    RooRealVar xvar ("x","x",(maxX_spline-minX_spline)/2,minX_spline,maxX_spline);
-    RooRealVar yvar ("y","y",(maxCoupling_spline-minCoupling_spline)/2,minCoupling_spline,maxCoupling_spline);
+    if(not useDMMass){
+      xvar = new RooRealVar("x","x",(maxX_spline-minX_spline)/2,minX_spline,maxX_spline);
+      yvar = new RooRealVar ("y","y",(maxCoupling_spline-minCoupling_spline)/2,minCoupling_spline,maxCoupling_spline);
+    }
+    else{
+      xvar = new RooRealVar("x","x",(maxY_spline-minY_spline)/2,minY_spline,maxY_spline);
+      yvar = new RooRealVar ("y","y",(maxCoupling_spline-minCoupling_spline)/2,minCoupling_spline,maxCoupling_spline);
+    }
     
-    RooSplineND* spline_exp = makeSplineND(hexp_coupling,xvar,yvar,"exp");
-    RooSplineND* spline_exp_up = makeSplineND(hexp_coupling_up,xvar,yvar,"exp_up");
-    RooSplineND* spline_exp_dw = makeSplineND(hexp_coupling_dw,xvar,yvar,"exp_dw");
-    RooSplineND* spline_obs = makeSplineND(hobs_coupling,xvar,yvar,"obs");
-    RooSplineND* spline_obs_up = makeSplineND(hobs_coupling_up,xvar,yvar,"obs_up");
-    RooSplineND* spline_obs_dw = makeSplineND(hobs_coupling_dw,xvar,yvar,"obs_dw");
+    RooSplineND* spline_exp = makeSplineND(hexp_coupling,*xvar,*yvar,"exp");
+    RooSplineND* spline_exp_up = makeSplineND(hexp_coupling_up,*xvar,*yvar,"exp_up");
+    RooSplineND* spline_exp_dw = makeSplineND(hexp_coupling_dw,*xvar,*yvar,"exp_dw");
+    RooSplineND* spline_obs = makeSplineND(hobs_coupling,*xvar,*yvar,"obs");
+    RooSplineND* spline_obs_up = makeSplineND(hobs_coupling_up,*xvar,*yvar,"obs_up");
+    RooSplineND* spline_obs_dw = makeSplineND(hobs_coupling_dw,*xvar,*yvar,"obs_dw");
     
-    TH2D* hexp_coupling_ext = new TH2D("hexp_coupling_ext", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
-    TH2D* hexp_coupling_ext_up = new TH2D("hexp_coupling_ext_up", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
-    TH2D* hexp_coupling_ext_dw = new TH2D("hexp_coupling_ext_dw", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
-    TH2D* hobs_coupling_ext = new TH2D("hobs_coupling_ext", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
-    TH2D* hobs_coupling_ext_up = new TH2D("hobs_coupling_ext_up", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
-    TH2D* hobs_coupling_ext_dw = new TH2D("hobs_coupling_ext_dw", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+    TH2D* hexp_coupling_ext = NULL;
+    TH2D* hexp_coupling_ext_up = NULL;
+    TH2D* hexp_coupling_ext_dw = NULL;
+    TH2D* hobs_coupling_ext = NULL;
+    TH2D* hobs_coupling_ext_up = NULL;
+    TH2D* hobs_coupling_ext_dw = NULL;
 
+    if(not useDMMass){
+      hexp_coupling_ext = new TH2D("hexp_coupling_ext", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_ext_up = new TH2D("hexp_coupling_ext_up", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_ext_dw = new TH2D("hexp_coupling_ext_dw", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_ext = new TH2D("hobs_coupling_ext", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_ext_up = new TH2D("hobs_coupling_ext_up", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_ext_dw = new TH2D("hobs_coupling_ext_dw", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+    }
+    else{
+      hexp_coupling_ext = new TH2D("hexp_coupling_ext", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_ext_up = new TH2D("hexp_coupling_ext_up", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      hexp_coupling_ext_dw = new TH2D("hexp_coupling_ext_dw", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_ext = new TH2D("hobs_coupling_ext", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_ext_up = new TH2D("hobs_coupling_ext_up", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_ext_dw = new TH2D("hobs_coupling_ext_dw", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+    }
+    
     for(int i = 1; i <= hexp_coupling_ext->GetNbinsX(); i++){
       for(int j = 1; j <= hexp_coupling_ext->GetNbinsY(); j++){
-	xvar.setVal(hexp_coupling_ext->GetXaxis()->GetBinCenter(i));
-	yvar.setVal(hexp_coupling_ext->GetYaxis()->GetBinCenter(j));
+	xvar->setVal(hexp_coupling_ext->GetXaxis()->GetBinCenter(i));
+	yvar->setVal(hexp_coupling_ext->GetYaxis()->GetBinCenter(j));
 	hexp_coupling_ext->SetBinContent(i,j,spline_exp->getVal());
 	hexp_coupling_ext_up->SetBinContent(i,j,spline_exp_up->getVal());
 	hexp_coupling_ext_dw->SetBinContent(i,j,spline_exp_dw->getVal());
@@ -466,7 +517,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 	hobs_coupling_ext_dw->SetBinContent(i,j,spline_obs_dw->getVal());
       }
     }
-
+    
     hexp_coupling = hexp_coupling_ext;
     hexp_coupling_up = hexp_coupling_ext_up;
     hexp_coupling_dw = hexp_coupling_ext_dw;
@@ -475,7 +526,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     hobs_coupling_dw = hobs_coupling_ext_dw;
 
   }
-
+  
   // extend the relic density line                                                                                                                                                                   
   TGraph* relic_graph_g1_ext = new TGraph();
   TGraph* relic_graph_g2_ext = new TGraph();
@@ -518,7 +569,12 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   canvas->SetLeftMargin(0.13);
   canvas->SetLogz();
 
-  TH1* frame = canvas->DrawFrame(minX,minCoupling,maxX,maxCoupling,"");
+  TH1* frame = NULL;
+  if(not useDMMass)
+    frame = canvas->DrawFrame(minX,minCoupling,maxX,maxCoupling,"");
+  else
+    frame = canvas->DrawFrame(minY,minCoupling,maxY,maxCoupling,"");
+
   frame->GetYaxis()->CenterTitle();
   if(not useDMMass)
     frame->GetXaxis()->SetTitle("m_{med} [GeV]");
@@ -569,8 +625,9 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   
   frame->Draw();
 
-  hobs_coupling->Draw("COLZ SAME");
-
+  if(makeCOLZ)
+    hobs_coupling->Draw("COLZ SAME");
+  
   if(addRelicDensity){
     relic_graph_g1_ext->SetLineColor(kGreen+3);
     relic_graph_g2_ext->SetLineColor(kGreen+3);

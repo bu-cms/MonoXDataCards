@@ -158,6 +158,8 @@ static double maxY_dd = 2e-25;
 static int  reductionForContour = 3;
 static bool addPreliminary = false;
 
+TGraph* fermiLAT();
+
 void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string coupling = "1", string energy = "13") {
 
 
@@ -170,7 +172,8 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   
   TFile* file2 = new TFile("externalFiles/FermiLat.root");
   TGraph* grdd = (TGraph*)file2->Get("FermiLAT8Y");   
-  
+  //TGraph* grdd = fermiLAT();
+
   TGraph2D* grexp = new TGraph2D();
   TGraph2D* grobs = new TGraph2D();
   
@@ -390,7 +393,39 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
     outfile->Write();
     outfile->Close();    
   }
-
-
 }
 
+
+TGraph* fermiLAT(){
+
+  int i0 = -1;
+  double *lX = new double[1000];
+  double *lY = new double[1000];
+
+  i0++; lX[i0] = 6;     lY[i0] = 7.0341e-27;
+  i0++; lX[i0] = 7.746; lY[i0] = 6.8354e-27;
+  i0++; lX[i0] = 10;    lY[i0] = 7.1518e-27;
+  i0++; lX[i0] = 15.81; lY[i0] = 8.7237e-27;
+  i0++; lX[i0] = 25;    lY[i0] = 1.2169e-26;
+  i0++; lX[i0] = 35.36; lY[i0] = 1.5279e-26;
+  i0++; lX[i0] = 50;    lY[i0] = 1.9937e-26;
+  i0++; lX[i0] = 70.7;  lY[i0] = 2.5689e-26;
+  i0++; lX[i0] = 100;   lY[i0] = 3.3864e-26;
+  i0++; lX[i0] = 158.1; lY[i0] = 4.985e-26;
+  i0++; lX[i0] = 250;   lY[i0] = 7.5682e-26;
+  i0++; lX[i0] = 353.6; lY[i0] = 1.0543e-25;
+  i0++; lX[i0] = 500;   lY[i0] = 1.48e-25;
+  i0++; lX[i0] = 707;   lY[i0] = 1.805e-25;
+  i0++; lX[i0] = 1000;  lY[i0] = 2.0116e-25;
+  i0++; lX[i0] = 1581;  lY[i0] = 2.5047e-25;
+  i0++; lX[i0] = 2500;  lY[i0] = 3.7746e-25;
+  i0++; lX[i0] = 3536;  lY[i0] = 5.5957e-25;
+  i0++; lX[i0] = 5000;  lY[i0] = 8.6803e-25;
+  i0++; lX[i0] = 7070;  lY[i0] = 1.3863e-24;
+  i0++; lX[i0] = 10000; lY[i0] = 2.2593e-24;
+
+  TGraph *lLimit = new TGraph(i0,lX,lY);
+  lLimit->SetLineWidth(3);
+  return lLimit;
+
+}
