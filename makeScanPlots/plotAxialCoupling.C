@@ -21,7 +21,7 @@ int code(double mh){
     return (int)(mh/100000000);
 }
 
-TGraph* produceContour (const int & reduction){
+TGraph* produceContour (const int & reduction, const bool & applyReduction = true){
 
   TObjArray *lContoursE = (TObjArray*) gROOT->GetListOfSpecials()->FindObject("contours");
   std::vector<double> lXE;
@@ -32,7 +32,7 @@ TGraph* produceContour (const int & reduction){
     TGraph *pCurv = (TGraph*)pContLevel->First();
     for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
       for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
-        if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                     
+        if(applyReduction && i2%reduction != 0) continue; // reduce number of points                                                                                                                 
         lXE.push_back(pCurv->GetX()[i2]);
         lYE.push_back(pCurv->GetY()[i2]);
       }
@@ -66,17 +66,24 @@ static bool  addPreliminary   = false;
 static bool  addRelicDensity  = true;
 static int   nForInterpolateX = 70;
 static int   nForInterpolateY = 55;
+//static int   nForInterpolateX = 35;
+//static int   nForInterpolateY = 35;
 static float minCoupling_spline = 0.01;
 static float maxCoupling_spline = 1.0;
 static float minX_spline = 1;
 static float maxX_spline = 2200;
 static float minY_spline = 0.5;
 static float maxY_spline = 800;
+static float maxXForBrazilianY = 1100;
+static float maxXForBrazilianX = 1450;
+static float maxXForBrazilianY_DM = 350;
+static float maxXForBrazilianX_DM = 475;
 
 void fillLimitGraphs(TTree* tree,
 		     TGraph* grexp, TGraph* grexp_up, TGraph* grexp_dw,
 		     TGraph* grobs, TGraph* grobs_up, TGraph* grobs_dw,
-		     const float & medOverDM = 3, const bool & useDMMass = false){
+		     const float & medOverDM = 3, const bool & useDMMass = false,
+		     TGraph* grexp_up2 = NULL, TGraph* grexp_dw2 = NULL){
 
   double mh;
   double limit;
@@ -116,7 +123,9 @@ void fillLimitGraphs(TTree* tree,
   // main loop  
   int expcounter       = 0;
   int exp_up_counter   = 0;
+  int exp_up2_counter   = 0;
   int exp_down_counter = 0;
+  int exp_down2_counter = 0;
   int obscounter       = 0;
 
   for(int i = 0; i < tree->GetEntries(); i++){
@@ -159,6 +168,14 @@ void fillLimitGraphs(TTree* tree,
       exp_down_counter++;
     }
 
+    if(grexp_dw2 and quantile < 0.09 && quantile > 0){
+      if(useDMMass)
+	grexp_dw2->SetPoint(exp_down2_counter, double(dmmass), limit);
+      else
+	grexp_dw2->SetPoint(exp_down2_counter, double(medmass), limit);
+      exp_down2_counter++;
+    }
+
     if (quantile < 0.85 && quantile > 0.83 ) {
       if(useDMMass)
 	grexp_up->SetPoint(exp_up_counter, double(dmmass), limit);
@@ -167,6 +184,14 @@ void fillLimitGraphs(TTree* tree,
 
       exp_up_counter++;
     }    
+
+    if(grexp_up2 and quantile > 0.9 && quantile < 1){
+      if(useDMMass)
+	grexp_up2->SetPoint(exp_up2_counter, double(dmmass), limit);
+      else
+	grexp_up2->SetPoint(exp_up2_counter, double(medmass), limit);
+      exp_up2_counter++;
+    }
     
     if (quantile == -1) { // observed
       if(useDMMass){
@@ -274,6 +299,120 @@ void fixBinContent(TH2D* histo, const float & minZ, const float & maxZ){
   }  
 }
   
+
+/////// --------
+void makeYGraph(TGraph* graph, TGraph* input){
+  int effective_points = 0;
+  for(int iPoint = 0; iPoint < input->GetN(); iPoint++){
+    double x,y;
+    input->GetPoint(iPoint,x,y);
+    graph->SetPoint(effective_points,y,x);
+    effective_points++;
+  }
+}
+
+/////// --------
+void makeXGraph(TGraph* graph, TGraph* input, TGraph* central){
+  int effective_points = 0;
+  for(int iPoint = 0; iPoint < central->GetN(); iPoint++){
+    double x,y;
+    central->GetPoint(iPoint,x,y);
+    graph->SetPoint(effective_points,x,input->Eval(x));
+    effective_points++;
+  }
+}
+
+
+////// ---------
+void makeUncertaintyBand(TGraphAsymmErrors* graph, TGraph* central, TGraph* band, TGraph* band_up, TGraph* band_dw, const bool & useDMMass, const int & steps = 100){
+
+  int effective_points = 0;
+
+  for(int iPoint = 0; iPoint < central->GetN(); iPoint++){
+    ////////////////
+    double x,y;
+    double x_up,y_up;
+    central->GetPoint(iPoint,x,y);
+
+    if(not useDMMass and x < maxXForBrazilianY) continue;
+    else if(useDMMass and x < maxXForBrazilianY_DM) continue;
+
+    central->GetPoint(iPoint+1,x_up,y_up);
+    //////////////
+    graph->SetPoint(effective_points,x,y);
+    ////////////
+    if(y_up > y and band_up->Eval(y) < band_dw->Eval(y))
+      graph->SetPointError(effective_points,x-band_up->Eval(y),band_dw->Eval(y)-x,0,0);
+    else if(y_up < y and band_up->Eval(y) < band_dw->Eval(y))
+      graph->SetPointError(effective_points,x-band_up->Eval(y),band_dw->Eval(y)-x,0,0);
+    else if(y < y_up and band_up->Eval(y) > band_dw->Eval(y))
+      graph->SetPointError(effective_points,x-band_dw->Eval(y),band_up->Eval(y)-x,0,0);
+    else if(y > y_up and band_up->Eval(y) > band_dw->Eval(y))
+      graph->SetPointError(effective_points,x-band_dw->Eval(y),band_up->Eval(y)-x,0,0);
+    
+    effective_points++;
+
+    for(int nSteps = 0; nSteps < steps; nSteps++){
+      graph->SetPoint(effective_points,band->Eval(y+(y_up-y)/nSteps),y+(y_up-y)/nSteps);
+      if(y+(y_up-y)/nSteps > y and band_up->Eval(y) < band_dw->Eval(y))
+	graph->SetPointError(effective_points,x-band_up->Eval(y),band_dw->Eval(y)-x,0,y+(y_up-y)/nSteps-y);
+      else if(y+(y_up-y)/nSteps < y and band_up->Eval(y) < band_dw->Eval(y))
+	graph->SetPointError(effective_points,x-band_up->Eval(y),band_dw->Eval(y)-x,y-y+(y_up-y)/nSteps,0);
+      else if(y < y+(y_up-y)/nSteps and band_up->Eval(y) > band_dw->Eval(y))
+	graph->SetPointError(effective_points,x-band_dw->Eval(y),band_up->Eval(y)-x,0,y+(y_up-y)/nSteps-y);
+      else if(y > y+(y_up-y)/nSteps and band_up->Eval(y) > band_dw->Eval(y))
+	graph->SetPointError(effective_points,x-band_dw->Eval(y),band_up->Eval(y)-x,y-y+(y_up-y)/nSteps,0);
+      effective_points++;
+    }
+  }
+}
+
+
+////// ---------
+void makeUncertaintyBand(TGraphAsymmErrors* graph, TGraph* central, TGraph* band_up, TGraph* band_dw, const bool & useDMMass, const int & steps = 100){
+
+  int effective_points = 0;
+
+  for(int iPoint = 0; iPoint < central->GetN(); iPoint++){
+    ////////////////
+    double x,y;
+    double x_up,y_up;
+    central->GetPoint(iPoint,x,y);
+
+    if(not useDMMass and x > maxXForBrazilianX) continue;
+    else if(useDMMass and x > maxXForBrazilianX_DM) continue;
+
+    central->GetPoint(iPoint+1,x_up,y_up);
+    //////////////
+    graph->SetPoint(effective_points,x,y);
+
+    ////////////
+    if(x_up > x and band_up->Eval(x) < band_dw->Eval(x))
+      graph->SetPointError(effective_points,0,0,y-band_up->Eval(x),band_dw->Eval(x)-y);
+    else if(x_up < x and band_up->Eval(x) < band_dw->Eval(x))
+      graph->SetPointError(effective_points,0,0,y-band_up->Eval(x),band_dw->Eval(x)-y);
+    else if(x < x_up and band_up->Eval(x) > band_dw->Eval(x))
+      graph->SetPointError(effective_points,0,0,y-band_dw->Eval(x),band_up->Eval(x)-y);
+    else if(x > x_up and band_up->Eval(x) > band_dw->Eval(x))
+      graph->SetPointError(effective_points,0,0,y-band_dw->Eval(x),band_up->Eval(x)-y);
+    
+    effective_points++;
+
+    for(int nSteps = 0; nSteps < steps; nSteps++){
+      graph->SetPoint(effective_points,x+(x_up-x)/nSteps,central->Eval(x+(x_up-x)/nSteps));
+      if(x+(x_up-x)/nSteps > x and band_up->Eval(x) < band_dw->Eval(x))
+	graph->SetPointError(effective_points,0,x+(x_up-x)/nSteps-x,y-band_up->Eval(x),band_dw->Eval(x)-y);
+      else if(x+(x_up-x)/nSteps < x and band_up->Eval(x) < band_dw->Eval(x))
+	graph->SetPointError(effective_points,x+(x_up-x)/nSteps-x,0,y-band_dw->Eval(x),band_up->Eval(x)-y);      
+      else if(x < x+(x_up-x)/nSteps and band_up->Eval(x) > band_dw->Eval(x))
+	graph->SetPointError(effective_points,0,x+(x_up-x)/nSteps-x,y-band_dw->Eval(x),band_up->Eval(x)-y);
+      else if(x > x+(x_up-x)/nSteps and band_up->Eval(x) > band_dw->Eval(x))
+	graph->SetPointError(effective_points,x-x+(x_up-x)/nSteps,0,y-band_dw->Eval(x),band_up->Eval(x)-y);
+      effective_points++;
+    }
+  }
+}
+
   
 ///////////////
 static vector<float> gq_coupling = {1.0,0.75,0.5,0.3,0.25,0.2,0.1,0.05,0.01};
@@ -347,6 +486,8 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   
   vector<pair<double,TGraph*> > grexp_up;
   vector<pair<double,TGraph*> > grexp_dw;
+  vector<pair<double,TGraph*> > grexp_up2;
+  vector<pair<double,TGraph*> > grexp_dw2;
   vector<pair<double,TGraph*> > grexp;
   vector<pair<double,TGraph*> > grobs;
   vector<pair<double,TGraph*> > grobs_up;
@@ -356,21 +497,35 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     grexp.push_back(pair<double,TGraph*>(gq,new TGraph()));
     grexp_up.push_back(pair<double,TGraph*>(gq,new TGraph()));
     grexp_dw.push_back(pair<double,TGraph*>(gq,new TGraph()));
+    grexp_up2.push_back(pair<double,TGraph*>(gq,new TGraph()));
+    grexp_dw2.push_back(pair<double,TGraph*>(gq,new TGraph()));
     grobs.push_back(pair<double,TGraph*>(gq,new TGraph()));
     grobs_up.push_back(pair<double,TGraph*>(gq,new TGraph()));
     grobs_dw.push_back(pair<double,TGraph*>(gq,new TGraph()));
   }
   
-  for(int itree = 0; itree < treeList.size(); itree++)
-    fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
-		    grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
-		    medOverDM,useDMMass);
-  
+  for(int itree = 0; itree < treeList.size(); itree++){
+    if(makeCOLZ)
+      fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
+		      grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
+		      medOverDM,useDMMass);
+    else
+      fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
+		      grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
+		      medOverDM,useDMMass,grexp_up2.at(itree).second,grexp_dw2.at(itree).second);
+
+  }
   
   //// make a spline to further smooth                                                                                                                                                          
   vector<pair<double,TSpline3*> > splineexp = make1DSpline(grexp,"exp");
   vector<pair<double,TSpline3*> > splineexp_up = make1DSpline(grexp_up,"exp_up");
   vector<pair<double,TSpline3*> > splineexp_dw = make1DSpline(grexp_dw,"exp_dw");
+  vector<pair<double,TSpline3*> > splineexp_up2;
+  if(not makeCOLZ) 
+    splineexp_up2 = make1DSpline(grexp_up2,"exp_up");
+  vector<pair<double,TSpline3*> > splineexp_dw2;
+  if(not makeCOLZ)
+    splineexp_dw2 = make1DSpline(grexp_dw2,"exp_dw");
   vector<pair<double,TSpline3*> > splineobs    = make1DSpline(grobs,"obs");
   vector<pair<double,TSpline3*> > splineobs_up = make1DSpline(grobs_up,"obs_up");
   vector<pair<double,TSpline3*> > splineobs_dw = make1DSpline(grobs_dw,"obs_dw");
@@ -379,6 +534,8 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   TGraph2D* grexp_coupling = new TGraph2D();
   TGraph2D* grexp_coupling_up = new TGraph2D();
   TGraph2D* grexp_coupling_dw = new TGraph2D();
+  TGraph2D* grexp_coupling_up2 = new TGraph2D();
+  TGraph2D* grexp_coupling_dw2 = new TGraph2D();
   TGraph2D* grobs_coupling = new TGraph2D();
   TGraph2D* grobs_coupling_up = new TGraph2D();
   TGraph2D* grobs_coupling_dw = new TGraph2D();
@@ -386,9 +543,13 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   fill2DGraph(grexp_coupling,splineexp,grexp);
   fill2DGraph(grexp_coupling_up,splineexp_up,grexp_up);
   fill2DGraph(grexp_coupling_dw,splineexp_dw,grexp_dw);
-  fill2DGraph(grexp_coupling_dw,splineexp_dw,grobs);
   fill2DGraph(grobs_coupling_up,splineobs_up,grobs_up);
   fill2DGraph(grobs_coupling_dw,splineobs_dw,grobs_dw);
+  if(not makeCOLZ){
+    fill2DGraph(grexp_coupling_up2,splineexp_up2,grexp_up2);
+    fill2DGraph(grexp_coupling_dw2,splineexp_dw2,grexp_dw2);    
+  }
+    
   float min_xaxis = 9999;
   float max_xaxis = -1;
   fill2DGraph(grobs_coupling,splineobs,grobs,min_xaxis,max_xaxis);
@@ -398,6 +559,8 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   TH2D* hobs_coupling = NULL;
   TH2D* hexp_coupling_up = NULL;
   TH2D* hexp_coupling_dw = NULL;
+  TH2D* hexp_coupling_up2 = NULL;
+  TH2D* hexp_coupling_dw2 = NULL;
   TH2D* hobs_coupling_up = NULL;
   TH2D* hobs_coupling_dw = NULL;  
 
@@ -409,6 +572,10 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hobs_coupling_up = new TH2D("hobs_coupling_up", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      if(not makeCOLZ){
+	hexp_coupling_up2 = new TH2D("hexp_coupling_up2", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+	hexp_coupling_dw2 = new TH2D("hexp_coupling_dw2", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      }
     }
     else{
       hexp_coupling = new TH2D("hexp_coupling", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
@@ -417,6 +584,12 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hobs_coupling_up = new TH2D("hobs_coupling_up", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+
+      if(not makeCOLZ){
+	hexp_coupling_up2 = new TH2D("hexp_coupling_up2", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+	hexp_coupling_dw2 = new TH2D("hexp_coupling_dw2", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
+      }
+
     }
   }
   else{
@@ -426,7 +599,11 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hexp_coupling_up = new TH2D("hexp_coupling_up", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
       hobs_coupling_up = new TH2D("hobs_coupling_up", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
       hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
-      hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);     
+      if(not makeCOLZ){
+	hexp_coupling_up2 = new TH2D("hexp_coupling_up2", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+	hexp_coupling_dw2 = new TH2D("hexp_coupling_dw2", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      }
     }
     else{
       hexp_coupling = new TH2D("hexp_coupling", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
@@ -435,6 +612,10 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hobs_coupling_up = new TH2D("hobs_coupling_up", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
       hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
       hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      if(not makeCOLZ){
+	hexp_coupling_up2 = new TH2D("hexp_coupling_up2", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+	hexp_coupling_dw2 = new TH2D("hexp_coupling_dw2", "",nbinsX,max(min_xaxis,minY),max_xaxis,nCoupling,minCoupling,maxCoupling);
+      }
     }
   }
 
@@ -446,6 +627,10 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hexp_coupling_dw->SetBinContent(i,j,grexp_coupling_dw->Interpolate(hexp_coupling_dw->GetXaxis()->GetBinCenter(i),hexp_coupling_dw->GetYaxis()->GetBinCenter(j)));
       hobs_coupling_up->SetBinContent(i,j,grobs_coupling_up->Interpolate(hobs_coupling_up->GetXaxis()->GetBinCenter(i),hobs_coupling_up->GetYaxis()->GetBinCenter(j)));
       hobs_coupling_dw->SetBinContent(i,j,grobs_coupling_dw->Interpolate(hobs_coupling_dw->GetXaxis()->GetBinCenter(i),hobs_coupling_dw->GetYaxis()->GetBinCenter(j)));
+      if(not makeCOLZ){
+	hexp_coupling_up2->SetBinContent(i,j,grexp_coupling_up2->Interpolate(hexp_coupling_up2->GetXaxis()->GetBinCenter(i),hexp_coupling_up2->GetYaxis()->GetBinCenter(j)));
+	hexp_coupling_dw2->SetBinContent(i,j,grexp_coupling_dw2->Interpolate(hexp_coupling_dw2->GetXaxis()->GetBinCenter(i),hexp_coupling_dw2->GetYaxis()->GetBinCenter(j)));
+      }
     }
   }
 
@@ -456,15 +641,20 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   hobs_coupling_up->Smooth();
   hexp_coupling_dw->Smooth();
   hobs_coupling_dw->Smooth();
-  
+  if(not makeCOLZ){
+    hexp_coupling_up2->Smooth();
+    hexp_coupling_dw2->Smooth();
+  }
+
   ///////-------------
   TFile* outputTemp = new TFile((outputDIR+"/outputTemp_axial.root").c_str(),"RECREATE");
   outputTemp->cd();
     
   RooRealVar* xvar = NULL;
   RooRealVar* yvar = NULL;
-  if(useSplineND){
-    
+
+  if(useSplineND){    
+
     if(not useDMMass){
       xvar = new RooRealVar("x","x",(maxX_spline-minX_spline)/2,minX_spline,maxX_spline);
       yvar = new RooRealVar ("y","y",(maxCoupling_spline-minCoupling_spline)/2,minCoupling_spline,maxCoupling_spline);
@@ -481,12 +671,22 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     RooSplineND* spline_obs_up = makeSplineND(hobs_coupling_up,*xvar,*yvar,"obs_up");
     RooSplineND* spline_obs_dw = makeSplineND(hobs_coupling_dw,*xvar,*yvar,"obs_dw");
     
+    RooSplineND* spline_exp_up2 = NULL;
+    RooSplineND* spline_exp_dw2 = NULL;
+    
+    if(not makeCOLZ){
+      spline_exp_up2 = makeSplineND(hexp_coupling_up2,*xvar,*yvar,"exp_up2");
+      spline_exp_dw2 = makeSplineND(hexp_coupling_dw2,*xvar,*yvar,"exp_dw2");
+    }
+    
     TH2D* hexp_coupling_ext = NULL;
     TH2D* hexp_coupling_ext_up = NULL;
     TH2D* hexp_coupling_ext_dw = NULL;
     TH2D* hobs_coupling_ext = NULL;
     TH2D* hobs_coupling_ext_up = NULL;
     TH2D* hobs_coupling_ext_dw = NULL;
+    TH2D* hexp_coupling_ext_up2 = NULL;
+    TH2D* hexp_coupling_ext_dw2 = NULL;
 
     if(not useDMMass){
       hexp_coupling_ext = new TH2D("hexp_coupling_ext", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
@@ -495,6 +695,10 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hobs_coupling_ext = new TH2D("hobs_coupling_ext", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
       hobs_coupling_ext_up = new TH2D("hobs_coupling_ext_up", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
       hobs_coupling_ext_dw = new TH2D("hobs_coupling_ext_dw", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      if(not makeCOLZ){
+	hexp_coupling_ext_up2 = new TH2D("hexp_coupling_ext_up2", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+	hexp_coupling_ext_dw2 = new TH2D("hexp_coupling_ext_dw2", "",nbinsX,minX,maxX,nCoupling,minCoupling,maxCoupling);
+      }
     }
     else{
       hexp_coupling_ext = new TH2D("hexp_coupling_ext", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
@@ -503,8 +707,13 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hobs_coupling_ext = new TH2D("hobs_coupling_ext", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
       hobs_coupling_ext_up = new TH2D("hobs_coupling_ext_up", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
       hobs_coupling_ext_dw = new TH2D("hobs_coupling_ext_dw", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      if(not makeCOLZ){
+	hexp_coupling_ext_up2 = new TH2D("hexp_coupling_ext_up2", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+	hexp_coupling_ext_dw2 = new TH2D("hexp_coupling_ext_dw2", "",nbinsY,minY,maxY,nCoupling,minCoupling,maxCoupling);
+      }
     }
-    
+
+    cout<<"Evaluating the splines "<<endl;
     for(int i = 1; i <= hexp_coupling_ext->GetNbinsX(); i++){
       for(int j = 1; j <= hexp_coupling_ext->GetNbinsY(); j++){
 	xvar->setVal(hexp_coupling_ext->GetXaxis()->GetBinCenter(i));
@@ -515,6 +724,10 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
 	hobs_coupling_ext->SetBinContent(i,j,spline_obs->getVal());
 	hobs_coupling_ext_up->SetBinContent(i,j,spline_obs_up->getVal());
 	hobs_coupling_ext_dw->SetBinContent(i,j,spline_obs_dw->getVal());
+	if(not makeCOLZ){
+	  hexp_coupling_ext_up2->SetBinContent(i,j,spline_exp_up2->getVal());
+	  hexp_coupling_ext_dw2->SetBinContent(i,j,spline_exp_dw2->getVal());
+	}
       }
     }
     
@@ -524,7 +737,10 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     hobs_coupling    = hobs_coupling_ext;
     hobs_coupling_up = hobs_coupling_ext_up;
     hobs_coupling_dw = hobs_coupling_ext_dw;
-
+    if(not makeCOLZ){
+      hexp_coupling_up2 = hexp_coupling_ext_up2;
+      hexp_coupling_dw2 = hexp_coupling_ext_dw2;
+    }
   }
   
   // extend the relic density line                                                                                                                                                                   
@@ -544,15 +760,26 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   fixBinContent(hobs_coupling,minZ,maxZ);
   fixBinContent(hobs_coupling_up,minZ,maxZ);
   fixBinContent(hobs_coupling_dw,minZ,maxZ);
+  if(not makeCOLZ){
+    fixBinContent(hexp_coupling_up2,minZ,maxZ);
+    fixBinContent(hexp_coupling_dw2,minZ,maxZ);
+  }
 
 
-  ////////////////                                                                                                                                                                                    
+  ////////////////                        
+  cout<<"Making contours "<<endl;
   TH2* hexp2 = (TH2*) hexp_coupling->Clone("hexp2");
   TH2* hobs2 = (TH2*) hobs_coupling->Clone("hobs2");
-  TH2* hexp2_up = (TH2*) hexp_coupling_up->Clone("hexp2");
-  TH2* hobs2_up = (TH2*) hobs_coupling_up->Clone("hobs2");
-  TH2* hexp2_dw = (TH2*) hexp_coupling_dw->Clone("hexp2");
-  TH2* hobs2_dw = (TH2*) hobs_coupling_dw->Clone("hobs2");
+  TH2* hexp2_up = (TH2*) hexp_coupling_up->Clone("hexp2_up");
+  TH2* hobs2_up = (TH2*) hobs_coupling_up->Clone("hobs2_up");
+  TH2* hexp2_dw = (TH2*) hexp_coupling_dw->Clone("hexp2_dw");
+  TH2* hobs2_dw = (TH2*) hobs_coupling_dw->Clone("hobs2_dw");
+  TH2* hexp2_up2 = NULL;
+  TH2* hexp2_dw2 = NULL;
+  if(not makeCOLZ){
+    hexp2_up2 = (TH2*) hexp_coupling_up2->Clone("hexp2_up2");
+    hexp2_dw2 = (TH2*) hexp_coupling_dw2->Clone("hexp2_dw2");    
+  }
 
   //////////                                                                                                                                                                                           
   double contours[1]; contours[0]=1;
@@ -562,11 +789,22 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   hobs2_up->SetContour(1,contours);
   hexp2_dw->SetContour(1,contours);
   hobs2_dw->SetContour(1,contours);
+  if(not makeCOLZ){
+    hexp2_up2->SetContour(1,contours);
+    hexp2_dw2->SetContour(1,contours);
+  }
 
   // All the plotting and cosmetics                                                                                                                                                                   
   TCanvas* canvas = new TCanvas("canvas", "canvas",650,600);
-  canvas->SetRightMargin(0.15);
-  canvas->SetLeftMargin(0.13);
+  if(makeCOLZ){
+    canvas->SetRightMargin(0.15);
+    canvas->SetLeftMargin(0.13);
+  }
+  else{
+    canvas->SetRightMargin(0.10);
+    canvas->SetLeftMargin(0.13);
+  }
+
   canvas->SetLogz();
 
   TH1* frame = NULL;
@@ -592,21 +830,49 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   hobs_coupling_up->GetZaxis()->SetRangeUser(minZ,maxZ);
   hexp_coupling_dw->GetZaxis()->SetRangeUser(minZ,maxZ);
   hobs_coupling_dw->GetZaxis()->SetRangeUser(minZ,maxZ);
+  if(not makeCOLZ){
+    hexp_coupling_up2->GetZaxis()->SetRangeUser(minZ,maxZ);
+    hexp_coupling_dw2->GetZaxis()->SetRangeUser(minZ,maxZ);
+  }
 
   hexp2->GetZaxis()->SetLabelSize(0);
   hexp2->Draw("contz list same");
   canvas->Update();
   TGraph* contour_exp = produceContour(reductionForContour);
+  TGraph* contour_exp_back = produceContour(reductionForContour,false);
 
   hexp2_up->GetZaxis()->SetLabelSize(0);
   hexp2_up->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_exp_up = produceContour(reductionForContour);
+  TGraph* contour_exp_up = NULL;
+  if(makeCOLZ)
+    contour_exp_up = produceContour(reductionForContour);
+  else
+    contour_exp_up = produceContour(reductionForContour,false);
 
   hexp2_dw->GetZaxis()->SetLabelSize(0);
   hexp2_dw->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_exp_dw = produceContour(reductionForContour);
+  TGraph* contour_exp_dw = NULL;
+  if(makeCOLZ)
+    contour_exp_dw = produceContour(reductionForContour);
+  else
+    contour_exp_dw = produceContour(reductionForContour,false);
+
+  TGraph* contour_exp_up2 = NULL;
+  TGraph* contour_exp_dw2 = NULL;
+
+  if(not makeCOLZ){
+    hexp2_up2->GetZaxis()->SetLabelSize(0);
+    hexp2_up2->Draw("contz list same");
+    canvas->Update();
+    contour_exp_up2 = produceContour(reductionForContour,false);
+
+    hexp2_dw2->GetZaxis()->SetLabelSize(0);
+    hexp2_dw2->Draw("contz list same");
+    canvas->Update();
+    contour_exp_dw2 = produceContour(reductionForContour,false);
+  }
 
   hobs2->GetZaxis()->SetLabelSize(0);
   hobs2->Draw("contz list same");
@@ -625,10 +891,11 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   
   frame->Draw();
 
+  cout<<"Plotting things "<<endl;
   if(makeCOLZ)
     hobs_coupling->Draw("COLZ SAME");
   
-  if(addRelicDensity){
+  if(addRelicDensity and makeCOLZ){
     relic_graph_g1_ext->SetLineColor(kGreen+3);
     relic_graph_g2_ext->SetLineColor(kGreen+3);
     relic_graph_g1_ext->SetLineWidth(-802);
@@ -641,33 +908,144 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
   }
 
-  contour_exp_up->SetLineColor(kBlack);
-  contour_exp_up->SetLineWidth(2);
-  contour_exp_up->SetLineStyle(7);
-  contour_exp_up->Draw("Lsame");
+  TGraphAsymmErrors* graph_1s = NULL;
+  TGraphAsymmErrors* graph_2s = NULL;
+  TGraphAsymmErrors* graph_1s_y = NULL;
+  TGraphAsymmErrors* graph_2s_y = NULL;
 
-  contour_exp_dw->SetLineColor(kBlack);
-  contour_exp_dw->SetLineWidth(2);
-  contour_exp_dw->SetLineStyle(7);
-  contour_exp_dw->Draw("Lsame");
-  
-  contour_obs_up->SetLineColor(kRed);
-  contour_obs_up->SetLineWidth(2);
-  contour_obs_up->SetLineStyle(7);
-  contour_obs_up->Draw("Lsame");
+  if(makeCOLZ){
+    contour_exp_up->SetLineColor(kBlack);
+    contour_exp_up->SetLineWidth(2);
+    contour_exp_up->SetLineStyle(7);
+    contour_exp_up->Draw("Lsame");
+    contour_exp_dw->SetLineColor(kBlack);
+    contour_exp_dw->SetLineWidth(2);
+    contour_exp_dw->SetLineStyle(7);
+    contour_exp_dw->Draw("Lsame");
+  }
+  // make a Brazilian like plot
+  else{
+    
+    graph_1s = new TGraphAsymmErrors();
+    graph_2s = new TGraphAsymmErrors();
+    graph_1s_y = new TGraphAsymmErrors();
+    graph_2s_y = new TGraphAsymmErrors();
 
-  contour_obs_dw->SetLineColor(kRed);
-  contour_obs_dw->SetLineWidth(2);
-  contour_obs_dw->SetLineStyle(7);
-  contour_obs_dw->Draw("Lsame");
+    // make band where for each x there is 1 x
+    TGraph* band_1_up = new TGraph();
+    TGraph* band_1_dw = new TGraph();
+    TGraph* band_2_up = new TGraph();
+    TGraph* band_2_dw = new TGraph();
 
-  contour_exp->SetLineColor(kBlack);
-  contour_exp->SetLineWidth(3);
-  contour_exp->Draw("Lsame");
+    makeXGraph(band_1_up,contour_exp_up,contour_exp_back);
+    makeXGraph(band_1_dw,contour_exp_dw,contour_exp_back);
+    makeXGraph(band_2_up,contour_exp_up2,contour_exp_back);
+    makeXGraph(band_2_dw,contour_exp_dw2,contour_exp_back);
 
-  contour_obs->SetLineColor(kRed);
-  contour_obs->SetLineWidth(3);
-  contour_obs->Draw("Lsame");
+    band_1_up->Write("band_1_up");
+    band_1_dw->Write("band_1_dw");
+    band_2_up->Write("band_2_up");
+    band_2_dw->Write("band_2_dw");
+    
+    makeUncertaintyBand(graph_1s,contour_exp_back,band_1_up,band_1_dw,useDMMass);
+    makeUncertaintyBand(graph_2s,contour_exp_back,band_2_up,band_2_dw,useDMMass);
+
+    TGraph* band_1_y = new TGraph();
+    TGraph* band_1_up_y = new TGraph();
+    TGraph* band_1_dw_y = new TGraph();
+    TGraph* band_2_up_y = new TGraph();
+    TGraph* band_2_dw_y = new TGraph();
+
+    makeYGraph(band_1_y,contour_exp_back);
+    makeYGraph(band_1_up_y,contour_exp_up);
+    makeYGraph(band_1_dw_y,contour_exp_dw);
+    makeYGraph(band_2_up_y,contour_exp_up2);
+    makeYGraph(band_2_dw_y,contour_exp_dw2);
+
+    band_1_up_y->Write("band_1_up_y");
+    band_1_dw_y->Write("band_1_dw_y");
+    band_2_up_y->Write("band_2_up_y");
+    band_2_dw_y->Write("band_2_dw_y");
+
+    makeUncertaintyBand(graph_1s_y,contour_exp_back,band_1_y,band_1_up_y,band_1_dw_y,useDMMass);
+    makeUncertaintyBand(graph_2s_y,contour_exp_back,band_1_y,band_2_up_y,band_2_dw_y,useDMMass);
+    
+    graph_1s->SetFillStyle(1001);
+    graph_1s->SetLineColor(kBlack);
+    graph_1s->SetFillColor(kGreen+1);
+    graph_2s->SetFillStyle(1001);
+    graph_2s->SetFillColor(kOrange);
+    graph_2s->SetLineColor(kBlack);
+
+    graph_1s_y->SetFillStyle(1001);
+    graph_1s_y->SetLineColor(kBlack);
+    graph_1s_y->SetFillColor(kGreen+1);
+    graph_2s_y->SetFillStyle(1001);
+    graph_2s_y->SetFillColor(kOrange);
+    graph_2s_y->SetLineColor(kBlack);
+
+    graph_2s->Draw("2same");
+    graph_1s->Draw("2same");
+    graph_2s_y->Draw("2same");
+    graph_1s_y->Draw("2same");
+
+    graph_2s->Write("graph_2s");
+    graph_1s->Write("graph_1s");
+    graph_2s_y->Write("graph_2s_y");
+    graph_1s_y->Write("graph_1s_y");
+
+  }
+
+  if(addRelicDensity and not makeCOLZ){
+    relic_graph_g1_ext->SetLineColor(kBlue);
+    relic_graph_g2_ext->SetLineColor(kBlue);
+    relic_graph_g1_ext->SetLineWidth(-802);
+    relic_graph_g2_ext->SetLineWidth(802);
+    relic_graph_g1_ext->SetFillStyle(3005);
+    relic_graph_g2_ext->SetFillStyle(3005);
+    relic_graph_g1_ext->SetFillColor(kBlue);
+    relic_graph_g2_ext->SetFillColor(kBlue);
+    relic_graph_g1_ext->Draw("L SAME");
+    relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
+  }
+
+  if(makeCOLZ){
+    contour_obs_up->SetLineColor(kRed);
+    contour_obs_up->SetLineWidth(2);
+    contour_obs_up->SetLineStyle(7);
+    contour_obs_up->Draw("Lsame");
+    
+    contour_obs_dw->SetLineColor(kRed);
+    contour_obs_dw->SetLineWidth(2);
+    contour_obs_dw->SetLineStyle(7);
+    contour_obs_dw->Draw("Lsame");
+    
+    contour_exp->SetLineColor(kBlack);
+    contour_exp->SetLineWidth(3);
+    contour_exp->Draw("Lsame");
+    
+    contour_obs->SetLineColor(kRed);
+    contour_obs->SetLineWidth(3);
+    contour_obs->Draw("Lsame");
+  }
+  else{
+    contour_obs_up->SetLineColor(kRed);
+    contour_obs_up->SetLineWidth(2);
+    contour_obs_up->Draw("Lsame");
+    
+    contour_obs_dw->SetLineColor(kRed);
+    contour_obs_dw->SetLineWidth(2);
+    contour_obs_dw->Draw("Lsame");
+    
+    contour_obs->SetLineColor(kBlack);
+    contour_obs->SetLineWidth(3);
+    contour_obs->Draw("Lsame");
+    
+    contour_exp->SetLineColor(kBlack);
+    contour_exp->SetLineWidth(3);
+    contour_exp->SetLineStyle(7);
+    contour_exp->Draw("Lsame");
+  }
 
   if(not addPreliminary)
     CMS_lumi(canvas,"35.9",true,true,false,0,-0.09);
@@ -676,22 +1054,45 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
 
   
   TLegend* tex = new TLegend(0.15,0.83,0.65,0.89);
-  tex->SetFillColor(kWhite);
-  tex->SetFillStyle(1001);
+  if(makeCOLZ){
+    tex->SetFillColor(kWhite);
+    tex->SetFillStyle(1001);
+  }
+  else{
+    tex->SetFillColor(0);
+    tex->SetFillStyle(0);
+  }
   tex->SetBorderSize(0);
   tex->SetTextFont(42);
   tex->SetTextSize(0.027);
   tex->SetHeader("#bf{Axial med, Dirac DM, g_{DM} = 1, m_{med} = 3 #times m_{DM}}");
   tex->Draw("same");
 
-  TLegend *leg = new TLegend(0.15,0.58,0.52,0.81);
-  leg->SetFillColor(kWhite);
-  leg->SetFillStyle(1001);
+  TLegend *leg = NULL;
+  if(makeCOLZ)
+    leg = new TLegend(0.15,0.58,0.52,0.81);
+  else
+    leg = new TLegend(0.15,0.55,0.52,0.81);
+
+  if(makeCOLZ){
+    leg->SetFillColor(kWhite);
+    leg->SetFillStyle(1001);
+  }
+  else{
+    leg->SetFillColor(0);
+    leg->SetFillStyle(0);    
+  }
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->SetTextSize(0.0243902);
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
-  leg->AddEntry(contour_exp_up,"68% expected","L");
+  if(makeCOLZ){
+    leg->AddEntry(contour_exp_up,"68% expected","L");
+  }
+  else{
+    leg->AddEntry(graph_1s,"68% expected","F");
+    leg->AddEntry(graph_2s,"95% expected","F");
+  }
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
   leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
   if(addRelicDensity)
@@ -706,7 +1107,9 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   tex2->SetLineWidth(2);
   tex2->SetTextSize(0.042);
   tex2->SetTextAngle(90);
-  tex2->DrawLatex(0.975,0.55,"Observed #sigma_{95% CL}/#sigma_{th}");
+  if(makeCOLZ){
+    tex2->DrawLatex(0.975,0.55,"Observed #sigma_{95% CL}/#sigma_{th}");
+  }
 
   canvas->RedrawAxis("sameaxis");
 
@@ -717,8 +1120,14 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
   canvas->SaveAs((outputDIR+"/scan_axial_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
 
+  contour_exp_back->Write("contour_exp_back");
+  contour_exp_up->Write("contour_exp_up");
+  contour_exp_dw->Write("contour_exp_dw");
+  contour_exp_up2->Write("contour_exp_up2");
+  contour_exp_dw2->Write("contour_exp_dw2");
+
   outputTemp->Close();
-  system(("rm "+outputDIR+"/outputTemp_axial.root").c_str());
+  //system(("rm "+outputDIR+"/outputTemp_axial.root").c_str());
 
 
 }
