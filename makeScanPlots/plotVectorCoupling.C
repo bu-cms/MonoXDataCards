@@ -51,7 +51,7 @@ TGraph* produceContour (const int & reduction, const bool & applyReduction = tru
 
 /////////
 static float nbinsX      = 1000;
-static float minX        = 1;
+static float minX        = 200;
 static float minY        = 1;
 static float maxX        = 2000;
 static float maxY        = 700;
@@ -66,11 +66,9 @@ static bool  addPreliminary   = false;
 static bool  addRelicDensity  = true;
 static int   nForInterpolateX = 70;
 static int   nForInterpolateY = 55;
-//static int   nForInterpolateX = 35;
-//static int   nForInterpolateY = 35;
 static float minCoupling_spline = 0.01;
 static float maxCoupling_spline = 1.0;
-static float minX_spline = 1;
+static float minX_spline = 200;
 static float maxX_spline = 2200;
 static float minY_spline = 0.5;
 static float maxY_spline = 800;

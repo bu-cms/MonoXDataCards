@@ -54,7 +54,7 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool addRelicDensity = true;
 static bool saveOutputFile  = true;
-static bool addICHEPContours = false;
+static bool addICHEPContours = true;
 static float nbinsX = 1000;
 static float nbinsY = 600;
 static float minX = 0;
