@@ -50,29 +50,29 @@ TGraph* produceContour (const int & reduction, const bool & applyReduction = tru
 }
 
 /////////
-static float nbinsX      = 1000;
-static float minX        = 200;
+static float nbinsX      = 1100;
+static float minX        = 50;
 static float minY        = 1;
 static float maxX        = 2000;
 static float maxY        = 700;
 static float nbinsY      = 350;
 static float nCoupling   = 100;
-static float minCoupling = 0.02;
-static float maxCoupling = 1;
+static float minCoupling = 0.01;
+static float maxCoupling = 1.0;
 static float minZ        = 0.1;
 static float maxZ        = 100;
 static int   reductionForContour = 12;
 static bool  addPreliminary   = false;
 static bool  addRelicDensity  = true;
-static int   nForInterpolateX = 70;
-static int   nForInterpolateY = 55;
+static int   nForInterpolateX = 75;
+static int   nForInterpolateY = 60;
 static float minCoupling_spline = 0.01;
 static float maxCoupling_spline = 1.0;
-static float minX_spline = 200;
+static float minX_spline = 40;
 static float maxX_spline = 2200;
 static float minY_spline = 0.5;
 static float maxY_spline = 800;
-static float maxXForBrazilianY = 1350;
+static float maxXForBrazilianY = 1380;
 static float maxXForBrazilianX = 1650;
 static float maxXForBrazilianY_DM = 410;
 static float maxXForBrazilianX_DM = 520;
@@ -80,8 +80,10 @@ static float maxXForBrazilianX_DM = 520;
 void fillLimitGraphs(TTree* tree,
 		     TGraph* grexp, TGraph* grexp_up, TGraph* grexp_dw,
 		     TGraph* grobs, TGraph* grobs_up, TGraph* grobs_dw,
-		     const float & medOverDM = 3, const bool & useDMMass = false,
-		     TGraph* grexp_up2 = NULL, TGraph* grexp_dw2 = NULL){
+		     const float & medOverDM = 3, 
+		     const bool & useDMMass = false,
+		     TGraph* grexp_up2 = NULL, 
+		     TGraph* grexp_dw2 = NULL){
 
   double mh;
   double limit;
@@ -97,13 +99,17 @@ void fillLimitGraphs(TTree* tree,
   int currentdmmass  = -1;
   int npoints = 0;
 
-  // identify bad mass points
+  // identify bad mass points 
   for(int i = 0; i < tree->GetEntries(); i++){
+
     tree->GetEntry(i);
+
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
+
     if(medmass != currentmedmass or dmmass != currentdmmass){
+
       if(npoints == 6)
 	goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
       npoints = 0;
@@ -131,8 +137,8 @@ void fillLimitGraphs(TTree* tree,
     tree->GetEntry(i);
     
     int c       = code(mh);
-    int medmass = mmed(mh, c);
-    int dmmass  = mdm(mh, c);
+    int medmass = mmed(mh,c);
+    int dmmass  = mdm(mh,c);
 
     bool isGoodMassPoint = false;
     for(auto mass : goodMassPoint){
@@ -148,8 +154,9 @@ void fillLimitGraphs(TTree* tree,
 
     // check / use only points for which mediator and DM mass are in this relation
     if(double(medmass) / double(dmmass) != medOverDM) continue;      
-
+ 
     if (quantile == 0.5) { // expected limit
+      cout<<"MedMass "<<medmass<<" dmMass "<<dmmass<<" Expected "<<limit<<endl;
       if(useDMMass){
 	grexp->SetPoint(expcounter, double(dmmass), limit);
       }
@@ -157,8 +164,8 @@ void fillLimitGraphs(TTree* tree,
 	grexp->SetPoint(expcounter, double(medmass), limit);
       expcounter++;
     }
-
-    if (quantile < 0.17 && quantile > 0.14 ) {
+    
+    if (quantile < 0.17 && quantile > 0.14 ) { // -1-sigma
       if(useDMMass)
 	grexp_dw->SetPoint(exp_down_counter, double(dmmass), limit);
       else
@@ -166,7 +173,7 @@ void fillLimitGraphs(TTree* tree,
       exp_down_counter++;
     }
 
-    if(grexp_dw2 and quantile < 0.09 && quantile > 0){
+    if(grexp_dw2 and quantile < 0.09 && quantile > 0){ // -2-sigma
       if(useDMMass)
 	grexp_dw2->SetPoint(exp_down2_counter, double(dmmass), limit);
       else
@@ -174,7 +181,7 @@ void fillLimitGraphs(TTree* tree,
       exp_down2_counter++;
     }
 
-    if (quantile < 0.85 && quantile > 0.83 ) {
+    if (quantile < 0.85 && quantile > 0.83 ) { //+1-sigma
       if(useDMMass)
 	grexp_up->SetPoint(exp_up_counter, double(dmmass), limit);
       else
@@ -183,7 +190,7 @@ void fillLimitGraphs(TTree* tree,
       exp_up_counter++;
     }    
 
-    if(grexp_up2 and quantile > 0.9 && quantile < 1){
+    if(grexp_up2 and quantile > 0.9 && quantile < 1){//+2-sigma
       if(useDMMass)
 	grexp_up2->SetPoint(exp_up2_counter, double(dmmass), limit);
       else
@@ -192,6 +199,7 @@ void fillLimitGraphs(TTree* tree,
     }
     
     if (quantile == -1) { // observed
+      cout<<"MedMass "<<medmass<<" dmMass "<<dmmass<<" Observed "<<limit<<endl;
       if(useDMMass){
 	grobs->SetPoint(obscounter, double(dmmass), limit);
 	grobs_up->SetPoint(obscounter, double(dmmass), limit*1.2);
@@ -310,7 +318,7 @@ void makeYGraph(TGraph* graph, TGraph* input){
 }
 
 /////// --------
-void makeXGraph(TGraph* graph, TGraph* input, TGraph* central){
+void makeXGraph(TGraph* graph, TGraph* input, TGraph* central){ // central = expected limit, input --> is the one used to read the y-value
   int effective_points = 0;
   for(int iPoint = 0; iPoint < central->GetN(); iPoint++){
     double x,y;
@@ -327,18 +335,20 @@ void makeUncertaintyBand(TGraphAsymmErrors* graph, TGraph* central, TGraph* band
   int effective_points = 0;
 
   for(int iPoint = 0; iPoint < central->GetN(); iPoint++){
+
     ////////////////
     double x,y;
     double x_up,y_up;
     central->GetPoint(iPoint,x,y);
 
+    /// decide by hand which is the area of the plot for which one needs to 
     if(not useDMMass and x < maxXForBrazilianY) continue;
     else if(useDMMass and x < maxXForBrazilianY_DM) continue;
 
     central->GetPoint(iPoint+1,x_up,y_up);
-    //////////////
+    ////////////// --> set central value
     graph->SetPoint(effective_points,x,y);
-    ////////////
+    //////////// --> set band
     if(y_up > y and band_up->Eval(y) < band_dw->Eval(y))
       graph->SetPointError(effective_points,x-band_up->Eval(y),band_dw->Eval(y)-x,0,0);
     else if(y_up < y and band_up->Eval(y) < band_dw->Eval(y))
@@ -414,15 +424,16 @@ void makeUncertaintyBand(TGraphAsymmErrors* graph, TGraph* central, TGraph* band
   
 ///////////////
 static vector<float> gq_coupling = {1.0,0.75,0.5,0.3,0.25,0.2,0.1,0.05,0.01};
-static bool makeCOLZ = false;
+static string energy = "13";
 
-void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverDM = 3, bool useSplineND = true, string energy = "13") {
+void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverDM = 3, bool useSplineND = true, bool makeCOLZ = false) {
 
   gSystem->Load("externalLibs/RooSplineND_cc.so");
 
   TGraph* relic_graph_g1 = new TGraph();
   TGraph* relic_graph_g2 = new TGraph();
 
+  // make relic density contours
   if(addRelicDensity){
     TFile* inputRelicDensity = TFile::Open("externalFiles/relic_v6_V_Res_v2.root","READ");
     TTree* relic = (TTree*) inputRelicDensity->Get("relic");
@@ -448,15 +459,16 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     relic_graph_g2->Sort();
   }
 
-  string inputFileName1 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_1p0.root";
-  string inputFileName2 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p75.root";
-  string inputFileName3 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p5.root";
-  string inputFileName4 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p3.root";
-  string inputFileName5 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p25.root";
-  string inputFileName6 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p2.root";
-  string inputFileName7 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p1.root";
-  string inputFileName8 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p05.root";
-  string inputFileName9 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p01.root";
+  // list of files with limit values for each coupling 
+  string inputFileName1 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_1p0.root";
+  string inputFileName2 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p75.root";
+  string inputFileName3 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p5.root";
+  string inputFileName4 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p3.root";
+  string inputFileName5 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p25.root";
+  string inputFileName6 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p2.root";
+  string inputFileName7 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p1.root";
+  string inputFileName8 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p05.root";
+  string inputFileName9 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p01.root";
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -482,6 +494,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   for(auto file: fileList)
     treeList.push_back((TTree*) file->Get("limit"));
   
+  // TGraph with limit values
   vector<pair<double,TGraph*> > grexp_up;
   vector<pair<double,TGraph*> > grexp_dw;
   vector<pair<double,TGraph*> > grexp_up2;
@@ -501,8 +514,10 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     grobs_up.push_back(pair<double,TGraph*>(gq,new TGraph()));
     grobs_dw.push_back(pair<double,TGraph*>(gq,new TGraph()));
   }
-  
+
+  // loop on the tree list and fill graphs  
   for(int itree = 0; itree < treeList.size(); itree++){
+    cout<<"################## "<<grexp.at(itree).first<<endl;
     if(makeCOLZ)
       fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
 		      grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
@@ -514,21 +529,21 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 
   }
   
-  //// make a spline to further smooth                                                                                                                                                          
+  //// make a spline to further smooth the limit values
   vector<pair<double,TSpline3*> > splineexp = make1DSpline(grexp,"exp");
   vector<pair<double,TSpline3*> > splineexp_up = make1DSpline(grexp_up,"exp_up");
   vector<pair<double,TSpline3*> > splineexp_dw = make1DSpline(grexp_dw,"exp_dw");
   vector<pair<double,TSpline3*> > splineexp_up2;
-  if(not makeCOLZ) 
-    splineexp_up2 = make1DSpline(grexp_up2,"exp_up");
   vector<pair<double,TSpline3*> > splineexp_dw2;
-  if(not makeCOLZ)
+  if(not makeCOLZ) {
+    splineexp_up2 = make1DSpline(grexp_up2,"exp_up");
     splineexp_dw2 = make1DSpline(grexp_dw2,"exp_dw");
+  }
   vector<pair<double,TSpline3*> > splineobs    = make1DSpline(grobs,"obs");
   vector<pair<double,TSpline3*> > splineobs_up = make1DSpline(grobs_up,"obs_up");
   vector<pair<double,TSpline3*> > splineobs_dw = make1DSpline(grobs_dw,"obs_dw");
 
-  // fill coupling
+  // fill coupling --> 2D plot mass vs gq
   TGraph2D* grexp_coupling = new TGraph2D();
   TGraph2D* grexp_coupling_up = new TGraph2D();
   TGraph2D* grexp_coupling_dw = new TGraph2D();
@@ -547,7 +562,8 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     fill2DGraph(grexp_coupling_up2,splineexp_up2,grexp_up2);
     fill2DGraph(grexp_coupling_dw2,splineexp_dw2,grexp_dw2);    
   }
-    
+  
+  // store also min and max for the x-axis limit
   float min_xaxis = 9999;
   float max_xaxis = -1;
   fill2DGraph(grobs_coupling,splineobs,grobs,min_xaxis,max_xaxis);
@@ -562,7 +578,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   TH2D* hobs_coupling_up = NULL;
   TH2D* hobs_coupling_dw = NULL;  
 
-  if(useSplineND){
+  if(useSplineND){ // make a 2D spine using the RooSplineND --> decrease the binning for time constraints
     if(not useDMMass){
       hexp_coupling = new TH2D("hexp_coupling", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hobs_coupling = new TH2D("hobs_coupling", "",nForInterpolateX,max(min_xaxis,minX),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
@@ -582,15 +598,13 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
       hobs_coupling_up = new TH2D("hobs_coupling_up", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hexp_coupling_dw = new TH2D("hexp_coupling_dw", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       hobs_coupling_dw = new TH2D("hobs_coupling_dw", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
-
       if(not makeCOLZ){
 	hexp_coupling_up2 = new TH2D("hexp_coupling_up2", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
 	hexp_coupling_dw2 = new TH2D("hexp_coupling_dw2", "",nForInterpolateX,max(min_xaxis,minY),max_xaxis,nForInterpolateY,minCoupling,maxCoupling);
       }
-
     }
   }
-  else{
+  else{ // use the original binning
     if(not useDMMass){
       hexp_coupling = new TH2D("hexp_coupling", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
       hobs_coupling = new TH2D("hobs_coupling", "",nbinsX,max(min_xaxis,minX),max_xaxis,nCoupling,minCoupling,maxCoupling);
@@ -617,6 +631,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     }
   }
 
+  // Linear interpolation in each bin center as first step
   for(int i = 1; i <= hexp_coupling->GetNbinsX(); i++){
     for(int j = 1; j <= hexp_coupling->GetNbinsY(); j++){
       hexp_coupling->SetBinContent(i,j,grexp_coupling->Interpolate(hexp_coupling->GetXaxis()->GetBinCenter(i),hexp_coupling->GetYaxis()->GetBinCenter(j)));
@@ -632,7 +647,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     }
   }
 
-  // Smooth more
+  // Smooth more with a 3-bin smoothing
   hexp_coupling->Smooth();
   hobs_coupling->Smooth();
   hexp_coupling_up->Smooth();
@@ -643,16 +658,12 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     hexp_coupling_up2->Smooth();
     hexp_coupling_dw2->Smooth();
   }
-
-  ///////-------------
-  TFile* outputTemp = new TFile((outputDIR+"/outputTemp_vector.root").c_str(),"RECREATE");
-  outputTemp->cd();
-    
+  
+  // in case one wants to use a 2D spline
   RooRealVar* xvar = NULL;
   RooRealVar* yvar = NULL;
 
   if(useSplineND){    
-
     if(not useDMMass){
       xvar = new RooRealVar("x","x",(maxX_spline-minX_spline)/2,minX_spline,maxX_spline);
       yvar = new RooRealVar ("y","y",(maxCoupling_spline-minCoupling_spline)/2,minCoupling_spline,maxCoupling_spline);
@@ -677,6 +688,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
       spline_exp_dw2 = makeSplineND(hexp_coupling_dw2,*xvar,*yvar,"exp_dw2");
     }
     
+    // histograms with more bins --> one can evaluate the spline
     TH2D* hexp_coupling_ext = NULL;
     TH2D* hexp_coupling_ext_up = NULL;
     TH2D* hexp_coupling_ext_dw = NULL;
@@ -752,6 +764,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     ipoint++;
   }
 
+  /// fix the bin content to be within the axis-range
   fixBinContent(hexp_coupling,minZ,maxZ);
   fixBinContent(hexp_coupling_up,minZ,maxZ);
   fixBinContent(hexp_coupling_dw,minZ,maxZ);
@@ -764,7 +777,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   }
 
 
-  ////////////////                        
+  //////////////// make the 1D contours                       
   cout<<"Making contours "<<endl;
   TH2* hexp2 = (TH2*) hexp_coupling->Clone("hexp2");
   TH2* hobs2 = (TH2*) hobs_coupling->Clone("hobs2");
@@ -805,6 +818,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 
   canvas->SetLogz();
 
+  // Draw the main frame of the plot
   TH1* frame = NULL;
   if(not useDMMass)
     frame = canvas->DrawFrame(minX,minCoupling,maxX,maxCoupling,"");
@@ -833,11 +847,12 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     hexp_coupling_dw2->GetZaxis()->SetRangeUser(minZ,maxZ);
   }
 
+  // start making the contours
   hexp2->GetZaxis()->SetLabelSize(0);
   hexp2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_exp = produceContour(reductionForContour);
-  TGraph* contour_exp_back = produceContour(reductionForContour,false);
+  TGraph* contour_exp      = produceContour(reductionForContour);
+  TGraph* contour_exp_back = produceContour(reductionForContour,false); // no reduction of points for the brazilian band
 
   hexp2_up->GetZaxis()->SetLabelSize(0);
   hexp2_up->Draw("contz list same");
@@ -846,7 +861,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   if(makeCOLZ)
     contour_exp_up = produceContour(reductionForContour);
   else
-    contour_exp_up = produceContour(reductionForContour,false);
+    contour_exp_up = produceContour(reductionForContour,false); // no reduction of points for the brazilian band
 
   hexp2_dw->GetZaxis()->SetLabelSize(0);
   hexp2_dw->Draw("contz list same");
@@ -855,7 +870,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   if(makeCOLZ)
     contour_exp_dw = produceContour(reductionForContour);
   else
-    contour_exp_dw = produceContour(reductionForContour,false);
+    contour_exp_dw = produceContour(reductionForContour,false); // reduction of points for the brazilian band
 
   TGraph* contour_exp_up2 = NULL;
   TGraph* contour_exp_dw2 = NULL;
@@ -864,12 +879,12 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     hexp2_up2->GetZaxis()->SetLabelSize(0);
     hexp2_up2->Draw("contz list same");
     canvas->Update();
-    contour_exp_up2 = produceContour(reductionForContour,false);
+    contour_exp_up2 = produceContour(reductionForContour,false); // reduction of points for the brazilian band
 
     hexp2_dw2->GetZaxis()->SetLabelSize(0);
     hexp2_dw2->Draw("contz list same");
     canvas->Update();
-    contour_exp_dw2 = produceContour(reductionForContour,false);
+    contour_exp_dw2 = produceContour(reductionForContour,false); // reduction of points for the brazilian band
   }
 
   hobs2->GetZaxis()->SetLabelSize(0);
@@ -903,7 +918,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     relic_graph_g1_ext->SetFillColor(kGreen+3);
     relic_graph_g2_ext->SetFillColor(kGreen+3);
     relic_graph_g1_ext->Draw("L SAME");
-    relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
+    //relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
   }
 
   TGraphAsymmErrors* graph_1s = NULL;
@@ -911,7 +926,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   TGraphAsymmErrors* graph_1s_y = NULL;
   TGraphAsymmErrors* graph_2s_y = NULL;
 
-  if(makeCOLZ){
+  if(makeCOLZ){ // draw only the 1-sigma bands as lines
     contour_exp_up->SetLineColor(kBlack);
     contour_exp_up->SetLineWidth(2);
     contour_exp_up->SetLineStyle(7);
@@ -921,8 +936,9 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     contour_exp_dw->SetLineStyle(7);
     contour_exp_dw->Draw("Lsame");
   }
-  // make a Brazilian like plot
-  else{
+
+  // make a Brazilian like plot --> a big trick is needed to fill an area of a contour for which, given one x-value, multiple y-value can be associated --> root has problems !!
+  else{ 
     
     graph_1s = new TGraphAsymmErrors();
     graph_2s = new TGraphAsymmErrors();
@@ -935,8 +951,8 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     TGraph* band_2_up = new TGraph();
     TGraph* band_2_dw = new TGraph();
 
-    makeXGraph(band_1_up,contour_exp_up,contour_exp_back);
-    makeXGraph(band_1_dw,contour_exp_dw,contour_exp_back);
+    makeXGraph(band_1_up,contour_exp_up,contour_exp_back); 
+    makeXGraph(band_1_dw,contour_exp_dw,contour_exp_back); 
     makeXGraph(band_2_up,contour_exp_up2,contour_exp_back);
     makeXGraph(band_2_dw,contour_exp_dw2,contour_exp_back);
 
@@ -945,9 +961,11 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     band_2_up->Write("band_2_up");
     band_2_dw->Write("band_2_dw");
     
+    // make uncertainty band using y-axis error bar
     makeUncertaintyBand(graph_1s,contour_exp_back,band_1_up,band_1_dw,useDMMass);
     makeUncertaintyBand(graph_2s,contour_exp_back,band_2_up,band_2_dw,useDMMass);
 
+    // swap x and y for the plot
     TGraph* band_1_y = new TGraph();
     TGraph* band_1_up_y = new TGraph();
     TGraph* band_1_dw_y = new TGraph();
@@ -965,6 +983,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     band_2_up_y->Write("band_2_up_y");
     band_2_dw_y->Write("band_2_dw_y");
 
+    // make uncertainty band using x-axis error bar
     makeUncertaintyBand(graph_1s_y,contour_exp_back,band_1_y,band_1_up_y,band_1_dw_y,useDMMass);
     makeUncertaintyBand(graph_2s_y,contour_exp_back,band_1_y,band_2_up_y,band_2_dw_y,useDMMass);
     
@@ -994,7 +1013,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 
   }
 
-  if(addRelicDensity and not makeCOLZ){
+  if(addRelicDensity and not makeCOLZ){ // to plot the relic when a brazilian plot is performed
     relic_graph_g1_ext->SetLineColor(kBlue);
     relic_graph_g2_ext->SetLineColor(kBlue);
     relic_graph_g1_ext->SetLineWidth(-802);
@@ -1004,11 +1023,11 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     relic_graph_g1_ext->SetFillColor(kBlue);
     relic_graph_g2_ext->SetFillColor(kBlue);
     relic_graph_g1_ext->Draw("L SAME");
-    relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
+    //relic_graph_g2_ext->Draw("L SAME");                                                                                                                                                           
   }
 
 
-  if(makeCOLZ){
+  if(makeCOLZ){ // in case of a colz plot change the line style
     contour_obs_up->SetLineColor(kRed);
     contour_obs_up->SetLineWidth(2);
     contour_obs_up->SetLineStyle(7);
@@ -1112,22 +1131,25 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 
   canvas->RedrawAxis("sameaxis");
 
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV.pdf").c_str());
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV.png").c_str());
+  string postfix;
+
+  if(useDMMass) postfix = "mdm_vs_qg";
+  else postfix = "mmed_vs_qg";
+
+  if(makeCOLZ) postfix += "_colz";
+  else postfix += "_brazilian";
+
+  if(useSplineND) postfix += "_spline";
+    
+  
+  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV.pdf").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV.png").c_str(),"png");
+  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV.C").c_str(),".C");
 
   canvas->SetLogy();
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.pdf").c_str());
-  canvas->SaveAs((outputDIR+"/scan_vector_mdm_vs_gq_"+string(energy)+"TeV_log.png").c_str());
-
-  contour_exp_back->Write("contour_exp_back");
-  contour_exp_up->Write("contour_exp_up");
-  contour_exp_dw->Write("contour_exp_dw");
-  contour_exp_up2->Write("contour_exp_up2");
-  contour_exp_dw2->Write("contour_exp_dw2");
-
-  outputTemp->Close();
-  //  system(("rm "+outputDIR+"/outputTemp_vector.root").c_str());
-
-
+  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.pdf").c_str(),"pdf");
+  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.png").c_str(),"png");
+  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.C").c_str(),".C");
+  
 }
 
