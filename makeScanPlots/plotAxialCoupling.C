@@ -49,6 +49,39 @@ TGraph* produceContour (const int & reduction, const bool & applyReduction = tru
   return lTotalE;
 }
 
+// calculate the width for a given mass point                                                                                                                                                           
+float mediatorWidth (const float & medMass, const float & dmMass, const float & gq){
+
+  float width    = 0;
+  float m_uquark = 0.0022;
+  float m_dquark = 0.0047;
+  float m_squark = 0.096;
+  float m_cquark = 1.28;
+  float m_bquark = 4.18;
+  float m_tquark = 173.1;
+
+  float gdm = 1;
+
+  if(medMass >= 2*m_uquark)
+    width += (3*gq*gq*(medMass*medMass-2*m_uquark*m_uquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_uquark*m_uquark/(medMass*medMass)));
+  if(medMass >= 2*m_dquark)
+    width += (3*gq*gq*(medMass*medMass-2*m_dquark*m_dquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_dquark*m_dquark/(medMass*medMass)));
+  if(medMass >= 2*m_squark)
+    width += (3*gq*gq*(medMass*medMass-2*m_squark*m_squark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_squark*m_squark/(medMass*medMass)));
+  if(medMass >= 2*m_cquark)
+    width += (3*gq*gq*(medMass*medMass-2*m_cquark*m_cquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_cquark*m_cquark/(medMass*medMass)));
+  if(medMass >= 2*m_bquark)
+    width += (3*gq*gq*(medMass*medMass-2*m_bquark*m_bquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_bquark*m_bquark/(medMass*medMass)));
+  if(medMass >= 2*m_tquark)
+    width += (3*gq*gq*(medMass*medMass-2*m_tquark*m_tquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_tquark*m_tquark/(medMass*medMass)));
+  if(dmMass >= 2*dmMass)
+    width += (gdm*gdm*(medMass*medMass-2*dmMass*dmMass)/(12*TMath::Pi()*medMass)*sqrt(1-4*dmMass*dmMass/(medMass*medMass)));
+
+  return width;
+  
+}
+
+
 /////////
 static float nbinsX      = 1100;
 static float minX        = 50;
@@ -57,7 +90,7 @@ static float maxX        = 2000;
 static float maxY        = 700;
 static float nbinsY      = 350;
 static float nCoupling   = 100;
-static float minCoupling = 0.01;
+static float minCoupling = 0.02;
 static float maxCoupling = 1;
 static float minZ        = 0.1;
 static float maxZ        = 100;
@@ -425,6 +458,7 @@ void makeUncertaintyBand(TGraphAsymmErrors* graph, TGraph* central, TGraph* band
 ///////////////
 static vector<float> gq_coupling = {1.0,0.75,0.5,0.3,0.25,0.2,0.1,0.05,0.01};
 static string energy = "13";
+static bool addWidthLines = true;
 
 void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM = 3, bool useSplineND = true, bool makeCOLZ = false) {
 
@@ -805,6 +839,8 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     hexp2_dw2->SetContour(1,contours);
   }
 
+
+
   // All the plotting and cosmetics                                                                                                                                                                   
   TCanvas* canvas = new TCanvas("canvas", "canvas",650,600);
   if(makeCOLZ){
@@ -901,6 +937,39 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   hobs2_dw->Draw("contz list same");
   canvas->Update();
   TGraph* contour_obs_dw = produceContour(reductionForContour);
+
+  // make the width from the 2D graph:                                                                                                                                                                 
+  TH2* hobs_width = (TH2*) hobs_coupling->Clone("hobs_width");
+  for(int iBinX = 0; iBinX < hobs_coupling->GetNbinsX(); iBinX++){
+    for(int iBinY = 0; iBinY < hobs_coupling->GetNbinsY(); iBinY++){
+      hobs_width->SetBinContent(iBinX+1,iBinY+1,mediatorWidth(hobs_coupling->GetXaxis()->GetBinCenter(iBinX+1),hobs_coupling->GetXaxis()->GetBinCenter(iBinX+1)/3,hobs_coupling->GetYaxis()->GetBinCenter(iBinY+1))/hobs_coupling->GetXaxis()->GetBinCenter(iBinX+1));
+    }
+  }
+
+  //////////                                                                                                                                                                                           
+  cout<<"Make width contours "<<endl;
+  double contours_width[1];
+  contours_width[0]= 0.3;
+  hobs_width->SetContour(1,contours_width);
+  hobs_width->GetZaxis()->SetLabelSize(0);
+  hobs_width->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_width_0p3 = produceContour(reductionForContour);
+
+  contours_width[0]= 0.05;
+  hobs_width->SetContour(1,contours_width);
+  hobs_width->GetZaxis()->SetLabelSize(0);
+  hobs_width->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_width_0p05 = produceContour(reductionForContour);
+
+  contours_width[0]= 0.001;
+  hobs_width->SetContour(1,contours_width);
+  hobs_width->GetZaxis()->SetLabelSize(0);
+  hobs_width->Draw("contz list same");
+  canvas->Update();
+  TGraph* contour_obs_width_0p001 = produceContour(reductionForContour);
+
   
   frame->Draw();
 
@@ -956,11 +1025,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     makeXGraph(band_2_up,contour_exp_up2,contour_exp_back);
     makeXGraph(band_2_dw,contour_exp_dw2,contour_exp_back);
 
-    band_1_up->Write("band_1_up");
-    band_1_dw->Write("band_1_dw");
-    band_2_up->Write("band_2_up");
-    band_2_dw->Write("band_2_dw");
-    
     // make uncertainty band using y-axis error bar
     makeUncertaintyBand(graph_1s,contour_exp_back,band_1_up,band_1_dw,useDMMass);
     makeUncertaintyBand(graph_2s,contour_exp_back,band_2_up,band_2_dw,useDMMass);
@@ -977,11 +1041,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     makeYGraph(band_1_dw_y,contour_exp_dw);
     makeYGraph(band_2_up_y,contour_exp_up2);
     makeYGraph(band_2_dw_y,contour_exp_dw2);
-
-    band_1_up_y->Write("band_1_up_y");
-    band_1_dw_y->Write("band_1_dw_y");
-    band_2_up_y->Write("band_2_up_y");
-    band_2_dw_y->Write("band_2_dw_y");
 
     // make uncertainty band using x-axis error bar
     makeUncertaintyBand(graph_1s_y,contour_exp_back,band_1_y,band_1_up_y,band_1_dw_y,useDMMass);
@@ -1005,11 +1064,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     graph_1s->Draw("2same");
     graph_2s_y->Draw("2same");
     graph_1s_y->Draw("2same");
-
-    graph_2s->Write("graph_2s");
-    graph_1s->Write("graph_1s");
-    graph_2s_y->Write("graph_2s_y");
-    graph_1s_y->Write("graph_1s_y");
 
   }
 
@@ -1065,6 +1119,40 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     contour_exp->Draw("Lsame");
   }
 
+  if(addWidthLines){
+    contour_obs_width_0p3->SetLineColor(kGray+1);
+    contour_obs_width_0p05->SetLineColor(kGray+1);
+    contour_obs_width_0p001->SetLineColor(kGray+1);
+
+    contour_obs_width_0p3->SetLineStyle(5);
+    contour_obs_width_0p05->SetLineStyle(5);
+    contour_obs_width_0p001->SetLineStyle(5);
+
+    contour_obs_width_0p3->SetLineWidth(2);
+    contour_obs_width_0p05->SetLineWidth(2);
+    contour_obs_width_0p001->SetLineWidth(2);
+
+    contour_obs_width_0p3->Draw("Lsame");
+    contour_obs_width_0p05->Draw("Lsame");
+    contour_obs_width_0p001->Draw("Lsame");
+
+    TLatex latex_0p3;
+    TLatex latex_0p05;
+    TLatex latex_0p001;
+
+    latex_0p3.SetTextSize(0.0243902);
+    latex_0p05.SetTextSize(0.0243902);
+    latex_0p001.SetTextSize(0.0243902);
+
+    latex_0p3.SetTextColor(kGray+1);
+    latex_0p05.SetTextColor(kGray+1);
+    latex_0p001.SetTextColor(kGray+1);
+
+    latex_0p3.DrawLatexNDC(0.78,0.86,"#Gamma/m_{med} = 0.3");
+    latex_0p05.DrawLatexNDC(0.43,0.72,"#Gamma/m_{med} = 0.05");
+    latex_0p001.DrawLatexNDC(0.73,0.27,"#Gamma/m_{med} = 0.001");
+  }
+  
   if(not addPreliminary)
     CMS_lumi(canvas,"35.9",true,true,false,0,-0.09);
   else
@@ -1144,12 +1232,11 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV.png").c_str(),"png");
-  canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV.C").c_str(),"C");
 
   canvas->SetLogy();
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.png").c_str(),"png");
-  canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.C").c_str(),"C");
+  canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.root").c_str(),"C");
 
 
 }
