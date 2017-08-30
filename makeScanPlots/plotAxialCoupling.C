@@ -97,8 +97,8 @@ static float maxZ        = 100;
 static int   reductionForContour = 12;
 static bool  addPreliminary   = false;
 static bool  addRelicDensity  = true;
-static int   nForInterpolateX = 75;
-static int   nForInterpolateY = 60;
+static int   nForInterpolateX = 80;
+static int   nForInterpolateY = 70;
 static float minCoupling_spline = 0.01;
 static float maxCoupling_spline = 1.0;
 static float minX_spline = 40;
@@ -140,6 +140,8 @@ void fillLimitGraphs(TTree* tree,
     int c       = code(mh);
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
+
+    if(medmass == 60) continue;
 
     if(medmass != currentmedmass or dmmass != currentdmmass){
 
@@ -189,7 +191,6 @@ void fillLimitGraphs(TTree* tree,
     if(double(medmass) / double(dmmass) != medOverDM) continue;      
  
     if (quantile == 0.5) { // expected limit
-      cout<<"MedMass "<<medmass<<" dmMass "<<dmmass<<" Expected "<<limit<<endl;
       if(useDMMass){
 	grexp->SetPoint(expcounter, double(dmmass), limit);
       }
@@ -232,7 +233,6 @@ void fillLimitGraphs(TTree* tree,
     }
     
     if (quantile == -1) { // observed
-      cout<<"MedMass "<<medmass<<" dmMass "<<dmmass<<" Observed "<<limit<<endl;
       if(useDMMass){
 	grobs->SetPoint(obscounter, double(dmmass), limit);
 	grobs_up->SetPoint(obscounter, double(dmmass), limit*1.2);
@@ -458,11 +458,20 @@ void makeUncertaintyBand(TGraphAsymmErrors* graph, TGraph* central, TGraph* band
 ///////////////
 static vector<float> gq_coupling = {1.0,0.75,0.5,0.3,0.25,0.2,0.1,0.05,0.01};
 static string energy = "13";
-static bool addWidthLines = true;
+static bool addWidthLines = false;
+static bool addWidthAsAxis = true;
 
 void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM = 3, bool useSplineND = true, bool makeCOLZ = false) {
 
   gSystem->Load("externalLibs/RooSplineND_cc.so");
+
+  if(addWidthAsAxis and addWidthLines)
+    addWidthLines = false;
+
+  if(makeCOLZ){
+    addWidthLines = false;
+    addWidthAsAxis = false;
+  }
 
   TGraph* relic_graph_g1 = new TGraph();
   TGraph* relic_graph_g2 = new TGraph();
@@ -551,7 +560,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
 
   // loop on the tree list and fill graphs  
   for(int itree = 0; itree < treeList.size(); itree++){
-    cout<<"################## "<<grexp.at(itree).first<<endl;
     if(makeCOLZ)
       fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
 		      grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
@@ -786,7 +794,25 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
       hexp_coupling_dw2 = hexp_coupling_ext_dw2;
     }
   }
-  
+
+  //// for bins --> fix constant all points above 70 GeV
+  for(int iBinX = 0; iBinX < hexp_coupling->GetNbinsX(); iBinX++){
+    for(int iBinY = 0; iBinY < hexp_coupling->GetNbinsX(); iBinY++){
+      if(hexp_coupling->GetXaxis()->GetBinCenter(iBinX+1) < 80){
+	hexp_coupling->SetBinContent(iBinX+1,iBinY+1,hexp_coupling->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+	hexp_coupling_up->SetBinContent(iBinX+1,iBinY+1,hexp_coupling_up->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+	hexp_coupling_dw->SetBinContent(iBinX+1,iBinY+1,hexp_coupling_dw->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+	if(not makeCOLZ){
+	  hexp_coupling_up2->SetBinContent(iBinX+1,iBinY+1,hexp_coupling_up2->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+	  hexp_coupling_dw2->SetBinContent(iBinX+1,iBinY+1,hexp_coupling_dw2->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+	}	  
+	hobs_coupling->SetBinContent(iBinX+1,iBinY+1,hobs_coupling->GetBinContent(hexp_coupling->GetXaxis()->FindBin(71),iBinY+1));
+	hobs_coupling_up->SetBinContent(iBinX+1,iBinY+1,hobs_coupling_up->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+	hobs_coupling_dw->SetBinContent(iBinX+1,iBinY+1,hobs_coupling_dw->GetBinContent(hexp_coupling->GetXaxis()->FindBin(81),iBinY+1));
+      }
+    }
+  }
+
   // extend the relic density line                                                                                                                                                                   
   TGraph* relic_graph_g1_ext = new TGraph();
   TGraph* relic_graph_g2_ext = new TGraph();
@@ -842,14 +868,23 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
 
 
   // All the plotting and cosmetics                                                                                                                                                                   
-  TCanvas* canvas = new TCanvas("canvas", "canvas",650,600);
+  TCanvas* canvas = NULL;
   if(makeCOLZ){
-    canvas->SetRightMargin(0.15);
-    canvas->SetLeftMargin(0.13);
+    canvas = new TCanvas("canvas", "canvas",650,600);
+    canvas->SetRightMargin(0.16);
+    canvas->SetLeftMargin(0.12);
   }
   else{
-    canvas->SetRightMargin(0.10);
-    canvas->SetLeftMargin(0.13);
+    if(not addWidthAsAxis){
+      canvas = new TCanvas("canvas", "canvas",600,600);
+      canvas->SetRightMargin(0.08);
+      canvas->SetLeftMargin(0.12);
+    }
+    else{
+      canvas = new TCanvas("canvas", "canvas",650,625);
+      canvas->SetRightMargin(0.12);
+      canvas->SetLeftMargin(0.12);
+    }
   }
 
   canvas->SetLogz();
@@ -867,9 +902,9 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   else
     frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
 
-  frame->GetYaxis()->SetTitle("g_{q}");
+  frame->GetYaxis()->SetTitle("coupling, g_{q}");
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->SetTitleOffset(1.20);
+  frame->GetYaxis()->SetTitleOffset(1.0);
   frame->Draw();
 
   hexp_coupling->GetZaxis()->SetRangeUser(minZ,maxZ);
@@ -938,15 +973,21 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   canvas->Update();
   TGraph* contour_obs_dw = produceContour(reductionForContour);
 
-  // make the width from the 2D graph:                                                                                                                                                                 
   TH2* hobs_width = (TH2*) hobs_coupling->Clone("hobs_width");
+  hobs_width->Reset();
+  hobs_width->GetZaxis()->SetRangeUser(0,0.5);
+  float minimum = 10000;
+  float maximum = 0;
   for(int iBinX = 0; iBinX < hobs_coupling->GetNbinsX(); iBinX++){
     for(int iBinY = 0; iBinY < hobs_coupling->GetNbinsY(); iBinY++){
       hobs_width->SetBinContent(iBinX+1,iBinY+1,mediatorWidth(hobs_coupling->GetXaxis()->GetBinCenter(iBinX+1),hobs_coupling->GetXaxis()->GetBinCenter(iBinX+1)/3,hobs_coupling->GetYaxis()->GetBinCenter(iBinY+1))/hobs_coupling->GetXaxis()->GetBinCenter(iBinX+1));
+      if(hobs_width->GetBinContent(iBinX+1,iBinY+1) < minimum) minimum = hobs_width->GetBinContent(iBinX+1,iBinY+1);
+      else if(hobs_width->GetBinContent(iBinX+1,iBinY+1) > maximum) maximum = hobs_width->GetBinContent(iBinX+1,iBinY+1);
     }
   }
 
-  //////////                                                                                                                                                                                           
+
+  //////////                                                                                                                                                                                         
   cout<<"Make width contours "<<endl;
   double contours_width[1];
   contours_width[0]= 0.3;
@@ -1152,12 +1193,46 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     latex_0p05.DrawLatexNDC(0.43,0.72,"#Gamma/m_{med} = 0.05");
     latex_0p001.DrawLatexNDC(0.73,0.27,"#Gamma/m_{med} = 0.001");
   }
-  
-  if(not addPreliminary)
-    CMS_lumi(canvas,"35.9",true,true,false,0,-0.09);
-  else
-    CMS_lumi(canvas,"35.9",true,false,false,0,-0.09);
 
+  if(addWidthAsAxis){
+
+    canvas->SetTicky(0);
+
+    TGaxis* widthAxis = new TGaxis(maxX,hobs_width->GetYaxis()->GetBinLowEdge(1),
+                                   maxX,hobs_width->GetYaxis()->GetBinLowEdge(hobs_width->GetNbinsY()+1),
+                                   minimum,maximum,510,"GR+");
+    widthAxis->SetLabelOffset(0.055);
+    widthAxis->SetTitle("#Gamma_{med} / m_{med}");
+    widthAxis->SetTitleFont(42);
+    widthAxis->SetLabelFont(42);
+    widthAxis->SetLabelSize(0.035);
+    widthAxis->SetTitleSize(0.05);
+    widthAxis->CenterTitle();
+    widthAxis->SetTitleOffset(1.1);
+    widthAxis->Draw();
+  }
+
+  
+  if(makeCOLZ){
+    if(not addPreliminary)
+      CMS_lumi(canvas,"35.9",true,true,false,0,-0.09);
+    else
+      CMS_lumi(canvas,"35.9",true,false,false,0,-0.09);
+  }
+  else{
+    if(not addWidthAsAxis){
+      if(not addPreliminary)
+        CMS_lumi(canvas,"35.9",true,true,false,0,-0.01);
+      else
+        CMS_lumi(canvas,"35.9",true,false,false,0,-0.01);
+    }
+    else{
+      if(not addPreliminary)
+        CMS_lumi(canvas,"35.9",true,true,false,0,-0.05);
+      else
+        CMS_lumi(canvas,"35.9",true,false,false,0,-0.05);
+    }
+  }
   
   TLegend* tex = new TLegend(0.15,0.83,0.65,0.89);
   if(makeCOLZ){
@@ -1230,9 +1305,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   if(useSplineND) postfix += "_spline";
     
   
-  canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV.pdf").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV.png").c_str(),"png");
-
   canvas->SetLogy();
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.png").c_str(),"png");
