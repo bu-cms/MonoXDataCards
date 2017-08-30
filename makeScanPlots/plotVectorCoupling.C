@@ -74,7 +74,7 @@ float mediatorWidth (const float & medMass, const float & dmMass, const float & 
     width += (3*gq*gq*(medMass*medMass+2*m_bquark*m_bquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_bquark*m_bquark/(medMass*medMass)));
   if(medMass >= 2*m_tquark)
     width += (3*gq*gq*(medMass*medMass+2*m_tquark*m_tquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_tquark*m_tquark/(medMass*medMass)));
-  if(dmMass >= 2*dmMass)
+  if(medMass >= 2*dmMass)
     width += (gdm*gdm*(medMass*medMass+2*dmMass*dmMass)/(12*TMath::Pi()*medMass)*sqrt(1-4*dmMass*dmMass/(medMass*medMass)));
   
   return width;
@@ -1002,12 +1002,12 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   canvas->Update();
   TGraph* contour_obs_width_0p05 = produceContour(reductionForContour);
 
-  contours_width[0]= 0.001;
+  contours_width[0]= 0.03;
   hobs_width->SetContour(1,contours_width);
   hobs_width->GetZaxis()->SetLabelSize(0);
   hobs_width->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_width_0p001 = produceContour(reductionForContour);
+  TGraph* contour_obs_width_0p03 = produceContour(reductionForContour);
 
   
   frame->Draw();
@@ -1122,35 +1122,35 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   if(addWidthLines){
     contour_obs_width_0p3->SetLineColor(kGray+1);
     contour_obs_width_0p05->SetLineColor(kGray+1);
-    contour_obs_width_0p001->SetLineColor(kGray+1);
+    contour_obs_width_0p03->SetLineColor(kGray+1);
     
     contour_obs_width_0p3->SetLineStyle(5);
     contour_obs_width_0p05->SetLineStyle(5);
-    contour_obs_width_0p001->SetLineStyle(5);
+    contour_obs_width_0p03->SetLineStyle(5);
 
     contour_obs_width_0p3->SetLineWidth(2);
     contour_obs_width_0p05->SetLineWidth(2);
-    contour_obs_width_0p001->SetLineWidth(2);
+    contour_obs_width_0p03->SetLineWidth(2);
     
     contour_obs_width_0p3->Draw("Lsame");
     contour_obs_width_0p05->Draw("Lsame");
-    contour_obs_width_0p001->Draw("Lsame");
+    contour_obs_width_0p03->Draw("Lsame");
 
     TLatex latex_0p3;
     TLatex latex_0p05;
-    TLatex latex_0p001;
+    TLatex latex_0p03;
 
     latex_0p3.SetTextSize(0.0243902);
     latex_0p05.SetTextSize(0.0243902);
-    latex_0p001.SetTextSize(0.0243902);
+    latex_0p03.SetTextSize(0.0243902);
 
     latex_0p3.SetTextColor(kGray+1);
     latex_0p05.SetTextColor(kGray+1);
-    latex_0p001.SetTextColor(kGray+1);
+    latex_0p03.SetTextColor(kGray+1);
 
     latex_0p3.DrawLatex(1436.45,0.706272,"#Gamma/m_{med} = 0.3");
     latex_0p05.DrawLatexNDC(0.63,0.67,"#Gamma/m_{med} = 0.05");
-    latex_0p001.DrawLatexNDC(0.73,0.26,"#Gamma/m_{med} = 0.001");
+    latex_0p03.DrawLatexNDC(0.73,0.48,"#Gamma/m_{med} = 0.03");
   }
 
   if(addWidthAsAxis){
