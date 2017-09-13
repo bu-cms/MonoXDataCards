@@ -359,12 +359,17 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
 
   if(addRelicDensity){
     if(addRelicDensity){
+      int iline = 0;
       for(auto graph : relicDensity){
         graph->SetLineColor(kBlue+2);
-        graph->SetLineWidth(802);
+	if(iline == 0)	  
+	  graph->SetLineWidth(802);
+	else
+	  graph->SetLineWidth(502);
         graph->SetFillStyle(3005);
         graph->SetFillColor(kBlue+2);
         graph->Draw("SAME");
+	iline++;
       }
     }
   }
