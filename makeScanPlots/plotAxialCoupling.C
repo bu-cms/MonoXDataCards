@@ -111,10 +111,11 @@ static float maxXForBrazilianY_DM = 350;
 static float maxXForBrazilianX_DM = 475;
 
 void fillLimitGraphs(TTree* tree,
+		     const float & gq,
 		     TGraph* grexp, TGraph* grexp_up, TGraph* grexp_dw,
 		     TGraph* grobs, TGraph* grobs_up, TGraph* grobs_dw,
 		     const float & medOverDM = 3, 
-		     const bool & useDMMass = false,
+		     const bool  & useDMMass = false,
 		     TGraph* grexp_up2 = NULL, 
 		     TGraph* grexp_dw2 = NULL){
 
@@ -142,9 +143,9 @@ void fillLimitGraphs(TTree* tree,
     int dmmass  = mdm(mh, c);
 
     if(medmass == 60) continue;
-
+    
     if(medmass != currentmedmass or dmmass != currentdmmass){
-
+      
       if(npoints == 6)
 	goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
       npoints = 0;
@@ -170,7 +171,7 @@ void fillLimitGraphs(TTree* tree,
   for(int i = 0; i < tree->GetEntries(); i++){
 
     tree->GetEntry(i);
-    
+
     int c       = code(mh);
     int medmass = mmed(mh,c);
     int dmmass  = mdm(mh,c);
@@ -187,6 +188,7 @@ void fillLimitGraphs(TTree* tree,
       continue;
     }
 
+       
     // check / use only points for which mediator and DM mass are in this relation
     if(double(medmass) / double(dmmass) != medOverDM) continue;      
  
@@ -216,6 +218,7 @@ void fillLimitGraphs(TTree* tree,
     }
 
     if (quantile < 0.85 && quantile > 0.83 ) { //+1-sigma
+
       if(useDMMass)
 	grexp_up->SetPoint(exp_up_counter, double(dmmass), limit);
       else
@@ -225,6 +228,7 @@ void fillLimitGraphs(TTree* tree,
     }    
 
     if(grexp_up2 and quantile > 0.9 && quantile < 1){//+2-sigma
+
       if(useDMMass)
 	grexp_up2->SetPoint(exp_up2_counter, double(dmmass), limit);
       else
@@ -561,16 +565,16 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   // loop on the tree list and fill graphs  
   for(int itree = 0; itree < treeList.size(); itree++){
     if(makeCOLZ)
-      fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
+      fillLimitGraphs(treeList.at(itree),grexp.at(itree).first,grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
 		      grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
 		      medOverDM,useDMMass);
     else
-      fillLimitGraphs(treeList.at(itree),grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
+      fillLimitGraphs(treeList.at(itree),grexp.at(itree).first,grexp.at(itree).second,grexp_up.at(itree).second,grexp_dw.at(itree).second,
 		      grobs.at(itree).second,grobs_up.at(itree).second,grobs_dw.at(itree).second,
 		      medOverDM,useDMMass,grexp_up2.at(itree).second,grexp_dw2.at(itree).second);
 
   }
-  
+
   //// make a spline to further smooth the limit values
   vector<pair<double,TSpline3*> > splineexp = make1DSpline(grexp,"exp");
   vector<pair<double,TSpline3*> > splineexp_up = make1DSpline(grexp_up,"exp_up");
@@ -619,6 +623,7 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   TH2D* hexp_coupling_dw2 = NULL;
   TH2D* hobs_coupling_up = NULL;
   TH2D* hobs_coupling_dw = NULL;  
+
 
   if(useSplineND){ // make a 2D spine using the RooSplineND --> decrease the binning for time constraints
     if(not useDMMass){
@@ -1103,6 +1108,7 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
 
     graph_2s->Draw("2same");
     graph_1s->Draw("2same");
+
     graph_2s_y->Draw("2same");
     graph_1s_y->Draw("2same");
 
@@ -1309,7 +1315,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.png").c_str(),"png");
   canvas->SaveAs((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.root").c_str(),"C");
-
 
 }
 

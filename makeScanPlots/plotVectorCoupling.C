@@ -1309,6 +1309,5 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.png").c_str(),"png");
   canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.root").c_str(),"png");
-  
 }
 
