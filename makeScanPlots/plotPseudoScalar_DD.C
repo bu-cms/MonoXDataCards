@@ -101,7 +101,7 @@ TGraph * makeOBV(TGraph *Graph1){
     pp++;
   }
   gr->GetXaxis()->SetTitle("m_{DM}");
-  gr->GetYaxis()->SetTitle("< #sigma v > (cm^{3}/s)");
+  gr->GetYaxis()->SetTitle("<#sigma v> (cm^{3}/s)");
   gr->SetName(Form("%s_DD",Graph1->GetName()));
   gr->SetLineStyle(Graph1->GetLineStyle());
   gr->SetLineColor(Graph1->GetLineColor());
@@ -154,7 +154,7 @@ static float maxZ = 10;
 static float minX_dd  = 5;
 static float maxX_dd  = 300;
 static double minY_dd = 1e-31;
-static double maxY_dd = 3e-25;
+static double maxY_dd = 1e-25;
 static int  reductionForContour = 3;
 static bool addPreliminary = false;
 
@@ -328,7 +328,7 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   canvas->SetLogy();
   
   TH1* frame = canvas->DrawFrame(minX_dd,minY_dd,maxX_dd,maxY_dd,"");
-  frame->GetYaxis()->SetTitle("<#sigma v > (cm^{3}/s)");
+  frame->GetYaxis()->SetTitle("<#sigma v> (cm^{3}/s)");
   frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
   frame->GetXaxis()->SetLabelSize(0.032);
   frame->GetYaxis()->SetLabelSize(0.032);
@@ -336,7 +336,6 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   frame->GetYaxis()->SetTitleSize(0.042);
   frame->GetYaxis()->SetTitleOffset(1.65);
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->CenterTitle();
   frame->Draw();
   
   frame->Draw();
@@ -348,12 +347,12 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.55,0.22,0.88,0.48,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.55,0.22,0.90,0.45,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
-  leg->AddEntry(DDE_graph,"CMS exp. 95% CL","L");
-  leg->AddEntry(DD_graph ,"CMS obs. 95% CL","L");
+  leg->AddEntry(DDE_graph,"CMS exp. 90% CL","L");
+  leg->AddEntry(DD_graph ,"CMS obs. 90% CL","L");
   leg->AddEntry(grdd ,"FermiLAT","L");
   
   leg->Draw("SAME");
@@ -369,12 +368,12 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   tex->SetTextSize(0.030);
   tex->Draw();
   if (coupling == "1"){
-    tex->DrawLatex(0.225,0.68,"#bf{Pseudoscalar med, Dirac DM}");
-    tex->DrawLatex(0.225,0.64,"#bf{g_{q} = 1, g_{DM} = 1}");
+    tex->DrawLatex(0.225,0.81,"#bf{Pseudoscalar med, Dirac DM}");
+    tex->DrawLatex(0.225,0.77,"#bf{g_{q} = 1, g_{DM} = 1}");
   }
   else{
-    tex->DrawLatex(0.225,0.68,"#bf{Pseudoscalar med, Dirac DM}");
-    tex->DrawLatex(0.225,0.64,"#bf{g_{q} = 0.25, g_{DM} = 1}");
+    tex->DrawLatex(0.225,0.81,"#bf{Pseudoscalar med, Dirac DM}");
+    tex->DrawLatex(0.225,0.77,"#bf{g_{q} = 0.25, g_{DM} = 1}");
   }
   
   ///////                                                                                                                                                                                          
@@ -402,17 +401,16 @@ TGraph* fermiLAT(){
   double *lX = new double[1000];
   double *lY = new double[1000];
 
-  //https://www-glast.stanford.edu/pub_data/713/limits_uu.txt
+  i0++; lX[i0] = 2;    lY[i0] = 8.6249e-28/2;
+  i0++; lX[i0] = 5;    lY[i0] = 1.5159e-27/2;
+  i0++; lX[i0] = 10;   lY[i0] = 2.3933e-27/2;
+  i0++; lX[i0] = 25;   lY[i0] = 4.7166e-27/2;
+  i0++; lX[i0] = 50;   lY[i0] = 7.5998e-27/2;
+  i0++; lX[i0] = 100;  lY[i0] = 1.2724e-26/2;
+  i0++; lX[i0] = 250;  lY[i0] = 2.8681e-26/2;
+  i0++; lX[i0] = 500;  lY[i0] = 5.812e-26/2;
+  i0++; lX[i0] = 1000; lY[i0] = 1.2705e-25/2;
 
-  i0++; lX[i0] = 2;    lY[i0] = 7.92e-27/2;
-  i0++; lX[i0] = 5;    lY[i0] = 1.40e-26/2;
-  i0++; lX[i0] = 10;   lY[i0] = 2.23e-26/2;
-  i0++; lX[i0] = 25;   lY[i0] = 4.24e-26/2;
-  i0++; lX[i0] = 50;   lY[i0] = 7.18e-26/2;
-  i0++; lX[i0] = 100;  lY[i0] = 1.31e-25/2;
-  i0++; lX[i0] = 250;  lY[i0] = 3.25e-25/2;
-  i0++; lX[i0] = 500;  lY[i0] = 7.01e-25/2;
-  i0++; lX[i0] = 1000; lY[i0] = 1.57e-24/2;
 
   TGraph *lLimit = new TGraph(i0,lX,lY);
   lLimit->SetLineWidth(3);

@@ -39,9 +39,9 @@ int code(double mh){
 /////
 static bool addPreliminary = false;
 static bool saveOutputFile = true;
-static bool addICHEPContours = true;
+static bool addICHEPContours = false;
 
-void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "025",string postfix = "COMB") {
+void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "1",string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -235,11 +235,10 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
   TH1* frame = canvas->DrawFrame(min(medMin,0.),TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.5,
 				 medMax,TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*1.5, "");
-  frame->GetYaxis()->CenterTitle();
   frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   frame->GetYaxis()->SetTitle("95%  CL upper limit on #sigma/#sigma_{theory}");
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->SetTitleOffset(1.07);  
+  frame->GetYaxis()->SetTitleOffset(0.95);
   frame->Draw();
 
   if(not addPreliminary)
@@ -281,14 +280,14 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
 
   TLegend *leg = NULL;
   if(not addICHEPContours)
-    leg = new TLegend(0.175,0.5,0.57,0.77);  
+    leg = new TLegend(0.165,0.48,0.45,0.77);  
   else
-    leg = new TLegend(0.175,0.45,0.57,0.77);  
+    leg = new TLegend(0.165,0.45,0.45,0.77);  
 
-  leg->AddEntry(splineobs,"Observed 95% CL","L");
-  leg->AddEntry(splineexp,"Median expected 95% CL","L");
+  leg->AddEntry(splineexp,"Median expected","L");
   leg->AddEntry(graph_1sigma_band,"68% expected","F");
   leg->AddEntry(graph_2sigma_band,"95% expected","F");
+  leg->AddEntry(splineobs,"Observed","L");
   if(addICHEPContours){
     leg->AddEntry(graph_obs_ichep,"EXO-16-037 observed","L");
     leg->AddEntry(graph_exp_ichep,"EXO-16-037 expected","L");  
@@ -314,7 +313,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   gPad->Modified(); 
   gPad->Update();
   
-  frame->GetYaxis()->SetRangeUser(0,6);
+  frame->GetYaxis()->SetRangeUser(0.001,6);
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".png").c_str(),"png");
 

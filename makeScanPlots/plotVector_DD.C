@@ -96,8 +96,8 @@ static float maxZ = 10;
 
 static float minX_dd = 1;
 static float maxX_dd = 1200;
-static double minY_dd = 1e-50;
-static double maxY_dd = 1e-26;
+static double minY_dd = 1e-47;
+static double maxY_dd = 1e-25;
 static int reductionForContour = 20;
 static bool saveOutputFile = true;
 static bool addPreliminary = false;
@@ -283,9 +283,9 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   frame->GetYaxis()->SetLabelSize(0.032);
   frame->GetXaxis()->SetTitleSize(0.042);
   frame->GetYaxis()->SetTitleSize(0.042);
-  frame->GetYaxis()->SetTitleOffset(1.65);
+  frame->GetYaxis()->SetTitleOffset(1.75);
+  frame->GetYaxis()->SetNdivisions(512);
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->CenterTitle();
   frame->Draw();
 
   TGraph *lM0 = lux();
@@ -304,7 +304,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   lM1->Draw("L SAME");
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
-  lM4->Draw("L SAME");
+  //lM4->Draw("L SAME");
 
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
@@ -315,7 +315,8 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.22,0.60,0.80,0.78,NULL,"brNDC");
+
+  TLegend *leg = new TLegend(0.22,0.60,0.85,0.78,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -326,7 +327,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   leg->AddEntry(lM1 ,"CDMSLite","L");
   leg->AddEntry(lM2 ,"Xenon-1T","L");
   leg->AddEntry(lM3 ,"CRESST-II","L");
-  leg->AddEntry(lM4 ,"Neutrino floor","L");
+  //leg->AddEntry(lM4 ,"Neutrino floor","L");
   leg->Draw("SAME");
 
   if(addPreliminary)
@@ -350,6 +351,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   ///////                                                                                                                                                                                             
   canvas->SaveAs((outputDirectory+"/scanDD_vector_g"+coupling+"_"+energy+"TeV_v1.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDirectory+"/scanDD_vector_g"+coupling+"_"+energy+"TeV_v1.png").c_str(),"png");
+  canvas->SaveAs((outputDirectory+"/scanDD_vector_g"+coupling+"_"+energy+"TeV_v1.root").c_str(),"root");
   
   if(saveOutputFile){
 

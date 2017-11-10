@@ -76,7 +76,8 @@ float mediatorWidth (const float & medMass, const float & dmMass, const float & 
     width += (3*gq*gq*(medMass*medMass+2*m_tquark*m_tquark)/(12*TMath::Pi()*medMass)*sqrt(1-4*m_tquark*m_tquark/(medMass*medMass)));
   if(medMass >= 2*dmMass)
     width += (gdm*gdm*(medMass*medMass+2*dmMass*dmMass)/(12*TMath::Pi()*medMass)*sqrt(1-4*dmMass*dmMass/(medMass*medMass)));
-  
+
+
   return width;
   
 }

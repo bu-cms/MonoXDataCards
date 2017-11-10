@@ -296,15 +296,14 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   // All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
   canvas->SetRightMargin(0.15);
-  canvas->SetLeftMargin(0.13);
+  canvas->SetLeftMargin(0.135);
   canvas->SetLogz();
   
   TH1* frame = canvas->DrawFrame(minX,minY,maxX,maxY, "");
-  frame->GetYaxis()->CenterTitle();
   frame->GetYaxis()->SetTitle("m_{DM} [GeV]");
   frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->SetTitleOffset(1.20);
+  frame->GetYaxis()->SetTitleOffset(1.30);
   frame->Draw();
 
   hobs->SetMinimum(minZ);
@@ -405,13 +404,13 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
     CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
 
-  TLegend *leg = new TLegend(0.175,0.48,0.50,0.75);
+  TLegend *leg = new TLegend(0.165,0.49,0.50,0.77);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
-  leg->AddEntry(contour_exp_up,"68% expected","L");
+  leg->AddEntry(contour_exp_up,"#pm 1 #sigma_{experiment}","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
   leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
   if(addRelicDensity)

@@ -386,9 +386,8 @@ void plotAxial_DD(string inputFileName, string outputDirectory, bool runningCoup
   frame->GetYaxis()->SetLabelSize(0.032);
   frame->GetXaxis()->SetTitleSize(0.042);
   frame->GetYaxis()->SetTitleSize(0.042);
-  frame->GetYaxis()->SetTitleOffset(1.65);
+  frame->GetYaxis()->SetTitleOffset(1.60);
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->CenterTitle();
   frame->Draw();
 
   lM0->Draw("L SAME");
@@ -396,7 +395,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, bool runningCoup
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
   lM4->Draw("L SAME");
-  lM5->Draw("L SAME");
+  //lM5->Draw("L SAME");
 
   if(not runningCoupling){
     DDE_graph->Draw("C SAME");
@@ -416,7 +415,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, bool runningCoup
   gPad->Modified();
   gPad->Update();
 
-  TLegend *leg = new TLegend(0.22,0.60,0.80,0.78,NULL,"brNDC");
+  TLegend *leg = new TLegend(0.22,0.57,0.83,0.78,NULL,"brNDC");
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
@@ -435,7 +434,7 @@ void plotAxial_DD(string inputFileName, string outputDirectory, bool runningCoup
   leg->AddEntry(lM2 ,"IceCube b#bar{b}","L");
   leg->AddEntry(lM4 ,"IceCube t#bar{t}","L");
   leg->AddEntry(lM3 ,"Super-K b#bar{b}","L");
-  leg->AddEntry(lM5 ,"Neutrino floor", "L"); 
+  //leg->AddEntry(lM5 ,"Neutrino floor", "L"); 
 
   leg->Draw("SAME");
   if(addPreliminary)
