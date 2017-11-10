@@ -901,7 +901,6 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   else
     frame = canvas->DrawFrame(minY,minCoupling,maxY,maxCoupling,"");
 
-  frame->GetYaxis()->CenterTitle();
   if(not useDMMass)
     frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   else
@@ -910,6 +909,7 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   frame->GetYaxis()->SetTitle("coupling, g_{q}");
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->SetTitleOffset(1.0);
+  frame->GetXaxis()->SetNdivisions(508);
   frame->Draw();
 
   hexp_coupling->GetZaxis()->SetRangeUser(minZ,maxZ);
@@ -1207,14 +1207,14 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     TGaxis* widthAxis = new TGaxis(maxX,hobs_width->GetYaxis()->GetBinLowEdge(1),
                                    maxX,hobs_width->GetYaxis()->GetBinLowEdge(hobs_width->GetNbinsY()+1),
                                    minimum,maximum,510,"GR+");
+
     widthAxis->SetLabelOffset(0.055);
     widthAxis->SetTitle("#Gamma_{med} / m_{med}");
     widthAxis->SetTitleFont(42);
     widthAxis->SetLabelFont(42);
     widthAxis->SetLabelSize(0.035);
     widthAxis->SetTitleSize(0.05);
-    widthAxis->CenterTitle();
-    widthAxis->SetTitleOffset(1.1);
+    widthAxis->SetTitleOffset(0.95);
     widthAxis->Draw();
   }
 
@@ -1240,7 +1240,9 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     }
   }
   
-  TLegend* tex = new TLegend(0.15,0.83,0.65,0.89);
+
+  TLegend* tex = new TLegend(0.15,0.84,0.60,0.89);
+
   if(makeCOLZ){
     tex->SetFillColor(kWhite);
     tex->SetFillStyle(1001);
@@ -1277,6 +1279,8 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
     leg->AddEntry(contour_exp_up,"68% expected","L");
   }
   else{
+    graph_1s->SetLineColor(kGreen+1);
+    graph_2s->SetLineColor(kOrange);
     leg->AddEntry(graph_1s,"68% expected","F");
     leg->AddEntry(graph_2s,"95% expected","F");
   }

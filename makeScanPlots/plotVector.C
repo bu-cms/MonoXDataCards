@@ -507,21 +507,21 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   if(not addICHEPContours)
     leg = new TLegend(0.165,0.49,0.50,0.77);
   else
-    leg = new TLegend(0.165,0.47,0.50,0.78);
+    leg = new TLegend(0.165,0.45,0.50,0.78);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
+  if(addICHEPContours){
+    leg->AddEntry(graph_obs_ichep,"arXiv:1703.01651 observed","L");
+    leg->AddEntry(graph_exp_ichep,"arXiv:1703.01651 expected","L");
+  }
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
   leg->AddEntry(contour_exp_up,"#pm 1 #sigma_{experiment}","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
   leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
-  if(addICHEPContours){
-    leg->AddEntry(graph_obs_ichep,"EXO-16-037 observed","L");
-    leg->AddEntry(graph_exp_ichep,"EXO-16-037 expected","L");
-  }
-   if(addRelicDensity)
-     leg->AddEntry(relicDensity.front(),"#Omega_{c}#timesh^{2} #geq 0.12","F");
+  if(addRelicDensity)
+    leg->AddEntry(relicDensity.front(),"#Omega_{c}#timesh^{2} #geq 0.12","F");
    
 
   leg->Draw("SAME");

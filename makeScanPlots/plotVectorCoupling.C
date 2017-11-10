@@ -896,7 +896,6 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   else
     frame = canvas->DrawFrame(minY,minCoupling,maxY,maxCoupling,"");
 
-  frame->GetYaxis()->CenterTitle();
   if(not useDMMass)
     frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   else
@@ -905,6 +904,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   frame->GetYaxis()->SetTitle("coupling, g_{q}");
   frame->GetXaxis()->SetTitleOffset(1.15);
   frame->GetYaxis()->SetTitleOffset(1.0);
+  frame->GetXaxis()->SetNdivisions(508);
   frame->Draw();
 
   hexp_coupling->GetZaxis()->SetRangeUser(minZ,maxZ);
@@ -1167,8 +1167,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     widthAxis->SetLabelFont(42);
     widthAxis->SetLabelSize(0.035);
     widthAxis->SetTitleSize(0.05);
-    widthAxis->CenterTitle();
-    widthAxis->SetTitleOffset(1.1);
+    widthAxis->SetTitleOffset(0.95);
     widthAxis->Draw();
   }
 
@@ -1235,7 +1234,7 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 
 
   
-  TLegend* tex = new TLegend(0.15,0.83,0.65,0.89);
+  TLegend* tex = new TLegend(0.15,0.84,0.60,0.89);
   if(makeCOLZ){
     tex->SetFillColor(kWhite);
     tex->SetFillStyle(1001);
@@ -1252,9 +1251,9 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
 
   TLegend *leg = NULL;
   if(makeCOLZ)
-    leg = new TLegend(0.15,0.58,0.52,0.81);
+    leg = new TLegend(0.15,0.58,0.55,0.81);
   else
-    leg = new TLegend(0.15,0.55,0.52,0.81);
+    leg = new TLegend(0.15,0.52,0.55,0.81);
 
   if(makeCOLZ){
     leg->SetFillColor(kWhite);
@@ -1272,6 +1271,8 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
     leg->AddEntry(contour_exp_up,"68% expected","L");
   }
   else{
+    graph_1s->SetLineColor(kGreen+1);
+    graph_2s->SetLineColor(kOrange);
     leg->AddEntry(graph_1s,"68% expected","F");
     leg->AddEntry(graph_2s,"95% expected","F");
   }

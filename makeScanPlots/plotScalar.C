@@ -340,15 +340,14 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
   // All the plotting and cosmetics
   TCanvas* canvas = new TCanvas("canvas", "canvas",625,600);
   canvas->SetRightMargin(0.15);
-  canvas->SetLeftMargin(0.13);
+  canvas->SetLeftMargin(0.135);
   canvas->SetLogz();
   
   TH1* frame = canvas->DrawFrame(minX,minY,maxX,maxY, "");
-  frame->GetYaxis()->CenterTitle();
   frame->GetYaxis()->SetTitle("m_{DM} [GeV]");
   frame->GetXaxis()->SetTitle("m_{med} [GeV]");
   frame->GetXaxis()->SetTitleOffset(1.15);
-  frame->GetYaxis()->SetTitleOffset(1.20);
+  frame->GetYaxis()->SetTitleOffset(1.30);
   frame->Draw();
 
   hobs->SetMinimum(minZ);
@@ -473,24 +472,26 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
   else
     CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
+
   TLegend *leg = NULL;
   if(not addICHEPContours)
-    leg = new TLegend(0.175,0.48,0.50,0.75);
+    leg = new TLegend(0.165,0.49,0.50,0.77);
   else
-    leg = new TLegend(0.175,0.45,0.50,0.78);
+    leg = new TLegend(0.165,0.45,0.50,0.77);
+
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextFont(42);
+  if(addICHEPContours){
+    leg->AddEntry(graph_obs_ichep,"arXiv:1703.01651 observed","L");
+  }
   leg->AddEntry(contour_exp,"Median expected 95% CL","L");
-  leg->AddEntry(contour_exp_up,"68% expected","L");
+  leg->AddEntry(contour_exp_up,"#pm 1 #sigma_{experiment}","L");
   leg->AddEntry(contour_obs,"Observed 95% CL","L");
   leg->AddEntry(contour_obs_up,"Observed #pm theory unc.","L");
-  if(addICHEPContours){
-    leg->AddEntry(graph_obs_ichep,"EXO-16-037 observed","L");
-  }
   if(addRelicDensity)
-    leg->AddEntry(relicDensity.at(0),"#Omega_{c}#timesh^{2} #geq 0.12","F");
+    leg->AddEntry(relicDensity.front(),"#Omega_{c}#timesh^{2} #geq 0.12","F");
   leg->Draw("SAME");
 
   TLatex * tex = new TLatex();

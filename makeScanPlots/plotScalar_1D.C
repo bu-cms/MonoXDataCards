@@ -39,7 +39,7 @@ int code(double mh){
 /////
 static bool addPreliminary = false;
 static bool saveOutputFile = true;
-static bool addICHEPContours = false;
+static bool addICHEPContours = true;
 
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "1",string postfix = "COMB") {
   
@@ -282,16 +282,16 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   if(not addICHEPContours)
     leg = new TLegend(0.165,0.48,0.45,0.77);  
   else
-    leg = new TLegend(0.165,0.45,0.45,0.77);  
+    leg = new TLegend(0.165,0.44,0.58,0.77);  
 
+  if(addICHEPContours){
+    leg->AddEntry(graph_obs_ichep,"arXiv:1703.01651 observed","L");
+    leg->AddEntry(graph_exp_ichep,"arXiv:1703.01651 expected","L");
+  }
   leg->AddEntry(splineexp,"Median expected","L");
   leg->AddEntry(graph_1sigma_band,"68% expected","F");
   leg->AddEntry(graph_2sigma_band,"95% expected","F");
   leg->AddEntry(splineobs,"Observed","L");
-  if(addICHEPContours){
-    leg->AddEntry(graph_obs_ichep,"EXO-16-037 observed","L");
-    leg->AddEntry(graph_exp_ichep,"EXO-16-037 expected","L");  
-  }
   leg->AddEntry(line,"#mu = 1","L");
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
