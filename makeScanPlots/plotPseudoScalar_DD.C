@@ -328,7 +328,7 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   canvas->SetLogy();
   
   TH1* frame = canvas->DrawFrame(minX_dd,minY_dd,maxX_dd,maxY_dd,"");
-  frame->GetYaxis()->SetTitle("<#sigma v> (cm^{3}/s)");
+  frame->GetYaxis()->SetTitle("#LT#sigma v#GT (cm^{3}/s)");
   frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
   frame->GetXaxis()->SetLabelSize(0.032);
   frame->GetYaxis()->SetLabelSize(0.032);
