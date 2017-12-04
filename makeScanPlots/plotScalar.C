@@ -475,9 +475,9 @@ void plotScalar(string inputFileName, string outputDIR, bool isDMF = false, stri
 
   TLegend *leg = NULL;
   if(not addICHEPContours)
-    leg = new TLegend(0.165,0.49,0.50,0.77);
+    leg = new TLegend(0.165,0.48,0.52,0.77);
   else
-    leg = new TLegend(0.165,0.45,0.50,0.77);
+    leg = new TLegend(0.165,0.44,0.52,0.77);
 
   leg->SetFillColor(0);
   leg->SetFillStyle(0);

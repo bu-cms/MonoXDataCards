@@ -279,6 +279,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   TH1* frame = canvas->DrawFrame(minX_dd,minY_dd,maxX_dd,maxY_dd,"");
   frame->GetYaxis()->SetTitle("#sigma^{SI}_{DM-nucleon} [cm^{2}]");
   frame->GetXaxis()->SetTitle("m_{DM} [GeV]");
+  frame->GetXaxis()->SetRangeUser(1,1000);
   frame->GetXaxis()->SetLabelSize(0.032);
   frame->GetYaxis()->SetLabelSize(0.032);
   frame->GetXaxis()->SetTitleSize(0.042);
@@ -293,18 +294,21 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   TGraph *lM2 = xenon();
   TGraph *lM3 = cresst();
   TGraph *lM4 = neutrino_floor();
+  TGraph *lM5 = panda();
 
   lM0->SetLineColor(kBlue);
   lM1->SetLineColor(kBlue+2);
   lM2->SetLineColor(kAzure+1);
   lM3->SetLineColor(kAzure+8);
   lM4->SetLineColor(kGreen+2);
+  lM5->SetLineColor(kBlue+3);
 
   lM0->Draw("L SAME");
   lM1->Draw("L SAME");
   lM2->Draw("L SAME");
   lM3->Draw("L SAME");
   //lM4->Draw("L SAME");
+  lM5->Draw("L SAME");
 
   DDE_graph->Draw("L SAME");
   DD_graph->Draw("L SAME");
@@ -327,6 +331,7 @@ void plotVector_DD (string inputFileName, string outputDirectory, string couplin
   leg->AddEntry(lM1 ,"CDMSLite","L");
   leg->AddEntry(lM2 ,"Xenon-1T","L");
   leg->AddEntry(lM3 ,"CRESST-II","L");
+  leg->AddEntry(lM5 ,"PandaX-II","L");
   //leg->AddEntry(lM4 ,"Neutrino floor","L");
   leg->Draw("SAME");
 
@@ -373,6 +378,48 @@ TGraph *panda(){
   int i0 = -1;
   double *lX = new double[1000];
   double *lY = new double[1000];
+
+  i0++; lX[i0] = 8.047; lY[i0]=  9.798e-45;
+  i0++; lX[i0] = 8.461; lY[i0]=  6.708e-45;
+  i0++; lX[i0] = 8.928; lY[i0]=  4.787e-45;
+  i0++; lX[i0] = 9.387; lY[i0]=  3.399e-45;
+  i0++; lX[i0] = 9.421; lY[i0]=  3.399e-45;
+  i0++; lX[i0] = 9.764; lY[i0]=  2.805e-45;
+  i0++; lX[i0] = 12.856; lY[i0]=  7.239e-46;
+  i0++; lX[i0] = 16.737; lY[i0]=  2.890e-46;
+  i0++; lX[i0] = 18.758; lY[i0]=  2.084e-46;
+  i0++; lX[i0] = 21.322; lY[i0]=  1.543e-46;
+  i0++; lX[i0] = 25.468; lY[i0]=  1.190e-46;
+  i0++; lX[i0] = 29.148; lY[i0]=  1.035e-46;
+  i0++; lX[i0] = 32.424; lY[i0]=  9.577e-47;
+  i0++; lX[i0] = 35.559; lY[i0]=  8.907e-47;
+  i0++; lX[i0] = 38.174; lY[i0]=  8.680e-47;
+  i0++; lX[i0] = 40.691; lY[i0]=  8.614e-47;
+  i0++; lX[i0] = 44.938; lY[i0]=  8.706e-47;
+  i0++; lX[i0] = 49.981; lY[i0]=  8.868e-47;
+  i0++; lX[i0] = 54.806; lY[i0]=  9.103e-47;
+  i0++; lX[i0] = 60.955; lY[i0]=  9.296e-47;
+  i0++; lX[i0] = 68.274; lY[i0]=  9.845e-47;
+  i0++; lX[i0] = 77.561; lY[i0]=  1.065e-46;
+  i0++; lX[i0] = 88.110; lY[i0]=  1.169e-46;
+  i0++; lX[i0] = 103.701; lY[i0]=  1.325e-46;
+  i0++; lX[i0] = 129.162; lY[i0]=  1.606e-46;
+  i0++; lX[i0] = 193.418; lY[i0]=  2.173e-46;
+  i0++; lX[i0] = 246.077; lY[i0]=  2.717e-46;
+  i0++; lX[i0] = 313.057; lY[i0]=  3.507e-46;
+  i0++; lX[i0] = 401.093; lY[i0]=  4.596e-46;
+  i0++; lX[i0] = 483.863; lY[i0]=  5.703e-46;
+  i0++; lX[i0] = 626.596; lY[i0]=  7.227e-46;
+  i0++; lX[i0] = 855.682; lY[i0]=  9.723e-46;
+  i0++; lX[i0] = 1236.581; lY[i0]=  1.422e-45;
+  i0++; lX[i0] = 1724.982; lY[i0]=  1.923e-45;
+  i0++; lX[i0] = 2306.110; lY[i0]=  2.546e-45;
+  i0++; lX[i0] = 3428.606; lY[i0]=  3.685e-45;
+  i0++; lX[i0] = 4748.818; lY[i0]=  5.088e-45;
+  i0++; lX[i0] = 6484.752; lY[i0]=  7.024e-45;
+  i0++; lX[i0] = 8792.397; lY[i0]=  9.902e-45;
+
+  /*
   i0++; lX[i0] =4.970 ; lY[i0]= 9.731e-43;
   i0++; lX[i0] =6.285 ; lY[i0]= 9.376e-44;
   i0++; lX[i0] =7.717 ; lY[i0]= 1.870e-44;
@@ -391,7 +438,8 @@ TGraph *panda(){
   i0++; lX[i0] =457.401 ; lY[i0]= 1.368e-45;
   i0++; lX[i0] =701.572 ; lY[i0]= 2.188e-45;
   i0++; lX[i0] =990.270 ; lY[i0]= 3.323e-45;
-  
+  */
+
   TGraph *lLimit = new TGraph(i0,lX,lY);
   lLimit->SetLineWidth(3.);
   return lLimit;

@@ -464,9 +464,9 @@ void plotAxial(string inputFileName, string outputDIR, bool isDMF = false, strin
 
   TLegend *leg = NULL;
   if(not addICHEPContours)
-    leg = new TLegend(0.165,0.49,0.50,0.77);
+    leg = new TLegend(0.165,0.48,0.53,0.77);
   else
-    leg = new TLegend(0.165,0.45,0.50,0.78);
+    leg = new TLegend(0.165,0.45,0.53,0.78);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);

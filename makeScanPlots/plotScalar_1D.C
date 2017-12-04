@@ -39,7 +39,7 @@ int code(double mh){
 /////
 static bool addPreliminary = false;
 static bool saveOutputFile = true;
-static bool addICHEPContours = true;
+static bool addICHEPContours = false;
 
 void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool isDMF = false, string coupling = "1",string postfix = "COMB") {
   
@@ -280,9 +280,9 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
 
   TLegend *leg = NULL;
   if(not addICHEPContours)
-    leg = new TLegend(0.165,0.48,0.45,0.77);  
+    leg =new TLegend(0.165,0.48,0.44,0.77);
   else
-    leg = new TLegend(0.165,0.44,0.58,0.77);  
+    leg = new TLegend(0.165,0.44,0.52,0.77);  
 
   leg->AddEntry(splineexp,"Median expected","L");
   leg->AddEntry(graph_1sigma_band,"68% expected","F");

@@ -404,7 +404,7 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
     CMS_lumi(canvas,"35.9",false,false,false,0,-0.09);
 
 
-  TLegend *leg = new TLegend(0.165,0.49,0.50,0.77);
+  TLegend *leg = new TLegend(0.165,0.48,0.53,0.77);
   leg->SetFillColor(0);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
