@@ -555,16 +555,11 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   if(saveOutputFile){
     TFile* outputFile = new TFile((outputDIR+"/fullLikelihood_scan_vector.root").c_str(),"RECREATE");
     outputFile->cd();
-    //hexp->Write("scan_expected");
-    //hobs->Write("scan_observed");
-    //grexp->Write("graph_expected");
-    //grexp_up->Write("graph_expected_p1s");
-    //grexp_down->Write("graph_expected_m1s");
-    //grobs->Write("graph_observed");
-    contour_exp->Write("contour_expected");
-    contour_obs->Write("contour_observed");
-    outputFile->Write();
-
+    hobs->Write("Observed_limit");
+    contour_obs->Write("Contour_observed");
+    hexp->Write("Expected_limit");
+    contour_exp->Write("Expected_observed");    
+    outputFile->Write();    
   }
 }
 

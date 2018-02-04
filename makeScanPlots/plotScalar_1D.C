@@ -313,7 +313,7 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   gPad->Modified(); 
   gPad->Update();
   
-  frame->GetYaxis()->SetRangeUser(0.001,6);
+  frame->GetYaxis()->SetRangeUser(0.001,7);
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".png").c_str(),"png");
 

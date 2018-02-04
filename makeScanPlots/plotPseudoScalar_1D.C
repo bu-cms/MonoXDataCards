@@ -38,8 +38,9 @@ int code(double mh){
 
 static bool addPreliminary = true;
 static bool saveOutputFile = true;
+static string coupling = "1";
 
-void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, string coupling = "025", string postfix = "COMB") {
+void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, float scale = 1, string postfix = "COMB") {
   
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -106,7 +107,7 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
 
     // fill expected limit graph
     if (quantile == 0.5) {      
-      grexp->SetPoint(expcounter, double(medmass), limit);
+      grexp->SetPoint(expcounter, double(medmass), limit*scale);
       expcounter++;
       // find max and min for frame
       if(medmass < medMin)
@@ -118,29 +119,29 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
     }
 
     else if (quantile == -1) {      
-      grobs->SetPoint(obscounter, double(medmass), limit);
+      grobs->SetPoint(obscounter, double(medmass), limit*scale);
       obscounter++;
     }
 
     // 1 sigma dw
     else if (quantile < 0.17 && quantile > 0.15 ) {
-      grexp_1sigma_dw->SetPoint(exp_down_counter_1s, double(medmass), limit);      
+      grexp_1sigma_dw->SetPoint(exp_down_counter_1s, double(medmass), limit*scale);      
       exp_down_counter_1s++;
     }
     // 1 sigma up
     else if (quantile < 0.85 && quantile > 0.83 ) {
-      grexp_1sigma_up->SetPoint(exp_up_counter_1s, double(medmass), limit);      
+      grexp_1sigma_up->SetPoint(exp_up_counter_1s, double(medmass), limit*scale);      
       exp_up_counter_1s++;
     }
 
     // 2 sigma dw
     else if (quantile < 0.04 && quantile > 0.02 ) {
-      grexp_2sigma_dw->SetPoint(exp_down_counter_2s, double(medmass), limit);      
+      grexp_2sigma_dw->SetPoint(exp_down_counter_2s, double(medmass), limit*scale);      
       exp_down_counter_2s++;
     }
     // 2 sigma up
     else if (quantile < 0.98 && quantile > 0.96 ) {
-      grexp_2sigma_up->SetPoint(exp_up_counter_2s, double(medmass), limit);      
+      grexp_2sigma_up->SetPoint(exp_up_counter_2s, double(medmass), limit*scale);      
       exp_up_counter_2s++;
     }    
   }
@@ -247,12 +248,12 @@ void plotPseudoScalar_1D(string inputFileName, string outputDIR, int dmMass = 1,
   grexp->SetLineColor(kBlack);
   grexp->SetLineStyle(7);
   grexp->SetLineWidth(2);
-  splineexp->Draw("Lsame");
-  //grexp->Draw("Lsame");
+  //splineexp->Draw("Lsame");
+  grexp->Draw("Lsame");
 
   grobs->SetLineColor(kBlack);
   grobs->SetLineWidth(2);
-  splineobs->Draw("Lsame");
+  //splineobs->Draw("Lsame");
   //grobs->Draw("Lsame");
 
   TF1* line = new TF1 ("line","1",min(medMin,0.),medMax);

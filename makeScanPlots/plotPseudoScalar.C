@@ -30,6 +30,7 @@ TGraph* produceContour (const int & reduction){
     TList * pContLevel = (TList*)lContoursE->At(i0);
     TGraph *pCurv = (TGraph*)pContLevel->First();
     for(int i1 = 0; i1 < pContLevel->GetSize(); i1++){
+      if(i1 > 0) continue;
       for(int i2  = 0; i2 < pCurv->GetN(); i2++) {
         if(i2%reduction != 0) continue; // reduce number of points                                                                                                                                     
         lXE.push_back(pCurv->GetX()[i2]);
@@ -132,6 +133,8 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
     int medmass = mmed(mh, c);
     int dmmass  = mdm(mh, c);
 
+    if(dmmass > medmass/2) continue;
+
     if(medmass != currentmedmass or dmmass != currentdmmass){
       if(npoints == 6)
         goodMassPoint.push_back(pair<int,int>(currentmedmass,currentdmmass));
@@ -194,7 +197,7 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
       exp_up_counter++;
     }
 
-    if (quantile == -1) { // observed
+    if (quantile == -1) { // observed      
       grobs->SetPoint(obscounter, double(medmass), double(dmmass), limit);
       grobu->SetPoint(obscounter, double(medmass), double(dmmass), limit*0.8);
       grobd->SetPoint(obscounter, double(medmass), double(dmmass), limit*1.2);
@@ -446,14 +449,10 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   if(saveOutputFile){
     TFile* outputFile = new TFile((outputDIR+"/fullLikelihood_scan_pseudoscalar.root").c_str(),"RECREATE");
     outputFile->cd();
-    hexp->Write("scan_expected");
-    hobs->Write("scan_observed");
-    grexp->Write("graph_expected");
-    grexp_up->Write("graph_expected_p1s");
-    grexp_down->Write("graph_expected_m1s");
-    grobs->Write("graph_observed");
-    contour_exp->Write("contour_expected");
-    contour_obs->Write("contour_observed");
+    hobs->Write("Observed_limit");
+    contour_obs->Write("Contour_observed");
+    hexp->Write("Expected_limit");
+    contour_exp->Write("Expected_observed");
     outputFile->Write();
   }
 }
