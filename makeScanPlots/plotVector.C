@@ -51,9 +51,11 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool saveOutputFile   = true;
 static bool addRelicDensity  = true;
-static bool addICHEPContours = true;
-static float nbinsX = 1000;
-static float nbinsY = 600;
+static bool addICHEPContours = false;
+//static float nbinsX = 1000;
+//static float nbinsY = 600;
+static float nbinsX = 425;
+static float nbinsY = 250;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 2500;
@@ -553,12 +555,12 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
   canvas->SaveAs((outputDIR+"/scan_vector_g"+string(coupling)+"_"+string(energy)+"TeV_v2.png").c_str());
 
   if(saveOutputFile){
-    TFile* outputFile = new TFile((outputDIR+"/fullLikelihood_scan_vector.root").c_str(),"RECREATE");
+    TFile* outputFile = new TFile((outputDIR+"/scan_vector_g"+string(coupling)+"_"+string(energy)+"TeV_v2.root").c_str(),"RECREATE");
     outputFile->cd();
     hobs->Write("Observed_limit");
-    contour_obs->Write("Contour_observed");
     hexp->Write("Expected_limit");
-    contour_exp->Write("Expected_observed");    
+    hexp_up->Write("Expected_limit_1sUp");
+    hexp_down->Write("Expected_limit_1sDw");
     outputFile->Write();    
   }
 }

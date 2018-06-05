@@ -84,11 +84,11 @@ float mediatorWidth (const float & medMass, const float & dmMass, const float & 
 
 
 /////////
-static float nbinsX      = 1100;
 static float minX        = 50;
 static float minY        = 1;
 static float maxX        = 2000;
 static float maxY        = 700;
+static float nbinsX      = 1100;
 static float nbinsY      = 350;
 static float nCoupling   = 100;
 static float minCoupling = 0.01;
@@ -502,15 +502,15 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   }
 
   // list of files with limit values for each coupling 
-  string inputFileName1 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_1p0.root";
-  string inputFileName2 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p75.root";
-  string inputFileName3 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p5.root";
-  string inputFileName4 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p3.root";
-  string inputFileName5 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p25.root";
-  string inputFileName6 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p2.root";
-  string inputFileName7 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p1.root";
-  string inputFileName8 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p05.root";
-  string inputFileName9 = "LimitsForPaperCoupling_v2/higgsCombine_COMB_Vector_gq_0p01.root";
+  string inputFileName1 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_1p0.root";
+  string inputFileName2 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p75.root";
+  string inputFileName3 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p5.root";
+  string inputFileName4 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p3.root";
+  string inputFileName5 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p25.root";
+  string inputFileName6 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p2.root";
+  string inputFileName7 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p1.root";
+  string inputFileName8 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p05.root";
+  string inputFileName9 = "LimitsForPaperCoupling/higgsCombine_COMB_Vector_gq_0p01.root";
 
   system(("mkdir -p "+outputDIR).c_str());
   gROOT->SetBatch(kTRUE);
@@ -1310,6 +1310,10 @@ void plotVectorCoupling(string outputDIR, bool useDMMass = false, float medOverD
   canvas->SetLogy();
   canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.png").c_str(),"png");
-  canvas->SaveAs((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.root").c_str(),"png");
+
+  TFile* file = new TFile((outputDIR+"/scan_vector_"+postfix+"_"+string(energy)+"TeV_log.root").c_str(),"RECREATE");
+  hobs_coupling->Write("Observed_limit");
+  hexp_coupling->Write("Expected_limit");
+  
 }
 

@@ -53,8 +53,10 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool saveOutputFile = true;
 static bool addRelicDensity = true;
-static float nbinsX = 600;
-static float nbinsY = 400;
+//static float nbinsX = 600;
+//static float nbinsY = 400;
+static float nbinsX = 300;
+static float nbinsY = 200;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
@@ -447,12 +449,12 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   canvas->SaveAs((outputDIR+"/scan_pseudoscalar_g"+string(coupling)+"_"+string(energy)+"TeV_v2.png").c_str());
 
   if(saveOutputFile){
-    TFile* outputFile = new TFile((outputDIR+"/fullLikelihood_scan_pseudoscalar.root").c_str(),"RECREATE");
+    TFile* outputFile = new TFile((outputDIR+"/scan_pseudoscalar_g"+string(coupling)+"_"+string(energy)+"TeV_v2.root").c_str(),"RECREATE");
     outputFile->cd();
     hobs->Write("Observed_limit");
-    contour_obs->Write("Contour_observed");
     hexp->Write("Expected_limit");
-    contour_exp->Write("Expected_observed");
+    //contour_obs->Write("Contour_observed");
+    //contour_exp->Write("Expected_observed");
     outputFile->Write();
   }
 }

@@ -382,11 +382,11 @@ void plotPseudoScalar_DD(string inputFileName, string outputDirectory, string co
   canvas->SaveAs((outputDirectory+"/scanDD_pseudo_g"+coupling+"_"+energy+"TeV_v1.png").c_str(),"png");
   
   if(saveOutputFile){   
-    TFile*outfile = new TFile((outputDirectory+"/pseudo_g"+coupling+"_DD.root").c_str(),"RECREATE");
-    hobs2->Write("contour_obs");
-    hexp2->Write("contour_exp");
-    lTotalE->Write("contour_exp_graph");
-    lTotal->Write("contour_obs_graph");
+    TFile*outfile = new TFile((outputDirectory+"/scanDD_pseudo_g"+coupling+"_"+energy+"TeV_v1.root").c_str(),"RECREATE");
+    //hobs2->Write("contour_obs");
+    //hexp2->Write("contour_exp");
+    //lTotalE->Write("contour_exp_graph");
+    //lTotal->Write("contour_obs_graph");
     DDE_graph->Write("expected_dd");
     DD_graph->Write("observed_dd");
     outfile->Write();

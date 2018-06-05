@@ -317,17 +317,19 @@ void plotScalar_1D(string inputFileName, string outputDIR, int dmMass = 1, bool 
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".pdf").c_str(),"pdf");
   canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".png").c_str(),"png");
 
-  canvas->SetLogy();
-  frame->GetYaxis()->SetRangeUser(TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.01,
-				  TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*100);
-  canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.pdf").c_str(),"pdf");
-  canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.png").c_str(),"png");
+  //canvas->SetLogy();
+  //frame->GetYaxis()->SetRangeUser(TMath::MinElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*0.01,
+  //				  TMath::MaxElement(graph_2sigma_band->GetN(),graph_2sigma_band->GetY())*100);
+  //canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.pdf").c_str(),"pdf");
+  //canvas->SaveAs((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+"_log.png").c_str(),"png");
 
   if(saveOutputFile){
-    TFile* outputFile = new TFile((outputDIR+"/limit_scalar_1D.root").c_str(),"RECREATE");
+    TFile* outputFile = new TFile((outputDIR+"/scan_scalar_1D_dmMass_"+to_string(dmMass)+"_g"+string(coupling)+"_"+postfix+".root").c_str(),"RECREATE");
     outputFile->cd();
-    splineexp->Write("expected_limit");
-    splineobs->Write("observed_limit");
+    splineobs->Write("Observed_limit");
+    splineexp->Write("Expected_limit");
+    graph_1sigma_band->Write("Expected_1sigma_band");
+    graph_2sigma_band->Write("Expected_2sigma_band");
     outputFile->Close();
   }
 

@@ -117,8 +117,10 @@ TGraph* produceContour (const int & reduction){
 static bool saveOutputFile  = false;
 static bool addRelicDensity = true;
 static bool addTheoreticalLine = false;
-static float nbinsX = 800;
-static float nbinsY = 500;
+//static float nbinsX = 800;
+//static float nbinsY = 500;
+static float nbinsX = 300;
+static float nbinsY = 180;
 static float minX = 0;
 static float minY = 10.;
 static float maxX = 1800;
@@ -481,7 +483,7 @@ hobs->Draw("COLZ SAME");
   canvas->SaveAs((outputDIR+"/scan_fermiportal.png").c_str(),"png");
 
   if(saveOutputFile){
-    TFile* outputFile = new TFile((outputDIR+"/fullLikelihood_scan_fermiportal.root").c_str(),"RECREATE");
+    TFile* outputFile = new TFile((outputDIR+"/scan_fermiportal.root").c_str(),"RECREATE");
     outputFile->cd();
     hexp->Write("scan_expected");
     hobs->Write("scan_observed");
