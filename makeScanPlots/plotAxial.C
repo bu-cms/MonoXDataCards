@@ -55,10 +55,10 @@ TGraph* produceContour (const int & reduction){
 static bool addRelicDensity = true;
 static bool saveOutputFile  = true;
 static bool addICHEPContours = true;
-//static float nbinsX = 1000;
-//static float nbinsY = 600;
-static float nbinsX = 425;
-static float nbinsY = 250;
+static float nbinsX = 1000;
+static float nbinsY = 600;
+//static float nbinsX = 120;
+//static float nbinsY = 50;
 static float minX = 0;
 static float minY = 4;
 static float maxX = 2500;
@@ -516,10 +516,8 @@ void plotAxial(string inputFileName, string outputDIR, bool isDMF = false, strin
     outputFile->cd();
     hobs->Write("Observed_limit");
     hexp->Write("Expected_limit");
-    hexp_up->Write("Expected_limit_1sUp");
-    hexp_down->Write("Expected_limit_1sDw");
-    //contour_obs->Write("Contour_observed");
-    //contour_exp->Write("Expected_observed");
+    contour_obs->Write("Observed_contour");
+    contour_exp->Write("Expected_contour");
     outputFile->Write();
 
   }  

@@ -52,10 +52,10 @@ TGraph* produceContour (const int & reduction){
 static bool saveOutputFile   = true;
 static bool addRelicDensity  = true;
 static bool addICHEPContours = false;
-//static float nbinsX = 1000;
-//static float nbinsY = 600;
-static float nbinsX = 425;
-static float nbinsY = 250;
+static float nbinsX = 1000;
+static float nbinsY = 600;
+//static float nbinsX = 80;
+//static float nbinsY = 35;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 2500;
@@ -559,8 +559,8 @@ void plotVector(string inputFileName, string outputDIR, bool isDMF = false, stri
     outputFile->cd();
     hobs->Write("Observed_limit");
     hexp->Write("Expected_limit");
-    hexp_up->Write("Expected_limit_1sUp");
-    hexp_down->Write("Expected_limit_1sDw");
+    contour_obs->Write("Observed_contour");
+    contour_exp->Write("Expected_contour");
     outputFile->Write();    
   }
 }

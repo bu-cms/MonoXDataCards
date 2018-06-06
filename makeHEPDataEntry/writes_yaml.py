@@ -3,6 +3,7 @@ import os
 from hepdata_lib import *
 import numpy as np
 
+################
 def convert_hist_1d(hist,width=True):
     points = {}
     for key in ["x","x_edges","y","y_error"]:
@@ -20,13 +21,11 @@ def convert_hist_1d(hist,width=True):
 
     return points;
 
-def convert_hist_2d(hist,isPS=False,rebin=1,minx=0):
+################
+def convert_hist_2d(hist,isPS=False,minx=0):
     points = {}
     for key in ["x", "y", "x_edges", "y_edges", "z"]:
         points[key] = []
-
-    hist.RebinX(rebin);
-    hist.RebinY(rebin);
 
     for binx in range(1,hist.GetNbinsX()+1):
         for biny in range(1,hist.GetNbinsY()+1):
@@ -45,6 +44,7 @@ def convert_hist_2d(hist,isPS=False,rebin=1,minx=0):
     return points;
 
 
+################
 def convert_graph_1d(graph,width=False):
     points = {}
     for key in ["x","y","y_error_up","y_error_dw"]:
@@ -134,13 +134,13 @@ def make_table_figure5(outidr,isMonoV):
     bkg_other.uncertainties.append(bkg_other_unc);
 
     if isMonoV == True:
-        table = Table("Event yields in the gamma+jets CR for the mono-V category")
+        table = Table("Event yields in the photon CR for the mono-V category")
         table.location = "Data from Figure 5 (right)"
-        table.description = """Comparison between data and MC simulation in the $gamma$+jets control sample before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. The plot shows the mono-V category. The hadronic recoil $p_{T}$ in $\gamma$+jets events is used as a proxy for $p_{T}^{miss}$ in the signal region. The last bin includes all events with hadronic recoil $p_{T}$ larger than 750 GeV in the mono-V category."""
+        table.description = """Comparison between data and MC simulation in the $\gamma$+jets control sample before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. The plot shows the mono-V category. The hadronic recoil $p_{T}$ in $\gamma$+jets events is used as a proxy for $p_{T}^{miss}$ in the signal region. The last bin includes all events with hadronic recoil $p_{T}$ larger than 750 GeV in the mono-V category."""
     else:
-        table = Table("Event yields in the gamma+jets CR for the monojet category")
+        table = Table("Event yields in the photon CR for the monojet category")
         table.location = "Data from Figure 5 (left)"
-        table.description = """Comparison between data and MC simulation in the $gamma$+jets control sample before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. The plot shows the monojet category. The hadronic recoil $p_{T}$ in $\gamma$+jets events is used as a proxy for $p_{T}^{miss}$ in the signal region. The last bin includes all events with hadronic recoil $p_{T}$ larger than 1250 GeV in the monojet category."""
+        table.description = """Comparison between data and MC simulation in the $\gamma$+jets control sample before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. The plot shows the monojet category. The hadronic recoil $p_{T}$ in $\gamma$+jets events is used as a proxy for $p_{T}^{miss}$ in the signal region. The last bin includes all events with hadronic recoil $p_{T}$ larger than 1250 GeV in the monojet category."""
 
 
     table.add_variable(observable)
@@ -155,8 +155,6 @@ def make_table_figure5(outidr,isMonoV):
         table.add_image("figures/PDF/Figure_005-a.pdf","./submission/")
 
     return table
-
-
 
 ##########
 def make_table_figure6_top(outidr,isMonoV):
@@ -228,11 +226,11 @@ def make_table_figure6_top(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Event yields in the dimuon CR for the mono-V category")
         table.location = "Data from Figure 6 (top,right)"
-        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
     else:
         table = Table("Event yields in the dimuon CR for the monojet category")
         table.location = "Data from Figure 6 (top,left)"
-        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
 
 
     table.add_variable(observable)
@@ -319,11 +317,11 @@ def make_table_figure6_bottom(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Event yields in the dielectron CR for the mono-V category")
         table.location = "Data from Figure 6 (bottom,right)"
-        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
     else:
         table = Table("Event yields in the dielectron CR for the monojet category")
         table.location = "Data from Figure 6 (bottom,left)"
-        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
 
 
     table.add_variable(observable)
@@ -412,11 +410,11 @@ def make_table_figure7_top(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Event yields in the single-muon CR for the mono-V category")
         table.location = "Data from Figure 7 (top,right)"
-        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
     else:
         table = Table("Event yields in the single-muon CR for the monojet category")
         table.location = "Data from Figure 7 (top,left)"
-        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
 
 
     table.add_variable(observable)
@@ -506,11 +504,11 @@ def make_table_figure7_bottom(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Event yields in the single-electron CR for the mono-V category")
         table.location = "Data from Figure 7 (bottom,right)"
-        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
     else:
         table = Table("Event yields in the single-electron CR for the monojet category")
         table.location = "Data from Figure 7 (bottom,left)"
-        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for pmiss in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
 
 
     table.add_variable(observable)
@@ -527,7 +525,7 @@ def make_table_figure7_bottom(outidr,isMonoV):
     return table
 
 ##########
-def make_table_figure8and9(outidr,isMonoV,isMasked):
+def make_table_figure8_and_9(outidr,isMonoV,isMasked):
 
     if isMasked:
         file = r.TFile("figures/combined_fit_masked.root","READ")
@@ -595,6 +593,9 @@ def make_table_figure8and9(outidr,isMonoV,isMasked):
     ### signal monojet
     dmsignal = Variable("DM signal Axial-Vector", is_independent=False, is_binned=False, units="")
     dmsignal.values = points_av["y"];
+    dmsignal_unc = Uncertainty("post-fit unc.",is_symmetric=True);
+    dmsignal_unc.values = points_av["y_error"];
+    dmsignal.uncertainties.append(dmsignal_unc);
 
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -625,7 +626,7 @@ def make_table_figure8and9(outidr,isMonoV,isMasked):
     bkg_wjet.uncertainties.append(bkg_wjet_unc);
 
     ### Diboson
-    bkg_vv = Variable("WW/WZ/ZZ",is_independent=False, is_binned=False, units="")
+    bkg_vv = Variable("Dibosons",is_independent=False, is_binned=False, units="")
     bkg_vv.values = points_vv["y"];
     bkg_vv_unc = Uncertainty("post-fit unc.",is_symmetric=True);
     bkg_vv_unc.values = points_vv["y_error"];
@@ -655,21 +656,20 @@ def make_table_figure8and9(outidr,isMonoV,isMasked):
     if isMonoV == True and isMasked == True:
         table = Table("Event yields in the signal region for the mono-V category obtained from the CR-only fit")
         table.location = "Data from Figure 8 (right)"
-        table.description = """Observed $p_{T}^{miss}$ distribution in the mono-V signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 750$ GeV for the mono-V category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, not including the signal region. Expected signal distributions for the 125 GeV Higgs boson decaying exclusively to invisible particles, and a 2 TeV axial-vector mediator decaying to 1 GeV DM particles, are overlaid."""
+        table.description = """Observed $p_{T}^{miss}$ distribution in the mono-V signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 750$ GeV for the mono-V category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, not including the signal region. Expected signal distribution for a 2 TeV axial-vector mediator, decaying to 1 GeV DM particles, is overlaid."""
     elif isMonoV == False and isMasked == True:
         table = Table("Event yields in the signal region for the monojet category obtained from the CR-only fit")
         table.location = "Data from Figure 8 (left)"
-        table.description = """Observed $p_{T}^{miss}$ distribution in the monojet signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 1250$ GeV for the monojet category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, not including the signal region. Expected signal distributions for the 125 GeV Higgs boson decaying exclusively to invisible particles, and a 2 TeV axial-vector mediator decaying to 1 GeV DM particles, are overlaid."""
+        table.description = """Observed $p_{T}^{miss}$ distribution in the monojet signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 1250$ GeV for the monojet category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, not including the signal region. Expected signal distribution for a 2 TeV axial-vector mediator, decaying to 1 GeV DM particles, is overlaid."""
 
     if isMonoV == True and isMasked == False:
         table = Table("Event yields in the signal region for the mono-V category obtained from the b-only fit")
         table.location = "Data from Figure 9 (right)"
-        table.description = """Observed $p_{T}^{miss}$ distribution in the mono-V signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 750$ GeV for the mono-V category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, not including as well as in the signal region. The fit is performed assuming the absence of any signal. Expected signal distributions for the 125 GeV Higgs boson decaying exclusively to invisible particles, and a 2 TeV axial-vector mediator decaying to 1 GeV DM particles, are overlaid."""
+        table.description = """Observed $p_{T}^{miss}$ distribution in the mono-V signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 750$ GeV for the mono-V category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, not including as well as in the signal region. The fit is performed assuming the absence of any signal. Expected signal distribution for a 2 TeV axial-vector mediator, decaying to 1 GeV DM particles, is overlaid."""
     elif isMonoV == False and isMasked == False:
         table = Table("Event yields in the signal region for the monojet category obtained from the b-only fit")
         table.location = "Data from Figure 9 (left)"
-        table.description = """Observed $p_{T}^{miss}$ distribution in the monojet signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 1250$ GeV for the monojet category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, as well as in the signal region.  The fit is performed assuming the absence of any signal. Expected signal distributions for the 125 GeV Higgs boson decaying exclusively to invisible particles, and a 2 TeV axial-vector mediator decaying to 1 GeV DM particles, are overlaid."""
-
+        table.description = """Observed $p_{T}^{miss}$ distribution in the monojet signal region compared with the post-fit background expectations for various SM processes. The last bin includes all events with $p_{T}^{miss} > 1250$ GeV for the monojet category. The expected background distributions are evaluated after performing a combined fit to the data in all the control samples, as well as in the signal region.  The fit is performed assuming the absence of any signal. Expected signal distribution for a 2 TeV axial-vector mediator, decaying to 1 GeV DM particles, is overlaid."""
 
     table.add_variable(observable)
     table.add_variable(data)
@@ -694,43 +694,66 @@ def make_table_figure8and9(outidr,isMonoV,isMasked):
         table.add_image("figures/PDF/Figure_009-a.pdf","./submission/")
     return table
     
-def make_table_figure10(outdir,isAV=False):
+
+################
+def make_table_figure10(outdir,isAV=False,type_plot="observed"):
 
     if isAV == False:
         file = r.TFile("figures//Figure_010-a.root","READ")
     else:
         file = r.TFile("figures//Figure_010-b.root","READ")
 
-    hobs = file.Get("Observed_limit");
-    hexp = file.Get("Expected_limit");
+    if type_plot == "observed":
+        hobs = file.Get("Observed_limit");
+    elif type_plot == "expected":
+        hobs = file.Get("Expected_limit");
 
     points_obs = convert_hist_2d(hobs);
-    points_exp = convert_hist_2d(hexp);
     
     mmed = Variable("Mediator mass", is_independent=True, is_binned=True, units="GeV")
     mmed.values = points_obs["x_edges"];
+
     mdm = Variable("Dark matter mass", is_independent=True, is_binned=True, units="GeV")
     mdm.values = points_obs["y_edges"];
-    
-    obs = Variable("Observed limit", is_independent=False, is_binned=False, units="")
-    obs.values = points_obs["z"]
-
-    exp = Variable("Expected limit", is_independent=False, is_binned=False, units="")
-    exp.values = points_exp["z"]
+ 
+    if type_plot == "observed":
+        obs = Variable("Observed limit", is_independent=False, is_binned=False, units="")
+        obs.values = points_obs["z"]
+    elif type_plot == "expected":
+        obs = Variable("Expected limit", is_independent=False, is_binned=False, units="")
+        obs.values = points_obs["z"]
     
     if isAV == False:
-        table = Table("Mass upper limits for vector mediator")
+
+        if type_plot == "observed":
+            table = Table("Observed upper limits for vector mediator in the mediator-DM mass plane")
+        elif type_plot == "expected":
+            table = Table("Expected upper limits for vector mediator in the mediator-DM mass plane")
+
         table.location = "Data from Figure 10 (left)"
-        table.description = "Exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a vector mediator. The solid (dotted) red (black) line shows the contour for the observed (expected) exclusion. The solid contours around the observed limit and the dashed contours around the expected limit represent one standard deviation due to theoretical uncertainties in the signal cross section and the combination of the statistical and experimental systematic uncertainties, respectively."
+
+        if type_plot == "observed":
+            table.description = "Observed exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a vector mediator. N.B.: the granularity in the presented limit values is reduced with respect to the published result."
+        elif type_plot == "expected":
+            table.description = "Expected exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a vector mediator. N.B.: the granularity in the presented limit values is reduced with respect to the published result."
     else:
-        table = Table("Mass upper limits for axial-vector mediator")
-        table.location = "Data from Figure 10 (right)"
-        table.description = "Exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a axial-vector mediator. The solid (dotted) red (black) line shows the contour for the observed (expected) exclusion. The solid contours around the observed limit and the dashed contours around the expected limit represent one standard deviation due to theoretical uncertainties in the signal cross section and the combination of the statistical and experimental systematic uncertainties, respectively."
+
+        if type_plot == "observed":
+            table = Table("Observed upper limits for axial-vector mediator in the mediator-DM mass plane")
+        elif type_plot == "expected":
+            table = Table("Expected upper limits for axial-vector mediator in the mediator-DM mass plane")
+            
+        table.location = "Data from Figure 10 (left)"
+
+        if type_plot == "observed":
+            table.description = "Observed exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming an axial-vector mediator. N.B.: the granularity in the presented limit values is reduced with respect to the published result."
+        elif type_plot == "expected":
+            table.description = "Expected exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming an axial-vector mediator. N.B.: the granularity in the presented limit values is reduced with respect to the published result."
 
     table.add_variable(mmed)
     table.add_variable(mdm)
     table.add_variable(obs)
-    table.add_variable(exp)
+
     if isAV == False:
         table.add_image("./figures/PDF//Figure_010-b.pdf","./submission/")
     else:
@@ -738,8 +761,60 @@ def make_table_figure10(outdir,isAV=False):
 
     return table
 
+################
+def make_table_figure10_cont(outdir,isAV=False,type_plot="observed"):
 
-def make_table_figure11(outdir,isPS=False):
+    if isAV == False:
+        file = r.TFile("figures//Figure_010-a_contour.root","READ")
+    else:
+        file = r.TFile("figures//Figure_010-b_contour.root","READ")
+
+    if type_plot == "observed" :
+        hobs = file.Get("Observed_contour");
+    elif type_plot == "expected" :    
+        hobs = file.Get("Expected_contour");
+
+    points_obs = convert_graph_1d(hobs);
+
+    mmed = Variable("Mediator mass", is_independent=True, is_binned=False, units="GeV")
+    mmed.values = points_obs["x"];
+
+    mdm = Variable("Dark matter mass", is_independent=False, is_binned=False, units="GeV")
+    mdm.values = points_obs["y"];
+
+    if not isAV:
+        if type_plot == "observed" :
+            table = Table("Observed exclusion contour for vector mediator in the mediator-DM mass plane")
+            table.location = "Data from Figure 10 (left)"
+            table.description = "Observed exclusion contour at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a vector mediator."
+        elif type_plot == "expected" :
+            table = Table("Expected exclusion contour for vector mediator in the mediator-DM mass plane")
+            table.location = "Data from Figure 10 (left)"
+            table.description = "Expected exclusion contour at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a vector mediator."
+        
+        table.add_variable(mmed)
+        table.add_variable(mdm)
+        table.add_image("./figures/PDF//Figure_010-a.pdf","./submission/")
+
+    else:
+
+        if type_plot == "observed" :
+            table = Table("Observed exclusion contour for axial-vector mediator in the mediator-DM mass plane")
+            table.location = "Data from Figure 10 (right)"
+            table.description = "Observed exclusion contour at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming an axial-vector mediator."
+        elif type_plot == "expected" :
+            table = Table("Expected exclusion contour for axial-vector mediator in the mediator-DM mass plane")
+            table.location = "Data from Figure 10 (right)"
+            table.description = "Expected exclusion contour at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming an axial-vector mediator."
+            
+        table.add_variable(mmed)
+        table.add_variable(mdm)
+        table.add_image("./figures/PDF//Figure_010-b.pdf","./submission/")
+        
+    return table
+
+################
+def make_table_figure11(outdir,isPS=False,type_plot="observed"):
 
     if isPS == False:
         file = r.TFile("figures//Figure_011-a.root","READ")
@@ -793,7 +868,7 @@ def make_table_figure11(outdir,isPS=False):
         exp_1s.uncertainties.append(exp_unc_1s);
         exp_2s.uncertainties.append(exp_unc_2s);
 
-        table = Table("Mass upper limits for scalar mediator")
+        table = Table("Upper limits for DM scalar mediators")
         table.location = "Data from Figure 11 (left)"
         table.description = "Exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ vs $m_{med}$ for $m_{DM} = 1$ GeV assuming a scalar mediator."
         
@@ -806,75 +881,118 @@ def make_table_figure11(outdir,isPS=False):
         return table
 
     else:
+
         file = r.TFile("figures//Figure_011-b.root","READ")
 
-        hobs = file.Get("Observed_limit");
-        hexp = file.Get("Expected_limit");
+        if type_plot == "observed" :
+            hobs = file.Get("Observed_limit");
+        elif type_plot =="expected" :
+            hobs = file.Get("Expected_limit");
         
         points_obs = convert_hist_2d(hobs,True);
-        points_exp = convert_hist_2d(hexp,True);
     
         mmed = Variable("Mediator mass", is_independent=True, is_binned=True, units="GeV")
         mmed.values = points_obs["x_edges"];
         mdm = Variable("Dark matter mass", is_independent=True, is_binned=True, units="GeV")
         mdm.values = points_obs["y_edges"];
         
-        obs = Variable("Observed limit", is_independent=False, is_binned=False, units="")
+        if type_plot =="observed" :
+            obs = Variable("Observed limit", is_independent=False, is_binned=False, units="")
+        elif type_plot =="expected" :
+            obs = Variable("Expected limit", is_independent=False, is_binned=False, units="")
         obs.values = points_obs["z"]
-        
-        exp = Variable("Expected limit", is_independent=False, is_binned=False, units="")
-        exp.values = points_exp["z"]
+     
+        if type_plot =="observed" :
+            table = Table("Observed upper limits for pseudoscalar mediator in the mediator-DM mass plane")
+            table.location = "Data from Figure 11 (right)"
+            table.description = "Observed exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a pseudoscalar mediator. N.B.: the granularity in the presented limit values is reduced with respect to the published result."
+        elif type_plot =="expected" :
+            table = Table("Expected upper limits for pseudoscalar mediator in the mediator-DM mass plane")
+            table.location = "Data from Figure 11 (right)"
+            table.description = "Expected exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a pseudoscalar mediator. N.B.: the granularity in the presented limit values is reduced with respect to the published result."
 
-        table = Table("Mass upper limits for pseudoscalar mediator")
-        table.location = "Data from Figure 11 (right)"
-        table.description = "Exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a vector mediator. The solid (dotted) red (black) line shows the contour for the observed (expected) exclusion. The solid contours around the observed limit and the dashed contours around the expected limit represent one standard deviation due to theoretical uncertainties in the signal cross section and the combination of the statistical and experimental systematic uncertainties, respectively."
-        
         table.add_variable(mmed)
         table.add_variable(mdm)
         table.add_variable(obs)
-        table.add_variable(exp)
         table.add_image("./figures/PDF//Figure_011-b.pdf","./submission/")
 
         return table
 
+################
+def make_table_figure11_cont(outdir,type_plot="observed"):
 
-def make_table_figure12(outdir,isAV=False):
+    file = r.TFile("figures//Figure_011-b_contour.root","READ")
+
+    if type_plot == "observed" :
+        hobs = file.Get("Observed_contour");
+    elif type_plot == "expected" :    
+        hobs = file.Get("Expected_contour");
+
+    points_obs = convert_graph_1d(hobs);
+
+    mmed = Variable("Mediator mass", is_independent=True, is_binned=False, units="GeV")
+    mmed.values = points_obs["x"];
+
+    mdm = Variable("Dark matter mass", is_independent=False, is_binned=False, units="GeV")
+    mdm.values = points_obs["y"];
+
+    if type_plot == "observed" :
+        table = Table("Observed exclusion contour for pseudoscalar mediator in the mediator-DM mass plane")
+        table.location = "Data from Figure 11 (right)"
+        table.description = "Observed exclusion contour at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a pseudoscalar mediator."
+    elif type_plot == "expected" :
+        table = Table("Expected exclusion contour for pseudoscalar mediator in the mediator-DM mass plane")
+        table.location = "Data from Figure 11 (right)"
+        table.description = "Expected exclusion contour at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-m_{DM}$ plane assuming a pseudoscalar mediator."
+        
+    table.add_variable(mmed)
+    table.add_variable(mdm)
+    table.add_image("./figures/PDF//Figure_011-b.pdf","./submission/")
+
+    return table
+
+#################
+def make_table_figure12(outdir,isAV=False,type_plot="observed"):
 
     if isAV == False:
         file = r.TFile("figures//Figure_012-a.root","READ")
     else:
         file = r.TFile("figures//Figure_012-b.root","READ")
 
-    hobs = file.Get("Observed_limit");
-    hexp = file.Get("Expected_limit");
+    if type_plot == "observed":
+        hobs = file.Get("Observed_contour");
+    elif type_plot == "expected":
+        hobs = file.Get("Expected_contour");
 
-    points_obs = convert_hist_2d(hobs,False,2,200);
-    points_exp = convert_hist_2d(hexp,False,2,200);
+    points_obs = convert_graph_1d(hobs);
     
-    mmed = Variable("Mediator mass", is_independent=True, is_binned=True, units="GeV")
-    mmed.values = points_obs["x_edges"];
-    gq = Variable("Coupling gq", is_independent=True, is_binned=True, units="")
-    gq.values = points_obs["y_edges"];
-    
-    obs = Variable("Observed limit", is_independent=False, is_binned=False, units="")
-    obs.values = points_obs["z"]
-
-    exp = Variable("Expected limit", is_independent=False, is_binned=False, units="")
-    exp.values = points_exp["z"]
+    mmed = Variable("Mediator mass", is_independent=True, is_binned=False, units="GeV")
+    mmed.values = points_obs["x"];
+    gq = Variable("Coupling gq", is_independent=False, is_binned=False, units="")
+    gq.values = points_obs["y"];
     
     if isAV == False:
-        table = Table("Coupling-mass upper limits for vector mediator")
-        table.location = "Data from Figure 12 (left)"
-        table.description = "Exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-g_{q}$ plane assuming a vector mediator. The solid (dotted) black line shows the contour for the observed (expected) exclusion. The solid red contours around the observed limit represent one standard deviation due to theoretical uncertainties in the signal cross section."
+        if type_plot == "observed":
+            table = Table("Observed exclusion contour in the coupling-mass plane for a vector mediator")
+            table.location = "Data from Figure 12 (left)"
+            table.description = "Observed exclusion contour at 95% CL in the $g_{q}-m_{med}$ plane assuming a vector mediator."
+        elif type_plot == "expected":
+            table = Table("Expected exclusion contour in the coupling-mass plane for a vector mediator")
+            table.location = "Data from Figure 12 (left)"
+            table.description = "Exclusion exclusion contour at 95% CL in the $g_{q}-m_{med}$ plane assuming a vector mediator."
     else:
-        table = Table("Coupling-mass upper limits for Axial-Vector mediator")
-        table.location = "Data from Figure 12 (right)"
-        table.description = "Exclusion limits at 95% CL on $\mu = \sigma/\sigma_{th}$ in the $m_{med}-g_{q}$ plane assuming a axial-vector mediator. The solid (dotted) black line shows the contour for the observed (expected) exclusion. The solid red contours around the observed limit represent one standard deviation due to theoretical uncertainties in the signal cross section."
+        if type_plot == "observed":
+            table = Table("Observed exclusion contour in the coupling-mass plane for an axial-vector mediator")
+            table.location = "Data from Figure 12 (right)"
+            table.description = "Observed exclusion contour at 95% CL in the $g_{q}-m_{med}$ plane assuming an axial-vector mediator."
+        elif type_plot == "expected":
+            table = Table("Expected exclusion contour in the coupling-mass plane for an axial-vector mediator")
+            table.location = "Data from Figure 12 (right)"
+            table.description = "Exclusion exclusion contour at 95% CL in the $g_{q}-m_{med}$ plane assuming an axial-vector mediator."
 
     table.add_variable(mmed)
     table.add_variable(gq)
-    table.add_variable(obs)
-    table.add_variable(exp)
+
     if isAV == False:
         table.add_image("./figures/PDF//Figure_012-a.pdf","./submission/")
     else:
@@ -883,77 +1001,91 @@ def make_table_figure12(outdir,isAV=False):
     return table
 
 
-def make_table_figure13(outdir,isAV=False):
+##############
+def make_table_figure13(outdir,isAV=False,type_plot="observed"):
 
     if isAV == False:
         file = r.TFile("figures//Figure_013-a.root","READ")
     else:
         file = r.TFile("figures//Figure_013-b.root","READ")
 
-    hobs = file.Get("observed_dd");
-    hexp = file.Get("expected_dd");
+    if type_plot == "observed":
+        hobs = file.Get("observed_dd");
+    elif type_plot == "expected":
+        hobs = file.Get("observed_dd");
 
     points_obs = convert_graph_1d(hobs);
-    points_exp = convert_graph_1d(hexp);
 
     mdm = Variable("Dark matter mass", is_independent=True, is_binned=False, units="GeV")
     mdm.values = points_obs["x"];
         
-    obs = Variable("Observed exclusion", is_independent=False, is_binned=False, units="")
+    if not isAV:
+        obs = Variable("Spin-independent DM-nucleon cross section ", is_independent=False, is_binned=False, units="cm$^{2}$")
+    else:
+        obs = Variable("Spin-dependent DM-nucleon cross section ", is_independent=False, is_binned=False, units="cms$^{2}$")
+
     obs.values = points_obs["y"]
-        
-    exp = Variable("Expected exclusion", is_independent=False, is_binned=False, units="")
-    exp.values = points_exp["y"]
 
     if not isAV:
-        table = Table("Spin-independent DM-nucleon scattering cross section upper limits")
-        table.location = "Data from Figure 13 (left)"
-        table.description = "Exclusion limits at 90% CL on $\sigma_{DM-nucleon}$ vs $m_{med}$ for vector mediator. The solid red (dotted black) line shows the contour for the observed (expected) exclusion in this search."
+        if type_plot == "observed":
+            table = Table("Observed upper limits on the spin-independent DM-nucleon scattering cross section")
+            table.location = "Data from Figure 13 (left)"
+            table.description = "Observed upper limits at 90% CL on $\sigma_{DM-nucleon}$ vs $m_{med}$ for vector mediator"
+        elif type_plot == "expected":
+            table = Table("Expected upper limits on the spin-independent DM-nucleon scattering cross section")
+            table.location = "Data from Figure 13 (left)"
+            table.description = "Expected upper limits at 90% CL on $\sigma_{DM-nucleon}$ vs $m_{med}$ for vector mediator"
         
         table.add_variable(mdm)
         table.add_variable(obs)
-        table.add_variable(exp)
         table.add_image("./figures/PDF//Figure_013-a.pdf","./submission/")
 
     else:
 
-        table = Table("Spin-dependent DM-nucleon scattering cross section upper limits")
-        table.location = "Data from Figure 13 (right)"
-        table.description = "Exclusion limits at 90% CL on $\sigma_{DM-nucleon}$ vs $m_{med}$ for axial-vector mediator. The solid red (dotted black) line shows the contour for the observed (expected) exclusion in this search."
+        if type_plot == "observed":
+            table = Table("Observed upper limits on the spin-dependent DM-nucleon scattering cross section")
+            table.location = "Data from Figure 13 (right)"
+            table.description = "Observed upper limits at 90% CL on $\sigma_{DM-nucleon}$ vs $m_{med}$ for axial-vector mediator"
+        elif type_plot == "expected":
+            table = Table("Expected upper limits on the spin-dependent DM-nucleon scattering cross section")
+            table.location = "Data from Figure 13 (right)"
+            table.description = "Expected upper limits at 90% CL on $\sigma_{DM-nucleon}$ vs $m_{med}$ for axial-vector mediator"
         
         table.add_variable(mdm)
         table.add_variable(obs)
-        table.add_variable(exp)
         table.add_image("./figures/PDF//Figure_013-b.pdf","./submission/")
         
     return table
 
-def make_table_figure14(outdir):
+def make_table_figure14(outdir,type_plot="observed"):
 
     file = r.TFile("figures//Figure_014.root","READ")
-
-    hobs = file.Get("observed_dd");
-    hexp = file.Get("expected_dd");
+    
+    if type_plot == "observed":
+        hobs = file.Get("observed_dd");
+    elif type_plot == "expected":
+        hobs = file.Get("expected_dd");
 
     points_obs = convert_graph_1d(hobs);
-    points_exp = convert_graph_1d(hexp);
 
     mdm = Variable("Dark matter mass", is_independent=True, is_binned=False, units="GeV")
     mdm.values = points_obs["x"];
         
-    obs = Variable("Observed exclusion", is_independent=False, is_binned=False, units="")
+    obs = Variable("Velocity averaged DM annihilation cross section", is_independent=False, is_binned=False, units="cm$^{2}$")
     obs.values = points_obs["y"]
-        
-    exp = Variable("Expected exclusion", is_independent=False, is_binned=False, units="")
-    exp.values = points_exp["y"]
 
-    table = Table("Velocity averaged DM annihilation cross section upper limits")
-    table.location = "Data from Figure 14"
-    table.description = "Exclusion limits at 90% CL on velocity averaged DM annihilation cross section derived from those placed for pseudoscalar mediators."
+    
+    if type_plot == "observed":
+        table = Table("Observed upper limits on the velocity averaged DM annihilation cross section")
+        table.location = "Data from Figure 14"
+        table.description = "Observed upper limits at 90% CL on velocity averaged DM annihilation cross section derived from those placed for pseudoscalar mediators."
+    elif type_plot == "expected":
+        table = Table("Expected upper limits on the velocity averaged DM annihilation cross section")
+        table.location = "Data from Figure 14"
+        table.description = "Expected upper limits at 90% CL on velocity averaged DM annihilation cross section derived from those placed for pseudoscalar mediators."
         
     table.add_variable(mdm)
     table.add_variable(obs)
-    table.add_variable(exp)
     table.add_image("./figures/PDF//Figure_014.pdf","./submission/")
         
     return table
@@ -961,7 +1093,8 @@ def make_table_figure14(outdir):
 def main():
 
     # Write to this directory
-    outdir = "./hepdata/"
+    outdir = "./submission/"
+    os.system("rm -rf "+outdir+"/*")
     submission = Submission()
     print "##### Generate Figure 5 #####"
     submission.add_table(make_table_figure5(outdir,False))
@@ -978,29 +1111,48 @@ def main():
     print "##### Generate Figure 7 bottom row #####"
     submission.add_table(make_table_figure7_bottom(outdir,False))
     submission.add_table(make_table_figure7_bottom(outdir,True))
-    #print "##### Generate Figure 8 #####"
-    #submission.add_table(make_table_figure8and9(outdir,False,True))
-    #submission.add_table(make_table_figure8and9(outdir,True,True))
-    #print "##### Generate Figure 9 #####"
-    #submission.add_table(make_table_figure8and9(outdir,False,False))
-    #submission.add_table(make_table_figure8and9(outdir,True,False))
-    #print "##### Generate Figure 10 #####"
-    #submission.add_table(make_table_figure10(outdir,False))
-    #submission.add_table(make_table_figure10(outdir,True))
-    #print "##### Generate Figure 11 #####"
-    #submission.add_table(make_table_figure11(outdir,False))
-    #submission.add_table(make_table_figure11(outdir,True))
-    #print "##### Generate Figure 12 #####"
-    #submission.add_table(make_table_figure12(outdir,False))
-    #submission.add_table(make_table_figure12(outdir,True))
-    print "##### Generate Figure 13 #####"
-    submission.add_table(make_table_figure13(outdir,False))
-    submission.add_table(make_table_figure13(outdir,True))
+    print "##### Generate Figure 8 #####"
+    submission.add_table(make_table_figure8_and_9(outdir,False,True))
+    submission.add_table(make_table_figure8_and_9(outdir,True,True))
+    print "##### Generate Figure 9 #####"
+    submission.add_table(make_table_figure8_and_9(outdir,False,False))
+    submission.add_table(make_table_figure8_and_9(outdir,True,False))
+    print "##### Generate Figure 10 --> limits #####"
+    submission.add_table(make_table_figure10(outdir,False,"observed"))
+    submission.add_table(make_table_figure10(outdir,False,"expected"))
+    submission.add_table(make_table_figure10(outdir,True,"observed"))
+    submission.add_table(make_table_figure10(outdir,True,"expected"))
+    print "##### Generate Figure 10 --> contours #####"
+    submission.add_table(make_table_figure10_cont(outdir,False,"observed"))
+    submission.add_table(make_table_figure10_cont(outdir,False,"expected"))
+    submission.add_table(make_table_figure10_cont(outdir,True,"observed"))
+    submission.add_table(make_table_figure10_cont(outdir,True,"expected"))
+    print "##### Generate Figure 11 --> limits #####"
+    submission.add_table(make_table_figure11(outdir,False))
+    submission.add_table(make_table_figure11(outdir,True,"observed"))
+    submission.add_table(make_table_figure11(outdir,True,"expected"))
+    print "##### Generate Figure 11 --> contours #####"
+    submission.add_table(make_table_figure11_cont(outdir,"observed"))
+    submission.add_table(make_table_figure11_cont(outdir,"expected"))
+    print "##### Generate Figure 12 #####"
+    submission.add_table(make_table_figure12(outdir,False,"observed"))
+    submission.add_table(make_table_figure12(outdir,False,"expected"))
+    submission.add_table(make_table_figure12(outdir,True,"observed"))
+    submission.add_table(make_table_figure12(outdir,True,"expected"))
+    print "##### Generate Figure 13 --> contours #####"
+    submission.add_table(make_table_figure13(outdir,False,"observed"))
+    submission.add_table(make_table_figure13(outdir,False,"expected"))
+    submission.add_table(make_table_figure13(outdir,True,"observed"))
+    submission.add_table(make_table_figure13(outdir,True,"expected"))
     print "##### Generate Figure 14 #####"
-    submission.add_table(make_table_figure14(outdir))
+    submission.add_table(make_table_figure14(outdir,"observed"))
+    submission.add_table(make_table_figure14(outdir,"expected"))
     
     submission.read_abstract("./abstract/abstract.txt")
     submission.create_files(outdir)
+
+    os.system("sed -i 's/!!python\/str//g' "+outdir+"/submission.yaml");
+    os.system("tar -czvf submission.tar.gz "+outdir+"/*");
 
 if __name__ == '__main__':
     main()

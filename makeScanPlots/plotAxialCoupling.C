@@ -83,7 +83,7 @@ float mediatorWidth (const float & medMass, const float & dmMass, const float & 
 
 
 /////////
-static float minX        = 50;
+static float minX        = 150;
 static float minY        = 1;
 static float maxX        = 2000;
 static float maxY        = 700;
@@ -1322,7 +1322,8 @@ void plotAxialCoupling(string outputDIR, bool useDMMass = false, float medOverDM
   TFile* file = new TFile((outputDIR+"/scan_axial_"+postfix+"_"+string(energy)+"TeV_log.root").c_str(),"RECREATE");
   hobs_coupling->Write("Observed_limit");
   hexp_coupling->Write("Expected_limit");
-
+  contour_obs->Write("Observed_contour");
+  contour_exp->Write("Expected_contour");
 
 }
 
