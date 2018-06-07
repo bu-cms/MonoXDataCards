@@ -3,6 +3,9 @@ import os
 from hepdata_lib import *
 import numpy as np
 
+met_bins_monojet = [250,280,310,340,370,400,430,470,510,550,590,640,690,740,790,840,900,960,1020,1090,1160,1250,1400]
+met_bins_monov   = [250,300,350,400,500,600,750,1000]
+
 ################
 def convert_hist_1d(hist,width=True):
     points = {}
@@ -22,7 +25,7 @@ def convert_hist_1d(hist,width=True):
     return points;
 
 ################
-def convert_hist_2d(hist,isPS=False,minx=0):
+def convert_hist_2d(hist,isPS=False):
     points = {}
     for key in ["x", "y", "x_edges", "y_edges", "z"]:
         points[key] = []
@@ -32,9 +35,7 @@ def convert_hist_2d(hist,isPS=False,minx=0):
 
             if not isPS and float(hist.GetBinContent(binx,biny)) <= 1e-4 : continue;
             if isPS and float(hist.GetBinContent(binx,biny)) <= 3e-3: continue;
-            if float(hist.GetBinContent(binx,biny)) == 10.0 : continue;            
-            if hist.GetXaxis().GetBinCenter(binx) < minx : continue;
-            
+
             points["x"].append(hist.GetXaxis().GetBinCenter(binx));
             points["x_edges"].append((hist.GetXaxis().GetBinLowEdge(binx),hist.GetXaxis().GetBinLowEdge(binx+1)));
             points["y"].append(hist.GetYaxis().GetBinCenter(biny));
@@ -42,6 +43,32 @@ def convert_hist_2d(hist,isPS=False,minx=0):
             points["z"].append(hist.GetBinContent(binx,biny));
 
     return points;
+
+################
+def convert_corr_2d(hist,isMonoV=False):
+    points = {}
+    for key in ["x", "y", "x_edges", "y_edges", "z"]:
+        points[key] = []
+
+    for binx in range(0,hist.GetNbinsX()):
+        for biny in range(0,hist.GetNbinsY()):
+
+            if isMonoV == False:
+                points["x"].append((met_bins_monojet[binx+1]-met_bins_monojet[binx])/2);
+                points["x_edges"].append((met_bins_monojet[binx],met_bins_monojet[binx+1]));
+                points["y"].append((met_bins_monojet[biny+1]-met_bins_monojet[biny])/2);
+                points["y_edges"].append((met_bins_monojet[biny],met_bins_monojet[biny+1]));
+                points["z"].append(hist.GetBinContent(binx+1,biny+1));            
+            else:
+                points["x"].append((met_bins_monov[binx+1]-met_bins_monov[binx])/2);
+                points["x_edges"].append((met_bins_monov[binx],met_bins_monov[binx+1]));
+                points["y"].append((met_bins_monov[biny+1]-met_bins_monov[biny])/2);
+                points["y_edges"].append((met_bins_monov[biny],met_bins_monov[biny+1]));
+                points["z"].append(hist.GetBinContent(binx+1,biny+1));            
+
+    return points;
+
+
 
 
 ################
@@ -98,12 +125,12 @@ def make_table_figure5(outidr,isMonoV):
     ### data
     data = Variable("Observed data", is_independent=False, is_binned=False, units="")
     data.values = points_data["y"];
-    data_unc = Uncertainty("data unc.",is_symmetric=False);
-    errors = [];
-    for i in range(0,len(points_data["y_error_dw"])):
-        errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
-    data_unc.values = errors;
-    data.uncertainties.append(data_unc);
+    #data_unc = Uncertainty("data unc.",is_symmetric=False);
+    #errors = [];
+    #for i in range(0,len(points_data["y_error_dw"])):
+    #    errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
+    #data_unc.values = errors;
+    #data.uncertainties.append(data_unc);
     
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -188,12 +215,12 @@ def make_table_figure6_top(outidr,isMonoV):
     ### data
     data = Variable("Observed data", is_independent=False, is_binned=False, units="")
     data.values = points_data["y"];
-    data_unc = Uncertainty("data unc.",is_symmetric=False);
-    errors = [];
-    for i in range(0,len(points_data["y_error_dw"])):
-        errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
-    data_unc.values = errors;
-    data.uncertainties.append(data_unc);
+    #data_unc = Uncertainty("data unc.",is_symmetric=False);
+    #errors = [];
+    #for i in range(0,len(points_data["y_error_dw"])):
+    #    errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
+    #data_unc.values = errors;
+    #data.uncertainties.append(data_unc);
     
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -279,12 +306,12 @@ def make_table_figure6_bottom(outidr,isMonoV):
     ### data
     data = Variable("Observed data", is_independent=False, is_binned=False, units="")
     data.values = points_data["y"];
-    data_unc = Uncertainty("Data unc.",is_symmetric=False);
-    errors = [];
-    for i in range(0,len(points_data["y_error_dw"])):
-        errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
-    data_unc.values = errors;
-    data.uncertainties.append(data_unc);
+    #data_unc = Uncertainty("Data unc.",is_symmetric=False);
+    #errors = [];
+    #for i in range(0,len(points_data["y_error_dw"])):
+    #    errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
+    #data_unc.values = errors;
+    #data.uncertainties.append(data_unc);
     
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -372,12 +399,12 @@ def make_table_figure7_top(outidr,isMonoV):
     ### data
     data = Variable("Observed data", is_independent=False, is_binned=False, units="")
     data.values = points_data["y"];
-    data_unc = Uncertainty("Data unc.",is_symmetric=False);
-    errors = [];
-    for i in range(0,len(points_data["y_error_dw"])):
-        errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
-    data_unc.values = errors;
-    data.uncertainties.append(data_unc);
+    #data_unc = Uncertainty("Data unc.",is_symmetric=False);
+    #errors = [];
+    #for i in range(0,len(points_data["y_error_dw"])):
+    #    errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
+    #data_unc.values = errors;
+    #data.uncertainties.append(data_unc);
     
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -466,12 +493,12 @@ def make_table_figure7_bottom(outidr,isMonoV):
     ### data
     data = Variable("Observed data", is_independent=False, is_binned=False, units="")
     data.values = points_data["y"];
-    data_unc = Uncertainty("Data unc.",is_symmetric=False);
-    errors = [];
-    for i in range(0,len(points_data["y_error_dw"])):
-        errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
-    data_unc.values = errors;
-    data.uncertainties.append(data_unc);
+    #data_unc = Uncertainty("Data unc.",is_symmetric=False);
+    #errors = [];
+    #for i in range(0,len(points_data["y_error_dw"])):
+    #    errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
+    #data_unc.values = errors;
+    #data.uncertainties.append(data_unc);
     
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -583,19 +610,19 @@ def make_table_figure8_and_9(outidr,isMonoV,isMasked):
     ### data
     data = Variable("Observed data", is_independent=False, is_binned=False, units="")
     data.values = points_data["y"];
-    data_unc = Uncertainty("Data unc.",is_symmetric=False);
-    errors = [];
-    for i in range(0,len(points_data["y_error_dw"])):
-        errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
-    data_unc.values = errors;
-    data.uncertainties.append(data_unc);
+    #data_unc = Uncertainty("Data unc.",is_symmetric=False);
+    #errors = [];
+    #for i in range(0,len(points_data["y_error_dw"])):
+    #    errors.append((points_data["y_error_dw"][i],points_data["y_error_up"][i]));
+    #data_unc.values = errors;
+    #data.uncertainties.append(data_unc);
 
     ### signal monojet
     dmsignal = Variable("DM signal Axial-Vector", is_independent=False, is_binned=False, units="")
     dmsignal.values = points_av["y"];
-    dmsignal_unc = Uncertainty("post-fit unc.",is_symmetric=True);
-    dmsignal_unc.values = points_av["y_error"];
-    dmsignal.uncertainties.append(dmsignal_unc);
+    #dmsignal_unc = Uncertainty("post-fit unc.",is_symmetric=True);
+    #dmsignal_unc.values = points_av["y_error"];
+    #dmsignal.uncertainties.append(dmsignal_unc);
 
     ### total bkg post-fit
     bkg_postfit = Variable("Total Background post-fit",is_independent=False, is_binned=False, units="")
@@ -1090,6 +1117,50 @@ def make_table_figure14(outdir,type_plot="observed"):
         
     return table
 
+def make_table_figure20_and_21(outdir,isMonoV=False):
+
+    if isMonoV == False:
+        file = r.TFile("figures//Figure_020.root","READ")
+    else:
+        file = r.TFile("figures//Figure_021.root","READ")
+
+    if isMonoV == False:
+        hcorr = file.Get("correlation_monojet");
+    else:
+        hcorr = file.Get("correlation_monov");
+
+    points_obs = convert_corr_2d(hcorr);
+
+    obs_x = Variable("Missing transverse momentum", is_independent=True, is_binned=True, units="GeV")
+    obs_x.values = points_obs["x_edges"];
+    obs_y = Variable("Missing transverse momentum", is_independent=True, is_binned=True, units="GeV")
+    obs_y.values = points_obs["y_edges"];
+    
+    corr_val = Variable("Correlation", is_independent=False, is_binned=False, units="")
+    corr_val.values = points_obs["z"];
+ 
+    if isMonoV == False:
+        table = Table("Correlation between bins for the monojet signal region")
+        table.location = "Data from Figure 20"
+        table.description = "Correlations between the predicted background yields in all the $p_{T}^{miss}$ bins of the monojet signal region."
+    else:
+        table = Table("Correlation between bins for the mono-V signal region")
+        table.location = "Data from Figure 21"
+        table.description = "Correlations between the predicted background yields in all the $p_{T}^{miss}$ bins of the mono-V signal region."
+
+    table.add_variable(obs_x)
+    table.add_variable(obs_y)
+    table.add_variable(corr_val)
+
+    if isMonoV == False:
+        table.add_image("./figures/PDF//Figure_020.pdf","./submission/")
+    else:
+        table.add_image("./figures/PDF//Figure_021.pdf","./submission/")
+
+    return table
+
+
+
 def main():
 
     # Write to this directory
@@ -1147,7 +1218,10 @@ def main():
     print "##### Generate Figure 14 #####"
     submission.add_table(make_table_figure14(outdir,"observed"))
     submission.add_table(make_table_figure14(outdir,"expected"))
-    
+    print "##### Generate Figure 20 and 21 #####"
+    submission.add_table(make_table_figure20_and_21(outdir,False))
+    submission.add_table(make_table_figure20_and_21(outdir,True))
+                         
     submission.read_abstract("./abstract/abstract.txt")
     submission.create_files(outdir)
 

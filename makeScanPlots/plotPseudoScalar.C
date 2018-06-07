@@ -53,10 +53,10 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool saveOutputFile = true;
 static bool addRelicDensity = true;
-static float nbinsX = 600;
-static float nbinsY = 400;
-//static float nbinsX = 80;
-//static float nbinsY = 120;
+//static float nbinsX = 600;
+//static float nbinsY = 400;
+static float nbinsX = 80;
+static float nbinsY = 120;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
