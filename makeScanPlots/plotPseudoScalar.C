@@ -53,17 +53,15 @@ TGraph* produceContour (const int & reduction){
 /////////
 static bool saveOutputFile = true;
 static bool addRelicDensity = true;
-//static float nbinsX = 600;
-//static float nbinsY = 400;
-static float nbinsX = 80;
-static float nbinsY = 120;
+static float nbinsX = 600;
+static float nbinsY = 400;
 static float minX = 0;
 static float minY = 1;
 static float maxX = 600;
 static float maxY = 400;
 static float minZ = 0.1;
 static float maxZ = 10;
-static int   reductionForContour = 20;
+static int   reductionForContour = 15;
 static bool  whiteOut = true;
 static bool  addPreliminary = false;
 static bool  skipPoints = false;
@@ -337,12 +335,12 @@ void plotPseudoScalar(string inputFileName, string outputDIR, string coupling = 
   hobu2->GetZaxis()->SetLabelSize(0);
   hobu2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_up = produceContour(1);
+  TGraph* contour_obs_up = produceContour(reductionForContour);
 
   hobd2->GetZaxis()->SetLabelSize(0);
   hobd2->Draw("contz list same");
   canvas->Update();
-  TGraph* contour_obs_dw = produceContour(1);
+  TGraph* contour_obs_dw = produceContour(reductionForContour);
 
   /// to white out                                                                                                                                                                                      
   if(whiteOut){
