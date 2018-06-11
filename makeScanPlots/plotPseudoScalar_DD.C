@@ -150,7 +150,6 @@ static float maxX = 600;
 static float maxY = 300;
 static float minZ = 0.1;
 static float maxZ = 10;
-
 static float minX_dd  = 5;
 static float maxX_dd  = 300;
 static double minY_dd = 1e-31;

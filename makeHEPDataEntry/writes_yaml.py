@@ -253,11 +253,11 @@ def make_table_figure6_top(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Dimuon CR event yields mono-V category")
         table.location = "Data from Figure 6 (top,right)"
-        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by Z+jets production. The other backgrounds include top quark, diboson, and W+jets processes."""
     else:
         table = Table("Dimuon CR event yields monojet category")
         table.location = "Data from Figure 6 (top,left)"
-        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dimuon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by Z+jets production. The other backgrounds include top quark, diboson, and W+jets processes."""
 
 
     table.add_variable(observable)
@@ -344,11 +344,11 @@ def make_table_figure6_bottom(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Dielectron CR event yields mono-V category")
         table.location = "Data from Figure 6 (bottom,right)"
-        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by Z+jets production. The other backgrounds include top quark, diboson, and W+jets processes."""
     else:
         table = Table("Dielectron CR event yields monojet category")
         table.location = "Data from Figure 6 (bottom,left)"
-        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, and W+jets processes."""
+        table.description = """Comparison between data and MC simulation in the dielectron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by Z+jets production. The other backgrounds include top quark, diboson, and W+jets processes."""
 
 
     table.add_variable(observable)
@@ -437,11 +437,11 @@ def make_table_figure7_top(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Single-muon CR event yields for the mono-V category")
         table.location = "Data from Figure 7 (top,right)"
-        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by W+jets production. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
     else:
         table = Table("Single-muon CR event yields for the monojet category")
         table.location = "Data from Figure 7 (top,left)"
-        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-muon control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by W+jets production. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
 
 
     table.add_variable(observable)
@@ -531,11 +531,11 @@ def make_table_figure7_bottom(outidr,isMonoV):
     if isMonoV == True:
         table = Table("Single-electron CR event yields for the mono-V category")
         table.location = "Data from Figure 7 (bottom,right)"
-        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the mono-V category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by W+jets production. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
     else:
         table = Table("Single-electron CR event yields for the monojet category")
         table.location = "Data from Figure 7 (bottom,left)"
-        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
+        table.description = """Comparison between data and MC simulation in the single-electron control samples before and after performing the simultaneous fit across all the control samples and the signal region assuming the absence of any signal. Plot correspond to the monojet category. The hadronic recoil $p_{T}$ in dilepton events is used as a proxy for $p_{T}^{miss}$ in the signal region. The leading contribution is represented by Z+jets production. The other backgrounds include top quark, diboson, Z+jets, and QCD multijet processes."""
 
 
     table.add_variable(observable)
@@ -640,9 +640,9 @@ def make_table_figure8_and_9(outidr,isMonoV,isMasked):
 
     ### znn+jets
     bkg_znn = Variable("$Z(nn)$+jets",is_independent=False, is_binned=False, units="")
-    bkg_znn.values = points_wjet["y"];
+    bkg_znn.values = points_znn["y"];
     bkg_znn_unc = Uncertainty("post-fit unc.",is_symmetric=True);
-    bkg_znn_unc.values = points_wjet["y_error"];
+    bkg_znn_unc.values = points_znn["y_error"];
     bkg_znn.uncertainties.append(bkg_znn_unc);
 
     ### wjet+jets

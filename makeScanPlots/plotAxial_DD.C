@@ -172,7 +172,7 @@ static double minY_dd = 1e-46;
 static double maxY_dd = 1e-28;
 
 static bool saveOutputFile      = true;
-static int  reductionForContour = 20;
+static int  reductionForContour = 10;
 static bool addPreliminary = false;
 
 TGraph* Pico2L();

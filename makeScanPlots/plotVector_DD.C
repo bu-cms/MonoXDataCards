@@ -98,7 +98,7 @@ static float minX_dd = 1;
 static float maxX_dd = 1200;
 static double minY_dd = 1e-47;
 static double maxY_dd = 1e-25;
-static int reductionForContour = 20;
+static int reductionForContour = 10;
 static bool saveOutputFile = true;
 static bool addPreliminary = false;
 
