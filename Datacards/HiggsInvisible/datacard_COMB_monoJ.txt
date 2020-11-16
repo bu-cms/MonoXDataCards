@@ -3,46 +3,46 @@ imax 6 number of bins
 jmax 20 number of processes minus 1
 kmax 570 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
-shapes Dibosons   ch1        workspace_MJ.root SR_MJ:Dibosons_SR_MJ SR_MJ:Dibosons_SR_MJ_$SYSTEMATIC
-shapes GJets      ch1        workspace_MJ.root SR_MJ:GJets_SR_MJ SR_MJ:GJets_SR_MJ_$SYSTEMATIC
-shapes QCD        ch1        workspace_MJ.root SR_MJ:QCD_SR_MJ SR_MJ:QCD_SR_MJ_$SYSTEMATIC
-shapes Top        ch1        workspace_MJ.root SR_MJ:Top_SR_MJ SR_MJ:Top_SR_MJ_$SYSTEMATIC
-shapes WH         ch1        workspace_MJ_signal.root SR_MJ:WH_SR_MJ SR_MJ:WH_SR_MJ_$SYSTEMATIC
-shapes WJets      ch1        workspace_MJ.root SR_MJ:WJets_SR_MJ
-shapes ZH         ch1        workspace_MJ_signal.root SR_MJ:ZH_SR_MJ SR_MJ:ZH_SR_MJ_$SYSTEMATIC
-shapes ZJets      ch1        workspace_MJ.root SR_MJ:ZJets_SR_MJ SR_MJ:ZJets_SR_MJ_$SYSTEMATIC
-shapes Znunu      ch1        workspace_MJ.root SR_MJ:Znunu_SR_MJ
-shapes data_obs   ch1        workspace_MJ.root SR_MJ:data_obs_SR_MJ
-shapes ggH        ch1        workspace_MJ_signal.root SR_MJ:ggH_SR_MJ SR_MJ:ggH_SR_MJ_$SYSTEMATIC
-shapes ggZH       ch1        workspace_MJ_signal.root SR_MJ:ggZH_SR_MJ SR_MJ:ggZH_SR_MJ_$SYSTEMATIC
-shapes qqH        ch1        workspace_MJ_signal.root SR_MJ:qqH_SR_MJ SR_MJ:qqH_SR_MJ_$SYSTEMATIC
-shapes Dibosons   ch2        workspace_MJ.root ZM_MJ:Dibosons_ZM_MJ ZM_MJ:Dibosons_ZM_MJ_$SYSTEMATIC
-shapes Top        ch2        workspace_MJ.root ZM_MJ:Top_ZM_MJ ZM_MJ:Top_ZM_MJ_$SYSTEMATIC
-shapes WJets_ZM   ch2        workspace_MJ.root ZM_MJ:WJets_ZM_MJ ZM_MJ:WJets_ZM_MJ_$SYSTEMATIC
-shapes Znunu      ch2        workspace_MJ.root ZM_MJ:Znunu_ZM_MJ
-shapes data_obs   ch2        workspace_MJ.root ZM_MJ:data_obs_ZM_MJ
-shapes Dibosons   ch3        workspace_MJ.root WM_MJ:Dibosons_WM_MJ WM_MJ:Dibosons_WM_MJ_$SYSTEMATIC
-shapes QCD_WM     ch3        workspace_MJ.root WM_MJ:QCD_WM_MJ WM_MJ:QCD_WM_MJ_$SYSTEMATIC
-shapes Top        ch3        workspace_MJ.root WM_MJ:Top_WM_MJ WM_MJ:Top_WM_MJ_$SYSTEMATIC
-shapes WJets      ch3        workspace_MJ.root WM_MJ:WJets_WM_MJ
-shapes ZJets_WM   ch3        workspace_MJ.root WM_MJ:ZJets_WM_MJ WM_MJ:ZJets_WM_MJ_$SYSTEMATIC
-shapes data_obs   ch3        workspace_MJ.root WM_MJ:data_obs_WM_MJ
-shapes QCD_GJ     ch4        workspace_MJ.root GJ_MJ:QCD_GJ_MJ
-shapes VGamma_GJ  ch4        workspace_MJ.root GJ_MJ:VGamma_GJ_MJ
-shapes WJets_GJ   ch4        workspace_MJ.root GJ_MJ:WJets_GJ_MJ
-shapes Znunu      ch4        workspace_MJ.root GJ_MJ:Znunu_GJ_MJ
-shapes data_obs   ch4        workspace_MJ.root GJ_MJ:data_obs_GJ_MJ
-shapes Dibosons   ch5        workspace_MJ.root ZE_MJ:Dibosons_ZE_MJ ZE_MJ:Dibosons_ZE_MJ_$SYSTEMATIC
-shapes Top        ch5        workspace_MJ.root ZE_MJ:Top_ZE_MJ ZE_MJ:Top_ZE_MJ_$SYSTEMATIC
-shapes WJets_ZE   ch5        workspace_MJ.root ZE_MJ:WJets_ZE_MJ ZE_MJ:WJets_ZE_MJ_$SYSTEMATIC
-shapes Znunu      ch5        workspace_MJ.root ZE_MJ:Znunu_ZE_MJ
-shapes data_obs   ch5        workspace_MJ.root ZE_MJ:data_obs_ZE_MJ
-shapes Dibosons   ch6        workspace_MJ.root WE_MJ:Dibosons_WE_MJ WE_MJ:Dibosons_WE_MJ_$SYSTEMATIC
-shapes QCD_WE     ch6        workspace_MJ.root WE_MJ:QCD_WE_MJ WE_MJ:QCD_WE_MJ_$SYSTEMATIC
-shapes Top        ch6        workspace_MJ.root WE_MJ:Top_WE_MJ WE_MJ:Top_WE_MJ_$SYSTEMATIC
-shapes WJets      ch6        workspace_MJ.root WE_MJ:WJets_WE_MJ
-shapes ZJets_WE   ch6        workspace_MJ.root WE_MJ:ZJets_WE_MJ WE_MJ:ZJets_WE_MJ_$SYSTEMATIC
-shapes data_obs   ch6        workspace_MJ.root WE_MJ:data_obs_WE_MJ
+shapes Dibosons   ch1        ../../Workspaces/workspace_MJ.root SR_MJ:Dibosons_SR_MJ SR_MJ:Dibosons_SR_MJ_$SYSTEMATIC
+shapes GJets      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:GJets_SR_MJ SR_MJ:GJets_SR_MJ_$SYSTEMATIC
+shapes QCD        ch1        ../../Workspaces/workspace_MJ.root SR_MJ:QCD_SR_MJ SR_MJ:QCD_SR_MJ_$SYSTEMATIC
+shapes Top        ch1        ../../Workspaces/workspace_MJ.root SR_MJ:Top_SR_MJ SR_MJ:Top_SR_MJ_$SYSTEMATIC
+shapes WH         ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:WH_SR_MJ SR_MJ:WH_SR_MJ_$SYSTEMATIC
+shapes WJets      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:WJets_SR_MJ
+shapes ZH         ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:ZH_SR_MJ SR_MJ:ZH_SR_MJ_$SYSTEMATIC
+shapes ZJets      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:ZJets_SR_MJ SR_MJ:ZJets_SR_MJ_$SYSTEMATIC
+shapes Znunu      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:Znunu_SR_MJ
+shapes data_obs   ch1        ../../Workspaces/workspace_MJ.root SR_MJ:data_obs_SR_MJ
+shapes ggH        ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:ggH_SR_MJ SR_MJ:ggH_SR_MJ_$SYSTEMATIC
+shapes ggZH       ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:ggZH_SR_MJ SR_MJ:ggZH_SR_MJ_$SYSTEMATIC
+shapes qqH        ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:qqH_SR_MJ SR_MJ:qqH_SR_MJ_$SYSTEMATIC
+shapes Dibosons   ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:Dibosons_ZM_MJ ZM_MJ:Dibosons_ZM_MJ_$SYSTEMATIC
+shapes Top        ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:Top_ZM_MJ ZM_MJ:Top_ZM_MJ_$SYSTEMATIC
+shapes WJets_ZM   ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:WJets_ZM_MJ ZM_MJ:WJets_ZM_MJ_$SYSTEMATIC
+shapes Znunu      ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:Znunu_ZM_MJ
+shapes data_obs   ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:data_obs_ZM_MJ
+shapes Dibosons   ch3        ../../Workspaces/workspace_MJ.root WM_MJ:Dibosons_WM_MJ WM_MJ:Dibosons_WM_MJ_$SYSTEMATIC
+shapes QCD_WM     ch3        ../../Workspaces/workspace_MJ.root WM_MJ:QCD_WM_MJ WM_MJ:QCD_WM_MJ_$SYSTEMATIC
+shapes Top        ch3        ../../Workspaces/workspace_MJ.root WM_MJ:Top_WM_MJ WM_MJ:Top_WM_MJ_$SYSTEMATIC
+shapes WJets      ch3        ../../Workspaces/workspace_MJ.root WM_MJ:WJets_WM_MJ
+shapes ZJets_WM   ch3        ../../Workspaces/workspace_MJ.root WM_MJ:ZJets_WM_MJ WM_MJ:ZJets_WM_MJ_$SYSTEMATIC
+shapes data_obs   ch3        ../../Workspaces/workspace_MJ.root WM_MJ:data_obs_WM_MJ
+shapes QCD_GJ     ch4        ../../Workspaces/workspace_MJ.root GJ_MJ:QCD_GJ_MJ
+shapes VGamma_GJ  ch4        ../../Workspaces/workspace_MJ.root GJ_MJ:VGamma_GJ_MJ
+shapes WJets_GJ   ch4        ../../Workspaces/workspace_MJ.root GJ_MJ:WJets_GJ_MJ
+shapes Znunu      ch4        ../../Workspaces/workspace_MJ.root GJ_MJ:Znunu_GJ_MJ
+shapes data_obs   ch4        ../../Workspaces/workspace_MJ.root GJ_MJ:data_obs_GJ_MJ
+shapes Dibosons   ch5        ../../Workspaces/workspace_MJ.root ZE_MJ:Dibosons_ZE_MJ ZE_MJ:Dibosons_ZE_MJ_$SYSTEMATIC
+shapes Top        ch5        ../../Workspaces/workspace_MJ.root ZE_MJ:Top_ZE_MJ ZE_MJ:Top_ZE_MJ_$SYSTEMATIC
+shapes WJets_ZE   ch5        ../../Workspaces/workspace_MJ.root ZE_MJ:WJets_ZE_MJ ZE_MJ:WJets_ZE_MJ_$SYSTEMATIC
+shapes Znunu      ch5        ../../Workspaces/workspace_MJ.root ZE_MJ:Znunu_ZE_MJ
+shapes data_obs   ch5        ../../Workspaces/workspace_MJ.root ZE_MJ:data_obs_ZE_MJ
+shapes Dibosons   ch6        ../../Workspaces/workspace_MJ.root WE_MJ:Dibosons_WE_MJ WE_MJ:Dibosons_WE_MJ_$SYSTEMATIC
+shapes QCD_WE     ch6        ../../Workspaces/workspace_MJ.root WE_MJ:QCD_WE_MJ WE_MJ:QCD_WE_MJ_$SYSTEMATIC
+shapes Top        ch6        ../../Workspaces/workspace_MJ.root WE_MJ:Top_WE_MJ WE_MJ:Top_WE_MJ_$SYSTEMATIC
+shapes WJets      ch6        ../../Workspaces/workspace_MJ.root WE_MJ:WJets_WE_MJ
+shapes ZJets_WE   ch6        ../../Workspaces/workspace_MJ.root WE_MJ:ZJets_WE_MJ WE_MJ:ZJets_WE_MJ_$SYSTEMATIC
+shapes data_obs   ch6        ../../Workspaces/workspace_MJ.root WE_MJ:data_obs_WE_MJ
 ----------------------------------------------------------------------------------------------------------------------------------
 bin          ch1          ch2          ch3          ch4          ch5          ch6        
 observation  -1.0         -1.0         -1.0         -1.0         -1.0         -1.0       
