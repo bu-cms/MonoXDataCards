@@ -7,15 +7,15 @@ shapes Dibosons   ch1        ../../Workspaces/workspace_MJ.root SR_MJ:Dibosons_S
 shapes GJets      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:GJets_SR_MJ SR_MJ:GJets_SR_MJ_$SYSTEMATIC
 shapes QCD        ch1        ../../Workspaces/workspace_MJ.root SR_MJ:QCD_SR_MJ SR_MJ:QCD_SR_MJ_$SYSTEMATIC
 shapes Top        ch1        ../../Workspaces/workspace_MJ.root SR_MJ:Top_SR_MJ SR_MJ:Top_SR_MJ_$SYSTEMATIC
-shapes WH         ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:WH_SR_MJ SR_MJ:WH_SR_MJ_$SYSTEMATIC
+shapes WH         ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root SR_MJ:WH_SR_MJ SR_MJ:WH_SR_MJ_$SYSTEMATIC
 shapes WJets      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:WJets_SR_MJ
-shapes ZH         ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:ZH_SR_MJ SR_MJ:ZH_SR_MJ_$SYSTEMATIC
+shapes ZH         ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root SR_MJ:ZH_SR_MJ SR_MJ:ZH_SR_MJ_$SYSTEMATIC
 shapes ZJets      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:ZJets_SR_MJ SR_MJ:ZJets_SR_MJ_$SYSTEMATIC
 shapes Znunu      ch1        ../../Workspaces/workspace_MJ.root SR_MJ:Znunu_SR_MJ
 shapes data_obs   ch1        ../../Workspaces/workspace_MJ.root SR_MJ:data_obs_SR_MJ
-shapes ggH        ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:ggH_SR_MJ SR_MJ:ggH_SR_MJ_$SYSTEMATIC
-shapes ggZH       ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:ggZH_SR_MJ SR_MJ:ggZH_SR_MJ_$SYSTEMATIC
-shapes qqH        ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root.root SR_MJ:qqH_SR_MJ SR_MJ:qqH_SR_MJ_$SYSTEMATIC
+shapes ggH        ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root SR_MJ:ggH_SR_MJ SR_MJ:ggH_SR_MJ_$SYSTEMATIC
+shapes ggZH       ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root SR_MJ:ggZH_SR_MJ SR_MJ:ggZH_SR_MJ_$SYSTEMATIC
+shapes qqH        ch1        ../../Workspaces/HiggsInvisible/workspace_MJ_signal.root SR_MJ:qqH_SR_MJ SR_MJ:qqH_SR_MJ_$SYSTEMATIC
 shapes Dibosons   ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:Dibosons_ZM_MJ ZM_MJ:Dibosons_ZM_MJ_$SYSTEMATIC
 shapes Top        ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:Top_ZM_MJ ZM_MJ:Top_ZM_MJ_$SYSTEMATIC
 shapes WJets_ZM   ch2        ../../Workspaces/workspace_MJ.root ZM_MJ:WJets_ZM_MJ ZM_MJ:WJets_ZM_MJ_$SYSTEMATIC
